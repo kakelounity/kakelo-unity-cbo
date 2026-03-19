@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Portal - Kakelo Unity CBO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .dashboard-card { transition: all 0.3s ease; }
+        .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans antialiased">
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="max-w-md mx-auto pt-16 px-6 fade-in">
+        <div class="text-center mb-10">
+            <img src="Kakelo Unity Logo (2).png" alt="Logo" class="mx-auto h-20 object-contain">
+            <h1 class="text-3xl font-bold text-teal-800 mt-6">Member Portal</h1>
+            <p class="text-slate-600 mt-2">Secure access to your account</p>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-xl p-8">
+            <input id="member-id" type="text" placeholder="Member ID (e.g. KU001)" 
+                   class="w-full px-5 py-4 border border-slate-300 rounded-2xl mb-4 text-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50">
+            <input id="password" type="password" placeholder="Password" 
+                   class="w-full px-5 py-4 border border-slate-300 rounded-2xl mb-6 text-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50">
+            
+            <div id="login-error" class="text-red-600 text-sm mb-4 hidden text-center"></div>
+
+            <button onclick="login()" 
+                    class="w-full bg-teal-700 hover:bg-teal-800 text-white py-5 rounded-3xl font-semibold text-lg transition shadow-md flex items-center justify-center gap-3">
+                Log In
+            </button>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="hidden max-w-4xl mx-auto pt-10 px-6 pb-20 fade-in">
+
+        <header class="flex justify-between items-center mb-6">
+            <h2 id="welcome-name" class="text-3xl font-bold text-teal-800"></h2>
+            <button onclick="logout()" class="flex items-center gap-2 text-red-600 hover:text-red-800 font-medium">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </header>
+
+        <!-- Announcements Banner -->
+        <div id="announcements-container" class="mb-8 space-y-4"></div>
+
+        <!-- Upcoming Events -->
+        <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-calendar-days text-teal-600 text-2xl"></i>
+                Upcoming Events
+            </h3>
+            <div id="events-list" class="space-y-4"></div>
+            <p id="no-events-msg" class="text-center text-slate-500 mt-6 hidden">No upcoming events scheduled.</p>
+        </div>
+
+        <!-- Profile -->
+        <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
+            <div class="flex flex-col md:flex-row gap-8 items-start">
+                <img id="photo" src="https://via.placeholder.com/140?text=Photo" alt="Profile" 
+                     class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-teal-100">
+                <div>
+                    <h3 id="name" class="text-2xl font-bold text-teal-900"></h3>
+                    <p id="role" class="text-teal-700 font-medium mt-1"></p>
+                    <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
+                        <p><i class="fa-solid fa-phone mr-2"></i><span id="phone"></span></p>
+                        <p><i class="fa-solid fa-envelope mr-2"></i><span id="email"></span></p>
+                        <p><i class="fa-solid fa-calendar-days mr-2"></i>Joined: <span id="join"></span></p>
+                        <p><i class="fa-solid fa-id-card mr-2"></i>ID: <span id="natid"></span></p>
+                        <p><i class="fa-solid fa-circle-info mr-2"></i>Status: <span id="status" class="font-semibold"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Change Password Section -->
+<div class="dashboard-card bg-white rounded-3xl shadow p-6 mb-8 max-w-md">
+    <h3 class="text-xl font-bold mb-4 flex items-center gap-3">
+        <i class="fa-solid fa-key text-teal-600"></i>
+        Change Password
+    </h3>
+
+    <div class="space-y-4">
+        <input id="current-pass" type="password" placeholder="Current Password" 
+               class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
+        
+        <input id="new-pass" type="password" placeholder="New Password" 
+               class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
+        
+        <input id="confirm-pass" type="password" placeholder="Confirm New Password" 
+               class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
+        
+        <div id="password-status" class="text-sm font-medium text-center hidden"></div>
+
+        <button onclick="changePassword()" 
+                class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold transition">
+            Update Password
+        </button>
+    </div>
+</div>
+
+        <!-- Financial Summary -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <div class="dashboard-card bg-white rounded-3xl shadow p-8">
+                <h4 class="text-lg font-semibold text-teal-800 mb-2">Total Savings</h4>
+                <p id="savings" class="text-5xl font-bold text-teal-700">KSh 0</p>
+            </div>
+            <div class="dashboard-card bg-white rounded-3xl shadow p-8">
+                <h4 class="text-lg font-semibold text-teal-800 mb-2">Reg. Fees Paid</h4>
+                <p id="regfees" class="text-5xl font-bold text-purple-600">KSh 0</p>
+            </div>
+            <div class="dashboard-card bg-white rounded-3xl shadow p-8">
+                <h4 class="text-lg font-semibold text-teal-800 mb-2">Total Loans Outstanding</h4>
+                <p id="total-outstanding" class="text-5xl font-bold text-orange-600">KSh 0</p>
+            </div>
+        </div>
+
+        <!-- Recent Savings -->
+        <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-piggy-bank text-teal-600"></i> Recent Savings
+            </h3>
+            <div id="savings-list" class="space-y-4"></div>
+            <p id="no-savings-msg" class="text-center text-slate-500 mt-6 hidden">No recent activity.</p>
+        </div>
+
+        <!-- Loans -->
+        <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-hand-holding-dollar text-orange-600"></i> Loans
+            </h3>
+            <div id="loans-list" class="space-y-4"></div>
+            <p id="no-loans-msg" class="text-center text-slate-500 mt-6 hidden">No loans found.</p>
+        </div>
+
+        <!-- M-Pesa Paybill Payment / Contribution -->
+        <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-mobile-screen-button text-green-600 text-2xl"></i>
+                Contribute / Make Payment via M-Pesa
+            </h3>
+
+            <div class="bg-green-50 border border-green-200 rounded-2xl p-6">
+                <p class="font-medium text-green-800 mb-4">Pay using KCB Bank Paybill via M-Pesa</p>
+                
+                <div class="space-y-4 text-gray-800">
+                    <p><strong>Paybill Number:</strong> <span class="font-bold text-xl text-green-700">522522</span></p>
+                    <p><strong>Account Name:</strong> <span class="font-bold text-xl text-green-700">Kakelo Unity</span></p>
+                    <p><strong>Account Number:</strong> <span class="font-bold text-xl text-green-700">1348462264</span></p>
+                    <p><strong>Amount:</strong> Any amount you wish to contribute, save, or repay</p>
+                </div>
+
+                <ol class="list-decimal pl-6 mt-6 space-y-2 text-gray-700 text-lg">
+                    <li>Open M-Pesa on your Safaricom line</li>
+                    <li>Select <strong>Lipa na M-Pesa</strong> → <strong>Pay Bill</strong></li>
+                    <li>Choose <strong>Enter Business No.</strong></li>
+                    <li>Enter Paybill Number: <strong>522522</strong></li>
+                    <li>Enter Account Number: <strong>1348462264</strong></li>
+                    <li>Enter the Amount (KSh) → Confirm → Enter PIN → Send</li>
+                </ol>
+
+                <p class="text-sm text-gray-600 mt-6 italic">
+                    Payment should reflect in your account shortly. Contact the treasurer for receipt or confirmation.
+                </p>
+            </div>
+
+            <div class="mt-6 text-center text-sm text-gray-500">
+                Thank you for supporting Kakelo Unity CBO ❤️
+            </div>
+        </div>
+
+        <!-- Feedback Form -->
+        <div class="dashboard-card bg-white rounded-3xl shadow p-8">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-comment-dots text-purple-600 text-2xl"></i>
+                Send Us Feedback
+            </h3>
+
+            <div class="space-y-6">
+                <input id="feedback-name" type="text" placeholder="Your Name (auto-filled)" 
+                       class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 bg-gray-50" disabled>
+                <input id="feedback-email" type="email" placeholder="Your Email (auto-filled)" 
+                       class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 bg-gray-50" disabled>
+                
+                <div class="flex items-center gap-3">
+                    <label class="text-gray-700 font-medium whitespace-nowrap">Rating:</label>
+                    <select id="feedback-rating" class="px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-500">
+                        <option value="5">5 - Excellent</option>
+                        <option value="4">4 - Good</option>
+                        <option value="3">3 - Average</option>
+                        <option value="2">2 - Fair</option>
+                        <option value="1">1 - Poor</option>
+                    </select>
+                </div>
+
+                <textarea id="feedback-message" rows="5" placeholder="Your message, suggestions, or concerns..." 
+                          class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 resize-y"></textarea>
+
+                <div id="feedback-status" class="text-sm text-center font-medium hidden"></div>
+
+                <button onclick="submitFeedback()" 
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white py-4 rounded-2xl font-semibold transition shadow-md">
+                    Submit Feedback
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
+
+        async function login() {
+            const id = document.getElementById('member-id').value.trim().toUpperCase();
+            const pass = document.getElementById('password').value;
+
+            if (!id || !pass) {
+                alert("Enter Member ID and Password");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${WEB_APP_URL}?id=${encodeURIComponent(id)}&pass=${encodeURIComponent(pass)}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+
+                    const p = data.profile;
+                    document.getElementById('welcome-name').textContent = `Welcome, ${p.fullName.split(' ')[0] || p.memberId}`;
+                    document.getElementById('name').textContent = p.fullName;
+                    document.getElementById('role').textContent = p.role;
+                    document.getElementById('phone').textContent = p.phone;
+                    document.getElementById('email').textContent = p.email;
+                    document.getElementById('join').textContent = p.joinDate;
+                    document.getElementById('natid').textContent = p.nationalId;
+
+                    const statusEl = document.getElementById('status');
+                    statusEl.textContent = p.status;
+                    statusEl.className = p.status.toLowerCase().includes('active') ? 'text-green-600' : 'text-orange-600';
+
+                    document.getElementById('photo').src = p.photoUrl || 'https://via.placeholder.com/140?text=Photo';
+                    document.getElementById('savings').textContent = `KSh ${Number(p.totalSavings).toLocaleString('en-KE')}`;
+                    document.getElementById('regfees').textContent = `KSh ${Number(p.regFeesPaid).toLocaleString('en-KE')}`;
+
+                    // Auto-fill feedback form
+                    document.getElementById('feedback-name').value = p.fullName || '';
+                    document.getElementById('feedback-email').value = p.email || '';
+
+                    renderSavings((data.recentSavings || []).slice(0, 5));
+                    renderLoans(data.loans || []);
+                    renderAnnouncements(data.announcements || []);
+                    renderEvents(data.events || []);
+                } else {
+                    alert(data.message || "Login failed");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Connection error – check internet or script");
+            }
+        }
+
+        function renderSavings(items) {
+            const container = document.getElementById('savings-list');
+            const noMsg = document.getElementById('no-savings-msg');
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                noMsg.classList.remove('hidden');
+                return;
+            }
+
+            noMsg.classList.add('hidden');
+
+            items.forEach(item => {
+                const isPositive = item.amount > 0;
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center py-3 border-b last:border-0';
+                div.innerHTML = `
+                    <div>
+                        <div class="font-medium">${item.date}</div>
+                        <div class="text-sm text-slate-600">${item.type}${item.notes ? ' • ' + item.notes : ''}</div>
+                    </div>
+                    <div class="${isPositive ? 'text-green-600' : 'text-red-600'} font-semibold">
+                        ${isPositive ? '+' : ''} KSh ${Math.abs(item.amount).toLocaleString('en-KE')}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderLoans(items) {
+            const container = document.getElementById('loans-list');
+            const noMsg = document.getElementById('no-loans-msg');
+            container.innerHTML = '';
+
+            let totalOutstanding = 0;
+
+            if (items.length === 0) {
+                noMsg.classList.remove('hidden');
+            } else {
+                noMsg.classList.add('hidden');
+
+                items.forEach(loan => {
+                    totalOutstanding += loan.outstanding || 0;
+
+                    let statusColor = 'text-gray-600';
+                    let bgColor = 'bg-gray-50';
+                    let borderColor = 'border-gray-400';
+                    let extraWarning = '';
+
+                    const statusLower = (loan.status || '').toLowerCase();
+
+                    if (loan.overdue) {
+                        statusColor = 'text-red-700 font-bold';
+                        bgColor = 'bg-red-50';
+                        borderColor = 'border-red-500';
+                        extraWarning = '<span class="text-red-600 font-semibold ml-2">OVERDUE!</span>';
+                    } else if (statusLower.includes('active') || loan.outstanding > 0) {
+                        statusColor = 'text-orange-700';
+                        bgColor = 'bg-orange-50';
+                        borderColor = 'border-orange-500';
+                    } else if (statusLower.includes('paid') || statusLower.includes('cleared')) {
+                        statusColor = 'text-green-700';
+                        bgColor = 'bg-green-50';
+                        borderColor = 'border-green-500';
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = `p-4 border-l-4 ${borderColor} ${bgColor} rounded-lg`;
+                    div.innerHTML = `
+                        <div class="font-medium flex items-center">
+                            Loan ${loan.loanId} – ${loan.date}${extraWarning}
+                        </div>
+                        <div class="text-lg font-bold mt-1">KSh ${loan.amount.toLocaleString('en-KE')}</div>
+                        <div class="text-sm mt-2">
+                            Outstanding: <span class="font-semibold">KSh ${(loan.outstanding || 0).toLocaleString('en-KE')}</span><br>
+                            ${loan.nextDue !== '—' ? `Next due: ${loan.nextDue}<br>` : ''}
+                            Status: <span class="${statusColor}">${loan.status || 'Unknown'}</span>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                });
+            }
+
+            document.getElementById('total-outstanding').textContent = 
+                `KSh ${totalOutstanding.toLocaleString('en-KE')}`;
+        }
+
+        // Render Announcements
+        function renderAnnouncements(announcements) {
+            const container = document.getElementById('announcements-container');
+            container.innerHTML = '';
+
+            if (announcements.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-500">No current announcements</p>';
+                return;
+            }
+
+            announcements.forEach(ann => {
+                if (localStorage.getItem(`dismiss-ann-${ann.title}`)) return;
+
+                let bgColor = 'bg-blue-50 border-blue-200 text-blue-800';
+                let priorityLabel = '';
+
+                if (ann.priority === 'High') {
+                    bgColor = 'bg-red-50 border-red-200 text-red-800';
+                    priorityLabel = '<span class="ml-2 text-xs font-bold bg-red-100 text-red-700 px-2 py-1 rounded">HIGH</span>';
+                } else if (ann.priority === 'Low') {
+                    bgColor = 'bg-gray-50 border-gray-200 text-gray-800';
+                    priorityLabel = '<span class="ml-2 text-xs font-bold bg-gray-100 text-gray-700 px-2 py-1 rounded">LOW</span>';
+                }
+
+                const div = document.createElement('div');
+                div.className = `p-6 rounded-2xl border ${bgColor} relative shadow-sm`;
+                div.innerHTML = `
+                    <button onclick="dismissAnnouncement('${ann.title.replace(/'/g, "\\'")}')" 
+                            class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                    <h4 class="font-bold text-lg mb-2 flex items-center">
+                        ${ann.title}${priorityLabel}
+                    </h4>
+                    <p class="text-gray-700">${ann.message}</p>
+                    <p class="text-xs text-gray-500 mt-3">${ann.date}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function dismissAnnouncement(title) {
+            localStorage.setItem(`dismiss-ann-${title}`, 'true');
+            location.reload();
+        }
+
+        // Render Upcoming Events
+        function renderEvents(events) {
+            const container = document.getElementById('events-list');
+            const noMsg = document.getElementById('no-events-msg');
+            container.innerHTML = '';
+
+            if (events.length === 0) {
+                noMsg.classList.remove('hidden');
+                return;
+            }
+
+            noMsg.classList.add('hidden');
+
+            events.forEach(event => {
+                const div = document.createElement('div');
+                div.className = 'p-4 border-l-4 border-teal-500 bg-teal-50 rounded-lg';
+                div.innerHTML = `
+                    <div class="font-bold text-lg">${event.title}</div>
+                    <div class="text-sm text-gray-700 mt-1">
+                        <strong>Date:</strong> ${event.date} | <strong>Time:</strong> ${event.time}<br>
+                        <strong>Location:</strong> ${event.location}<br>
+                        <strong>Category:</strong> ${event.category}
+                    </div>
+                    <p class="mt-2 text-gray-600">${event.description}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Submit Feedback
+        async function submitFeedback() {
+            const statusEl = document.getElementById('feedback-status');
+            statusEl.classList.remove('hidden', 'text-green-600', 'text-red-600');
+            statusEl.classList.add('text-gray-700');
+            statusEl.textContent = 'Submitting...';
+
+            const name = document.getElementById('feedback-name').value.trim() || 'Anonymous';
+            const email = document.getElementById('feedback-email').value.trim() || 'Not provided';
+            const rating = document.getElementById('feedback-rating').value;
+            const message = document.getElementById('feedback-message').value.trim();
+
+            if (!message) {
+                statusEl.classList.add('text-red-600');
+                statusEl.textContent = 'Please enter a message';
+                return;
+            }
+
+            const memberId = document.getElementById('member-id').value.trim().toUpperCase() || localStorage.getItem('memberId') || 'Unknown';
+
+            try {
+                const res = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        action: 'submitFeedback',
+                        memberId: memberId,
+                        name: name,
+                        email: email,
+                        rating: rating,
+                        message: message
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    statusEl.classList.add('text-green-600');
+                    statusEl.textContent = data.message;
+                    document.getElementById('feedback-message').value = '';
+                    document.getElementById('feedback-rating').value = '5';
+                } else {
+                    statusEl.classList.add('text-red-600');
+                    statusEl.textContent = data.message || 'Failed to submit feedback';
+                }
+            } catch (err) {
+                statusEl.classList.add('text-red-600');
+                statusEl.textContent = 'Connection error – please try again';
+                console.error(err);
+            }
+        }
+        async function changePassword() {
+    const statusEl = document.getElementById('password-status');
+    statusEl.classList.remove('hidden', 'text-green-600', 'text-red-600');
+    statusEl.classList.add('text-gray-700');
+    statusEl.textContent = 'Updating...';
+
+    const current = document.getElementById('current-pass').value.trim();
+    const newPass = document.getElementById('new-pass').value.trim();
+    const confirm = document.getElementById('confirm-pass').value.trim();
+
+    if (!current || !newPass || !confirm) {
+        statusEl.classList.add('text-red-600');
+        statusEl.textContent = 'All fields are required';
+        return;
+    }
+
+    if (newPass !== confirm) {
+        statusEl.classList.add('text-red-600');
+        statusEl.textContent = 'New passwords do not match';
+        return;
+    }
+
+    if (newPass.length < 6) {
+        statusEl.classList.add('text-red-600');
+        statusEl.textContent = 'New password must be at least 6 characters';
+        return;
+    }
+
+    const memberId = document.getElementById('member-id').value.trim().toUpperCase() || 'Unknown';
+
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: new URLSearchParams({
+                action: 'changePassword',
+                id: memberId,
+                currentPass: current,
+                newPass: newPass
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            statusEl.classList.add('text-green-600');
+            statusEl.textContent = data.message;
+            // Clear fields on success
+            document.getElementById('current-pass').value = '';
+            document.getElementById('new-pass').value = '';
+            document.getElementById('confirm-pass').value = '';
+        } else {
+            statusEl.classList.add('text-red-600');
+            statusEl.textContent = data.message || 'Failed to update password';
+        }
+    } catch (err) {
+        statusEl.classList.add('text-red-600');
+        statusEl.textContent = 'Connection error – try again';
+        console.error(err);
+    }
+}
+
+        function logout() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('password').value = '';
+        }
+
+        document.getElementById('password').addEventListener('keypress', e => {
+            if (e.key === 'Enter') login();
+        });
+    </script>
+</body>
+</html>
