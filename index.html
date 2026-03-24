@@ -418,60 +418,62 @@
         </div>
     </div>
 </section>
-<!-- SUPPORT OUR MISSION / DONATE -->
+<!-- SUPPORT OUR MISSION -->
 <section id="donate" class="py-20 bg-white">
     <div class="max-w-4xl mx-auto px-6 text-center">
         <h2 class="text-4xl font-bold mb-6 text-teal-800">Support Our Mission</h2>
         <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">
-            Your contribution helps us provide skills training, local philanthropy and service to the community.
+            Your generous contribution helps us provide skills training, local philanthropy
+            and community development projects.
         </p>
 
-        <div class="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-3xl p-10 shadow-xl">
-            <h3 class="text-2xl font-bold text-teal-800 mb-8">Contribute via M-Pesa to KCB Bank</h3>
+        <div class="bg-teal-50 rounded-3xl p-10 md:p-12 shadow-lg">
+            <h3 class="text-2xl font-semibold text-teal-800 mb-8">Make a Contribution via M-Pesa</h3>
 
-            <!-- Payment Details Cards -->
+            <!-- Payment Details -->
             <div class="grid md:grid-cols-3 gap-6 mb-10">
-                <div class="bg-white p-6 rounded-2xl shadow">
-                    <p class="text-sm text-slate-500">Paybill Number</p>
+                <div class="bg-white p-6 rounded-2xl shadow-sm">
+                    <p class="text-sm text-slate-500 mb-1">Paybill Number</p>
                     <p class="text-3xl font-bold text-green-700">522533</p>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow">
-                    <p class="text-sm text-slate-500">Account Number</p>
+                <div class="bg-white p-6 rounded-2xl shadow-sm">
+                    <p class="text-sm text-slate-500 mb-1">Account Number</p>
                     <p class="text-3xl font-bold text-green-700">8074390</p>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow">
-                    <p class="text-sm text-slate-500">Account Name</p>
+                <div class="bg-white p-6 rounded-2xl shadow-sm">
+                    <p class="text-sm text-slate-500 mb-1">Account Name</p>
                     <p class="text-2xl font-bold text-green-700">Kakelo Unity</p>
                 </div>
             </div>
 
-            <!-- Input and Buttons -->
+            <!-- Amount Input & Buttons -->
             <div class="max-w-md mx-auto space-y-6">
                 <div>
-                    <label class="block text-left text-sm font-medium text-slate-600 mb-2">Amount (KSh)</label>
+                    <label class="block text-left text-sm font-medium text-slate-600 mb-2">
+                        Amount (KSh)
+                    </label>
                     <input id="donate-amount" 
                            type="number" 
-                           placeholder="Enter amount e.g. 500" 
-                           min="10" 
-                           class="w-full px-6 py-4 text-lg border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200">
+                           placeholder="Enter amount e.g. 500, 1000, 5000" 
+                           min="10"
+                           class="w-full px-6 py-4 text-lg border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
                 </div>
 
-                <button onclick="copyPaybillDetails()" 
-                        class="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-3xl font-semibold text-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-3">
+                <button onclick="copyPaymentDetails()" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-3xl font-semibold text-lg transition shadow-md flex items-center justify-center gap-3">
                     <i class="fa-solid fa-copy"></i>
                     Copy Details & Pay via M-Pesa
                 </button>
 
-                <a href="#" id="whatsapp-button" target="_blank" rel="noopener noreferrer"
-                   class="block w-full bg-[#25D366] hover:bg-[#22c55e] text-white py-5 rounded-3xl font-semibold text-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-3">
+                <a href="#" id="whatsapp-btn" target="_blank" rel="noopener noreferrer"
+                   class="block w-full bg-[#25D366] hover:bg-[#22c55e] text-white py-5 rounded-3xl font-semibold text-lg transition shadow-md flex items-center justify-center gap-3">
                     <i class="fa-brands fa-whatsapp text-2xl"></i>
-                    Send Proof via WhatsApp
+                    Send Payment Proof via WhatsApp
                 </a>
             </div>
 
-            <p class="text-sm text-slate-500 mt-10 italic">
-                After payment, your contribution will reflect in our KCB account shortly.<br>
-                Thank you for supporting Kakelo Unity CBO ❤️
+            <p class="text-sm text-slate-500 mt-10">
+                Once you make the payment, kindly send the proof (M-Pesa message) to the treasurer via WhatsApp for confirmation.
             </p>
         </div>
     </div>
@@ -848,6 +850,28 @@
             button.innerHTML = 'Read less <i class="fa-solid fa-chevron-up text-xs ml-1"></i>';
         }
     }
+    function copyPaymentDetails() {
+    const amount = document.getElementById('donate-amount').value.trim() || '';
+
+    let text = `Kakelo Unity CBO Contribution\n\n`;
+    text += `Paybill: 522533\n`;
+    text += `Account Number: 8074390\n`;
+    text += `Account Name: Kakelo Unity\n`;
+    if (amount) text += `Amount: KSh ${amount}\n`;
+    text += `\nThank you for your support!`;
+
+    navigator.clipboard.writeText(text).then(() => {
+        alert("✅ Payment details copied!\n\nNow open M-Pesa and complete the transaction.");
+        
+        // Update WhatsApp button dynamically
+        const whatsappLink = document.getElementById('whatsapp-btn');
+        let msg = `Hello%20Treasurer,%20I%20have%20sent%20`;
+        if (amount) msg += `KSh%20${amount}%20`;
+        msg += `via%20Paybill%20522533%20(Account%208074390).%20Please%20confirm%20receipt.`;
+        
+        whatsappLink.href = `https://wa.me/2547XXXXXXXX?text=${msg}`;   // ← CHANGE THIS NUMBER
+    });
+}
 </script>
 </body>
 </html>
