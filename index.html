@@ -418,32 +418,151 @@
         </div>
     </div>
 </section>
+<!-- SUPPORT OUR MISSION / DONATE -->
+<section id="donate" class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-6 text-center">
+        <h2 class="text-4xl font-bold mb-6 text-teal-800">Support Our Mission</h2>
+        <p class="text-xl text-slate-600 mb-12 max-w-2xl mx-auto">
+            Your contribution helps us provide skills training, local philanthropy and service to the community.
+        </p>
 
-    <!-- DONATE -->
-    <section id="donate" class="py-20 bg-white">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <h2 class="section-header text-4xl font-bold mb-6">Support Our Mission</h2>
-            <p class="text-xl text-slate-600 mb-12">
-                Your contribution helps us provide skills training, local philanthropy and service to the community.
+        <div class="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-3xl p-10 shadow-xl">
+            <h3 class="text-2xl font-bold text-teal-800 mb-8">Contribute via M-Pesa to KCB Bank</h3>
+
+            <!-- Payment Details Cards -->
+            <div class="grid md:grid-cols-3 gap-6 mb-10">
+                <div class="bg-white p-6 rounded-2xl shadow">
+                    <p class="text-sm text-slate-500">Paybill Number</p>
+                    <p class="text-3xl font-bold text-green-700">522533</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow">
+                    <p class="text-sm text-slate-500">Account Number</p>
+                    <p class="text-3xl font-bold text-green-700">8074390</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow">
+                    <p class="text-sm text-slate-500">Account Name</p>
+                    <p class="text-2xl font-bold text-green-700">Kakelo Unity</p>
+                </div>
+            </div>
+
+            <!-- Input and Buttons -->
+            <div class="max-w-md mx-auto space-y-6">
+                <div>
+                    <label class="block text-left text-sm font-medium text-slate-600 mb-2">Amount (KSh)</label>
+                    <input id="donate-amount" 
+                           type="number" 
+                           placeholder="Enter amount e.g. 500" 
+                           min="10" 
+                           class="w-full px-6 py-4 text-lg border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200">
+                </div>
+
+                <button onclick="copyPaybillDetails()" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white py-5 rounded-3xl font-semibold text-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-copy"></i>
+                    Copy Details & Pay via M-Pesa
+                </button>
+
+                <a href="#" id="whatsapp-button" target="_blank" rel="noopener noreferrer"
+                   class="block w-full bg-[#25D366] hover:bg-[#22c55e] text-white py-5 rounded-3xl font-semibold text-lg transition-all duration-300 shadow-lg flex items-center justify-center gap-3">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i>
+                    Send Proof via WhatsApp
+                </a>
+            </div>
+
+            <p class="text-sm text-slate-500 mt-10 italic">
+                After payment, your contribution will reflect in our KCB account shortly.<br>
+                Thank you for supporting Kakelo Unity CBO ❤️
             </p>
-
-            <div id="paybill-section" class="bg-teal-50 rounded-3xl p-10 highlight-target">
-                <div class="mb-8">
-                    <h3 class="text-2xl font-bold text-teal-800 mb-4">Pay via M-Pesa to KCB Bank</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left max-w-3xl mx-auto">
-                        <div class="bg-white p-6 rounded-2xl shadow">
-                            <p class="font-bold text-lg">Paybill Number</p>
-                            <p class="text-3xl font-bold text-green-700">522522</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl shadow">
-                            <p class="font-bold text-lg">Account Name</p>
-                            <p class="text-2xl font-bold text-green-700">Kakelo Unity</p>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl shadow">
-                            <p class="font-bold text-lg">Account Number</p>
-                            <p class="text-2xl font-bold text-green-700">1348462264</p>
+        </div>
+    </div>
+</section>
+  <!-- CONTACT -->
+<section id="contact" class="py-20 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-6">
+        <h2 class="section-header text-4xl font-bold text-center mb-12">Get In Touch</h2>
+        
+        <div class="grid md:grid-cols-2 gap-12">
+            <div>
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <i class="fa-solid fa-location-dot text-3xl text-teal-700 mt-1"></i>
+                        <div>
+                            <p class="font-medium">Rachuonyo East Sub-County, Homabay County-Kenya</p>
                         </div>
                     </div>
+                    <div class="flex items-start gap-4">
+                        <i class="fa-solid fa-phone text-3xl text-teal-700 mt-1"></i>
+                        <div>
+                            <p class="font-medium">+254 707 118 312</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <i class="fa-solid fa-envelope text-3xl text-teal-700 mt-1"></i>
+                        <div>
+                            <p class="font-medium">kakelounitycbo@gmail.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+           <!-- CONTACT FORM – Netlify Forms enabled -->
+<form 
+    id="contact-form" 
+    name="contact" 
+    data-netlify="true" 
+    method="POST" 
+    class="space-y-6"
+    netlify-honeypot="bot-field"
+>
+    <!-- Hidden fields required by Netlify -->
+    <input type="hidden" name="form-name" value="contact" />
+    
+    <!-- Honeypot (spam protection – invisible to humans) -->
+    <p class="hidden">
+        <label>Don’t fill this out if you're human: <input name="bot-field" /></label>
+    </p>
+
+    <input 
+        type="text" 
+        id="name" 
+        name="name" 
+        placeholder="Your Name" 
+        required
+        class="w-full px-6 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500"
+    >
+    
+    <input 
+        type="email" 
+        id="email" 
+        name="email" 
+        placeholder="Your Email" 
+        required
+        class="w-full px-6 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500"
+    >
+    
+    <textarea 
+        id="message" 
+        name="message" 
+        rows="5" 
+        placeholder="Your Message" 
+        required
+        class="w-full px-6 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500"
+    ></textarea>
+    
+    <button 
+        type="submit"
+        class="w-full bg-teal-700 text-white py-5 rounded-3xl font-semibold text-lg hover:bg-teal-800 transition"
+    >
+        SEND MESSAGE
+    </button>
+
+    <!-- Status message (optional – shows success/error) -->
+    <div id="form-status" class="text-sm text-center font-medium hidden"></div>
+</form>
+
+        </div>
+    </div>
+</section>
     
 
   <!-- CONTACT -->
