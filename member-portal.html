@@ -576,5 +576,35 @@
     });
   }
 </script>
+    <!-- WhatsApp Floating Widget -->
+<div style="position: fixed; bottom: 25px; right: 25px; z-index: 10000;">
+    <a href="https://wa.me/254707118312?text=Hello%20Kakelo%20Unity%20CBO%2C%20I%20visited%20your%20website%20and%20would%20like%20to%20know%20more."
+       target="_blank" 
+       rel="noopener noreferrer"
+       style="display: flex; align-items: center; justify-content: center; width: 65px; height: 65px; background-color: #25D366; color: white; border-radius: 50%; box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); text-decoration: none; font-size: 32px; transition: all 0.3s ease;">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+    
+    <!-- Optional small tooltip -->
+    <div style="position: absolute; right: 75px; bottom: 10px; background: #1f2937; color: white; padding: 8px 14px; border-radius: 20px; font-size: 14px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: none; align-items: center; gap: 8px;" id="wa-tooltip">
+        Chat with us on WhatsApp
+        <div style="width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 8px solid #1f2937;"></div>
+    </div>
+</div>
+
+<script>
+    // Show tooltip on hover
+    const waButton = document.querySelector('a[href*="wa.me"]');
+    const tooltip = document.getElementById('wa-tooltip');
+    
+    if (waButton && tooltip) {
+        waButton.addEventListener('mouseenter', () => {
+            tooltip.style.display = 'flex';
+        });
+        waButton.addEventListener('mouseleave', () => {
+            tooltip.style.display = 'none';
+        });
+    }
+</script>
 </body>
 </html>
