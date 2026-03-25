@@ -1,4 +1,5 @@
 const CACHE_NAME = 'kakelo-unity-cbo-v1';
+
 const urlsToCache = [
   '/',
   '/index.html',
