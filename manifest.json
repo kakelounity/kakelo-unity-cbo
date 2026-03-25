@@ -2,21 +2,23 @@
   "name": "Kakelo Unity CBO",
   "short_name": "Kakelo Unity",
   "description": "Kakelo Unity Community Based Organization",
-  "start_url": "/index.html",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0f766e",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "logo.png",
+      "src": "Kakelo Unity Logo (2).png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "logo.png",
+      "src": "Kakelo Unity Logo (2).png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
