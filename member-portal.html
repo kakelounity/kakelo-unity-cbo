@@ -562,16 +562,16 @@
         document.getElementById('password').addEventListener('keypress', e => {
             if (e.key === 'Enter') login();
         });
-        <!-- PWA Service Worker -->
+       <!-- PWA Service Worker Registration -->
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('/sw.js')
-        .then(function(registration) {
-          console.log('Service Worker registered successfully:', registration);
+        .then(function(reg) {
+          console.log('✅ Service Worker Registered Successfully');
         })
-        .catch(function(error) {
-          console.log('Service Worker registration failed:', error);
+        .catch(function(err) {
+          console.log('❌ Service Worker Error:', err);
         });
     });
   }
