@@ -22,13 +22,14 @@
         gtag('config', 'G-K02NEQDESG');
     </script>
 
+    <!-- PWA Support -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0f766e">
     <link rel="apple-touch-icon" href="Kakelo Unity Logo (2).png">
 </head>
 <body class="bg-slate-50 min-h-screen font-sans antialiased">
 
-    <!-- LOGIN SCREEN -->
+    <!-- ==================== LOGIN SCREEN ==================== -->
     <div id="login-screen" class="min-h-screen bg-gradient-to-br from-teal-50 to-slate-50 flex items-center justify-center p-6">
         <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md">
             <div class="text-center mb-10">
@@ -52,7 +53,6 @@
                            placeholder="Enter your password" required>
                 </div>
 
-                <!-- FIXED: No onclick="login()" anymore -->
                 <button type="submit" id="loginBtn"
                         class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-3xl font-semibold text-lg transition-all">
                     Login
@@ -63,8 +63,9 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- ==================== DASHBOARD ==================== -->
     <div id="dashboard" class="hidden max-w-4xl mx-auto pt-10 px-6 pb-20 fade-in">
+
         <header class="flex justify-between items-center mb-6">
             <h2 id="welcome-name" class="text-3xl font-bold text-teal-800"></h2>
             <button onclick="logout()" class="flex items-center gap-2 text-red-600 hover:text-red-800 font-medium">
@@ -72,6 +73,7 @@
             </button>
         </header>
 
+        <!-- Announcements -->
         <div id="announcements-container" class="mb-8 space-y-4"></div>
 
         <!-- Upcoming Events -->
@@ -86,7 +88,7 @@
         <!-- Profile -->
         <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
             <div class="flex flex-col md:flex-row gap-8 items-start">
-                <img id="photo" src="https://via.placeholder.com/140?text=Photo" alt="Profile" 
+                <img id="photo" src="https://via.placeholder.com/140?text=Photo" alt="Profile Photo" 
                      class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-teal-100">
                 <div>
                     <h3 id="name" class="text-2xl font-bold text-teal-900"></h3>
@@ -108,11 +110,15 @@
                 <i class="fa-solid fa-key text-teal-600"></i> Change Password
             </h3>
             <div class="space-y-4">
-                <input id="current-pass" type="password" placeholder="Current Password" class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
-                <input id="new-pass" type="password" placeholder="New Password" class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
-                <input id="confirm-pass" type="password" placeholder="Confirm New Password" class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
+                <input id="current-pass" type="password" placeholder="Current Password" 
+                       class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
+                <input id="new-pass" type="password" placeholder="New Password" 
+                       class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
+                <input id="confirm-pass" type="password" placeholder="Confirm New Password" 
+                       class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500">
                 <div id="password-status" class="text-sm font-medium text-center hidden"></div>
-                <button onclick="changePassword()" class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold transition">
+                <button onclick="changePassword()" 
+                        class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold transition">
                     Update Password
                 </button>
             </div>
@@ -134,9 +140,6 @@
             </div>
         </div>
 
-        <!-- Recent Savings, Loans, M-Pesa, Feedback sections remain the same -->
-        <!-- (For brevity, I kept them short here. You can copy the full sections from previous response if needed) -->
-
         <!-- Recent Savings -->
         <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
             <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
@@ -155,11 +158,11 @@
             <p id="no-loans-msg" class="text-center text-slate-500 mt-6 hidden">No loans found.</p>
         </div>
 
-        <!-- M-Pesa -->
+        <!-- M-Pesa Payment -->
         <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
             <h3 class="text-xl font-bold mb-6 flex items-center gap-3">
                 <i class="fa-solid fa-mobile-screen-button text-green-600 text-2xl"></i>
-                Contribute / Make Payment via M-Pesa
+                Contribute via M-Pesa
             </h3>
             <div class="bg-green-50 border border-green-200 rounded-2xl p-6">
                 <p class="font-medium text-green-800 mb-4">Pay using KCB Bank Paybill via M-Pesa</p>
@@ -169,11 +172,10 @@
                     <p><strong>Account Number:</strong> <span class="font-bold text-xl text-green-700">1348462264</span></p>
                 </div>
                 <ol class="list-decimal pl-6 mt-6 space-y-2 text-gray-700 text-lg">
-                    <li>Open M-Pesa on your Safaricom line</li>
-                    <li>Select <strong>Lipa na M-Pesa</strong> → <strong>Pay Bill</strong></li>
+                    <li>Open M-Pesa → Lipa na M-Pesa → Pay Bill</li>
                     <li>Enter Business No: <strong>522522</strong></li>
-                    <li>Enter Account Number: <strong>1348462264</strong></li>
-                    <li>Enter the Amount → Confirm → Enter PIN</li>
+                    <li>Enter Account No: <strong>1348462264</strong></li>
+                    <li>Enter Amount → Confirm with PIN</li>
                 </ol>
             </div>
         </div>
@@ -184,9 +186,9 @@
                 <i class="fa-solid fa-comment-dots text-purple-600 text-2xl"></i> Send Us Feedback
             </h3>
             <div class="space-y-6">
-                <input id="feedback-name" type="text" placeholder="Your Name" 
+                <input id="feedback-name" type="text" placeholder="Your Name (auto-filled)" 
                        class="w-full px-5 py-4 border border-slate-300 rounded-2xl bg-gray-50" disabled>
-                <input id="feedback-email" type="email" placeholder="Your Email" 
+                <input id="feedback-email" type="email" placeholder="Your Email (auto-filled)" 
                        class="w-full px-5 py-4 border border-slate-300 rounded-2xl bg-gray-50" disabled>
                 
                 <div class="flex items-center gap-3">
@@ -213,10 +215,10 @@
         </div>
     </div>
 
-    <!-- ====================== FULL JAVASCRIPT ====================== -->
+    <!-- ====================== JAVASCRIPT ====================== -->
     <script>
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec"
-        // LOGIN FORM HANDLER
+        // ==================== LOGIN HANDLER ====================
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -252,19 +254,21 @@
                     document.getElementById('login-screen').classList.add('hidden');
                     document.getElementById('dashboard').classList.remove('hidden');
 
-                    loadDashboard(data.profile, data.recentSavings || [], data.loans || [], data.announcements || [], data.events || []);
+                    loadDashboard(data.profile, data.recentSavings || [], data.loans || [], 
+                                 data.announcements || [], data.events || []);
                 } else {
                     alert(data.message || "Invalid Member ID or Password");
                 }
             } catch (error) {
                 console.error(error);
-                alert("Connection error. Please check your internet and try again.");
+                alert("Connection error. Please check your internet connection.");
             } finally {
                 loginBtn.disabled = false;
                 loginBtn.textContent = "Login";
             }
         });
 
+        // ==================== LOAD DASHBOARD ====================
         function loadDashboard(profile, recentSavings, loans, announcements, events) {
             document.getElementById('welcome-name').textContent = `Welcome, ${profile.fullName ? profile.fullName.split(' ')[0] : profile.memberId}`;
 
@@ -282,218 +286,4 @@
             document.getElementById('photo').src = profile.photoUrl || 'https://via.placeholder.com/140?text=Photo';
 
             document.getElementById('savings').textContent = `KSh ${Number(profile.totalSavings || 0).toLocaleString('en-KE')}`;
-            document.getElementById('regfees').textContent = `KSh ${Number(profile.regFeesPaid || 0).toLocaleString('en-KE')}`;
-
-            document.getElementById('feedback-name').value = profile.fullName || '';
-            document.getElementById('feedback-email').value = profile.email || '';
-
-            renderSavings(recentSavings.slice(0, 5));
-            renderLoans(loans);
-            renderAnnouncements(announcements);
-            renderEvents(events);
-        }
-
-        // Render Savings
-        function renderSavings(items) {
-            const container = document.getElementById('savings-list');
-            const noMsg = document.getElementById('no-savings-msg');
-            container.innerHTML = '';
-
-            if (items.length === 0) {
-                noMsg.classList.remove('hidden');
-                return;
-            }
-            noMsg.classList.add('hidden');
-
-            items.forEach(item => {
-                const isPositive = item.amount > 0;
-                const div = document.createElement('div');
-                div.className = 'flex justify-between items-center py-3 border-b last:border-0';
-                div.innerHTML = `
-                    <div>
-                        <div class="font-medium">${item.date}</div>
-                        <div class="text-sm text-slate-600">${item.type}${item.notes ? ' • ' + item.notes : ''}</div>
-                    </div>
-                    <div class="${isPositive ? 'text-green-600' : 'text-red-600'} font-semibold">
-                        ${isPositive ? '+' : ''} KSh ${Math.abs(item.amount).toLocaleString('en-KE')}
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // Render Loans
-        function renderLoans(items) {
-            const container = document.getElementById('loans-list');
-            const noMsg = document.getElementById('no-loans-msg');
-            container.innerHTML = '';
-            let totalOutstanding = 0;
-
-            if (items.length === 0) {
-                noMsg.classList.remove('hidden');
-            } else {
-                noMsg.classList.add('hidden');
-                items.forEach(loan => {
-                    totalOutstanding += loan.outstanding || 0;
-                    const extra = loan.overdue ? '<span class="text-red-600 font-semibold ml-2">OVERDUE!</span>' : '';
-
-                    const div = document.createElement('div');
-                    div.className = `p-4 border-l-4 ${loan.overdue ? 'border-red-500 bg-red-50' : 'border-orange-500 bg-orange-50'} rounded-lg`;
-                    div.innerHTML = `
-                        <div class="font-medium flex items-center">Loan ${loan.loanId} – ${loan.date} ${extra}</div>
-                        <div class="text-lg font-bold mt-1">KSh ${loan.amount.toLocaleString('en-KE')}</div>
-                        <div class="text-sm mt-2">
-                            Outstanding: <span class="font-semibold">KSh ${(loan.outstanding || 0).toLocaleString('en-KE')}</span><br>
-                            ${loan.nextDue && loan.nextDue !== '—' ? `Next due: ${loan.nextDue}<br>` : ''}
-                            Status: <span class="${loan.overdue ? 'text-red-700' : 'text-orange-700'}">${loan.status || 'Active'}</span>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
-            }
-            document.getElementById('total-outstanding').textContent = `KSh ${totalOutstanding.toLocaleString('en-KE')}`;
-        }
-
-        function renderAnnouncements(announcements) {
-            const container = document.getElementById('announcements-container');
-            container.innerHTML = '';
-            if (announcements.length === 0) {
-                container.innerHTML = '<p class="text-center text-slate-500">No current announcements</p>';
-                return;
-            }
-            announcements.forEach(ann => {
-                if (localStorage.getItem(`dismiss-ann-${ann.title}`)) return;
-                const div = document.createElement('div');
-                div.className = `p-6 rounded-2xl border ${ann.priority === 'High' ? 'bg-red-50 border-red-200' : 'bg-blue-50 border-blue-200'} relative`;
-                div.innerHTML = `
-                    <button onclick="dismissAnnouncement('${ann.title.replace(/'/g, "\\'")}')" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-xl">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                    <h4 class="font-bold text-lg mb-2">${ann.title}</h4>
-                    <p>${ann.message}</p>
-                    <p class="text-xs text-gray-500 mt-3">${ann.date}</p>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function dismissAnnouncement(title) {
-            localStorage.setItem(`dismiss-ann-${title}`, 'true');
-            location.reload();
-        }
-
-        function renderEvents(events) {
-            const container = document.getElementById('events-list');
-            const noMsg = document.getElementById('no-events-msg');
-            container.innerHTML = '';
-
-            if (events.length === 0) {
-                noMsg.classList.remove('hidden');
-                return;
-            }
-            noMsg.classList.add('hidden');
-
-            events.forEach(event => {
-                const div = document.createElement('div');
-                div.className = 'p-4 border-l-4 border-teal-500 bg-teal-50 rounded-lg';
-                div.innerHTML = `
-                    <div class="font-bold text-lg">${event.title}</div>
-                    <div class="text-sm text-gray-700 mt-1">
-                        <strong>Date:</strong> ${event.date} | <strong>Time:</strong> ${event.time}<br>
-                        <strong>Location:</strong> ${event.location}
-                    </div>
-                    <p class="mt-2 text-gray-600">${event.description}</p>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        async function submitFeedback() {
-            const statusEl = document.getElementById('feedback-status');
-            statusEl.classList.remove('hidden');
-            statusEl.textContent = 'Submitting...';
-
-            const memberId = localStorage.getItem('memberId') || '';
-            const name = document.getElementById('feedback-name').value;
-            const email = document.getElementById('feedback-email').value;
-            const rating = document.getElementById('feedback-rating').value;
-            const message = document.getElementById('feedback-message').value.trim();
-
-            if (!message) {
-                statusEl.classList.add('text-red-600');
-                statusEl.textContent = 'Please enter a message';
-                return;
-            }
-
-            try {
-                const res = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: new URLSearchParams({ action: 'submitFeedback', memberId, name, email, rating, message })
-                });
-                const data = await res.json();
-                statusEl.classList.add(data.success ? 'text-green-600' : 'text-red-600');
-                statusEl.textContent = data.message || (data.success ? 'Thank you!' : 'Failed');
-                if (data.success) document.getElementById('feedback-message').value = '';
-            } catch (err) {
-                statusEl.classList.add('text-red-600');
-                statusEl.textContent = 'Connection error';
-            }
-        }
-
-        async function changePassword() {
-            const statusEl = document.getElementById('password-status');
-            statusEl.classList.remove('hidden');
-            statusEl.textContent = 'Updating...';
-
-            const current = document.getElementById('current-pass').value.trim();
-            const newPass = document.getElementById('new-pass').value.trim();
-            const confirm = document.getElementById('confirm-pass').value.trim();
-            const memberId = localStorage.getItem('memberId') || '';
-
-            if (!current || !newPass || !confirm) {
-                statusEl.classList.add('text-red-600');
-                statusEl.textContent = 'All fields required';
-                return;
-            }
-            if (newPass !== confirm) {
-                statusEl.classList.add('text-red-600');
-                statusEl.textContent = 'Passwords do not match';
-                return;
-            }
-
-            try {
-                const res = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: new URLSearchParams({ action: 'changePassword', id: memberId, currentPass: current, newPass: newPass })
-                });
-                const data = await res.json();
-                statusEl.classList.add(data.success ? 'text-green-600' : 'text-red-600');
-                statusEl.textContent = data.message || 'Failed to update';
-                if (data.success) {
-                    document.getElementById('current-pass').value = '';
-                    document.getElementById('new-pass').value = '';
-                    document.getElementById('confirm-pass').value = '';
-                }
-            } catch (err) {
-                statusEl.classList.add('text-red-600');
-                statusEl.textContent = 'Connection error';
-            }
-        }
-
-        function logout() {
-            localStorage.clear();
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('login-screen').classList.remove('hidden');
-            document.getElementById('password').value = '';
-        }
-    </script>
-
-    <!-- WhatsApp Floating Button -->
-    <div style="position: fixed; bottom: 25px; right: 25px; z-index: 10000;">
-        <a href="https://wa.me/254707118312?text=Hello%20Kakelo%20Unity%20CBO" target="_blank" 
-           style="display: flex; align-items: center; justify-content: center; width: 65px; height: 65px; background-color: #25D366; color: white; border-radius: 50%; box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); text-decoration: none; font-size: 32px;">
-            <i class="fa-brands fa-whatsapp"></i>
-        </a>
-    </div>
-</body>
-</html>
+            document.getElementById('regfees').textContent = `KSh ${Number(profile.regFees
