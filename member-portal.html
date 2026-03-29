@@ -28,28 +28,39 @@
 </head>
 <body class="bg-slate-50 min-h-screen font-sans antialiased">
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="max-w-md mx-auto pt-16 px-6 fade-in">
+ <!-- LOGIN FORM -->
+<div id="login-screen" class="min-h-screen bg-gradient-to-br from-teal-50 to-slate-50 flex items-center justify-center p-6">
+    <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md">
         <div class="text-center mb-10">
-            <img src="Kakelo Unity Logo (2).png" alt="Logo" class="mx-auto h-20 object-contain">
-            <h1 class="text-3xl font-bold text-teal-800 mt-6">Member Portal</h1>
-            <p class="text-slate-600 mt-2">Secure access to your account</p>
+            <img src="Kakelo Unity Logo (2).png" alt="Kakelo Unity CBO" class="mx-auto h-20 mb-4">
+            <h2 class="text-3xl font-bold text-teal-800">Member Portal</h2>
+            <p class="text-slate-600 mt-2">Sign in to access your account</p>
         </div>
 
-        <div class="bg-white rounded-3xl shadow-xl p-8">
-            <input id="member-id" type="text" placeholder="Member ID (e.g. KU001)" 
-                   class="w-full px-5 py-4 border border-slate-300 rounded-2xl mb-4 text-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50">
-            <input id="password" type="password" placeholder="Password" 
-                   class="w-full px-5 py-4 border border-slate-300 rounded-2xl mb-6 text-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-200/50">
-            
-            <div id="login-error" class="text-red-600 text-sm mb-4 hidden text-center"></div>
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Member ID</label>
+                <input type="text" id="memberId" 
+                       class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 text-lg" 
+                       placeholder="e.g. KU001" required>
+            </div>
 
-            <button onclick="login()" 
-                    class="w-full bg-teal-700 hover:bg-teal-800 text-white py-5 rounded-3xl font-semibold text-lg transition shadow-md flex items-center justify-center gap-3">
-                Log In
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
+                <input type="password" id="password" 
+                       class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 text-lg" 
+                       placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" id="loginBtn"
+                    class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-3xl font-semibold text-lg transition-all duration-300">
+                Login
             </button>
-        </div>
+        </form>
+
+        <div id="loginMessage" class="mt-6 text-center text-sm hidden"></div>
     </div>
+</div>
 
     <!-- DASHBOARD -->
     <div id="dashboard" class="hidden max-w-4xl mx-auto pt-10 px-6 pb-20 fade-in">
@@ -604,6 +615,69 @@
             tooltip.style.display = 'none';
         });
     }
+</script>
+    <script>
+// Main Login Function
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const loginBtn = document.getElementById('loginBtn');
+    const messageDiv = document.getElementById('loginMessage');
+    
+    const memberId = document.getElementById('memberId').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!memberId || !password) {
+        showMessage("Please enter both Member ID and Password", "red");
+        return;
+    }
+
+    // Show loading state
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = 'Logging in...';
+    messageDiv.classList.add('hidden');
+
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                action: 'login',
+                memberId: memberId,
+                password: password
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Save member data
+            localStorage.setItem('memberId', memberId);
+            localStorage.setItem('memberData', JSON.stringify(data.member));
+            
+            showMessage("Login successful! Redirecting...", "green");
+            
+            setTimeout(() => {
+                window.location.href = 'member-portal.html';   // or dashboard view
+            }, 800);
+        } else {
+            showMessage(data.message || "Invalid Member ID or Password", "red");
+        }
+    } catch (error) {
+        console.error(error);
+        showMessage("Connection error. Please check your internet and try again.", "red");
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = 'Login';
+    }
+});
+
+function showMessage(text, color) {
+    const msgDiv = document.getElementById('loginMessage');
+    msgDiv.textContent = text;
+    msgDiv.classList.remove('hidden');
+    msgDiv.style.color = color === 'green' ? '#10b981' : '#ef4444';
+}
 </script>
 </body>
 </html>
