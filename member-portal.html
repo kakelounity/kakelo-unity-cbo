@@ -147,7 +147,7 @@
    <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
-// ================= LOGIN =================
+// LOGIN
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -161,7 +161,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     try {
         const res = await fetch(WEB_APP_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
             body: new URLSearchParams({
                 action: 'login',
                 memberId,
@@ -186,7 +186,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
     btn.textContent = "Login";
 });
 
-// ================= SHOW DASHBOARD =================
+// SHOW DASHBOARD
 function showDashboard(member) {
     document.getElementById('login-screen').classList.add('hidden');
     document.getElementById('dashboard').classList.remove('hidden');
@@ -198,7 +198,7 @@ function showDashboard(member) {
     }
 }
 
-// ================= RENDER =================
+// RENDER PROFILE
 function renderProfile(data) {
     document.getElementById('welcome-name').textContent = "Welcome, " + data.fullName;
     document.getElementById('name').textContent = data.fullName;
@@ -223,7 +223,7 @@ function renderProfile(data) {
         "KSh " + Number(data.regFees).toLocaleString();
 }
 
-// ================= ADMIN =================
+// ADMIN
 async function loadAdminDashboardData() {
     const memberId = localStorage.getItem("memberId");
 
@@ -264,7 +264,7 @@ function toggleAdminView() {
     }
 }
 
-// ================= AUTO LOGIN =================
+// AUTO LOGIN
 window.onload = function () {
     const saved = localStorage.getItem("memberData");
     if (saved) {
@@ -272,13 +272,12 @@ window.onload = function () {
     }
 };
 
-// ================= LOGOUT =================
+// LOGOUT
 function logout() {
     localStorage.clear();
     location.reload();
 }
 </script>
-
     <!-- WhatsApp Widget -->
     <div style="position: fixed; bottom: 25px; right: 25px; z-index: 10000;">
         <a href="https://wa.me/254707118312?text=Hello%20Kakelo%20Unity%20CBO" target="_blank" 
