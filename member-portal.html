@@ -144,128 +144,140 @@
         </div>
     </div>
 
-    <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
+   <script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
-        // ==================== LOGIN ====================
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+// ================= LOGIN =================
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-            const loginBtn = document.getElementById('loginBtn');
-            const memberId = document.getElementById('memberId').value.trim().toUpperCase();
-            const password = document.getElementById('password').value.trim();
+    const memberId = document.getElementById('memberId').value.trim().toUpperCase();
+    const password = document.getElementById('password').value.trim();
+    const btn = document.getElementById('loginBtn');
 
-            if (!memberId || !password) {
-                alert("Please enter both Member ID and Password");
-                return;
-            }
+    btn.disabled = true;
+    btn.textContent = "Logging in...";
 
-            loginBtn.disabled = true;
-            loginBtn.textContent = "Logging in...";
-
-            try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        action: 'login',
-                        memberId: memberId,
-                        password: password
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    localStorage.setItem('memberId', memberId);
-                    localStorage.setItem('memberData', JSON.stringify(data.member));
-
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('dashboard').classList.remove('hidden');
-
-                    renderProfile(data.member);
-                } else {
-                    alert(data.message || "Invalid Member ID or Password");
-                }
-            } catch (error) {
-                console.error(error);
-                alert("Connection error. Please check your internet and try again.");
-            } finally {
-                loginBtn.disabled = false;
-                loginBtn.textContent = "Login";
-            }
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                action: 'login',
+                memberId,
+                password
+            })
         });
 
-        // ==================== RENDER PROFILE ====================
-        function renderProfile(data) {
-            document.getElementById('welcome-name').textContent = `Welcome, ${data.fullName ? data.fullName.split(' ')[0] : data.memberId}`;
+        const data = await res.json();
 
-            document.getElementById('name').textContent = data.fullName || '';
-            document.getElementById('role').textContent = data.role || 'Member';
-            document.getElementById('phone').textContent = data.phone || '';
-            document.getElementById('email').textContent = data.email || '';
-            document.getElementById('join').textContent = data.joinDate || '';
-            document.getElementById('natid').textContent = data.nationalID || '';
-            document.getElementById('status').textContent = data.status || 'Active';
+        if (!data.success) throw new Error(data.message);
 
-            if (data.photoUrl) document.getElementById('photo').src = data.photoUrl;
+        localStorage.setItem("memberId", memberId);
+        localStorage.setItem("memberData", JSON.stringify(data.member));
 
-            document.getElementById('savings').textContent = `KSh ${Number(data.totalSavings || 0).toLocaleString('en-KE')}`;
-            document.getElementById('total-fines').textContent = `KSh ${Number(data.totalFinesPaid || 0).toLocaleString('en-KE')}`;
-            document.getElementById('regfees').textContent = `KSh ${Number(data.regFees || 0).toLocaleString('en-KE')}`;
+        showDashboard(data.member);
 
-            // Show Admin Button for authorized roles
-            if (data.isAdmin) {
-                document.getElementById('admin-button-container').classList.remove('hidden');
-            }
-        }
+    } catch (err) {
+        alert(err.message);
+    }
 
-        // ==================== ADMIN DASHBOARD ====================
-        function toggleAdminView() {
-            const memberView = document.getElementById('member-view');
-            const adminView = document.getElementById('admin-dashboard-view');
-            const btnText = document.getElementById('admin-btn-text');
+    btn.disabled = false;
+    btn.textContent = "Login";
+});
 
-            if (adminView.classList.contains('hidden')) {
-                memberView.classList.add('hidden');
-                adminView.classList.remove('hidden');
-                btnText.textContent = "Back to My Dashboard";
-                loadAdminDashboardData();
-            } else {
-                memberView.classList.remove('hidden');
-                adminView.classList.add('hidden');
-                btnText.textContent = "View Group Dashboard";
-            }
-        }
+// ================= SHOW DASHBOARD =================
+function showDashboard(member) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
 
-        async function loadAdminDashboardData() {
-            try {
-                const response = await fetch(WEB_APP_URL + '?action=getAdminData');
-                const result = await response.json();
+    renderProfile(member);
 
-                if (result.success && result.adminData) {
-                    document.getElementById('admin-cash-in-hand').textContent = 
-                        'KSh ' + Number(result.adminData.cashInHand || 0).toLocaleString('en-KE');
-                    document.getElementById('admin-total-savings').textContent = 
-                        'KSh ' + Number(result.adminData.totalMemberSavings || 0).toLocaleString('en-KE');
-                    document.getElementById('admin-total-fines').textContent = 
-                        'KSh ' + Number(result.adminData.totalFinesCollected || 0).toLocaleString('en-KE');
-                    document.getElementById('admin-total-expenses').textContent = 
-                        'KSh ' + Number(result.adminData.totalExpenses || 0).toLocaleString('en-KE');
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
+    if (member.isAdmin) {
+        document.getElementById('admin-button-container').classList.remove('hidden');
+    }
+}
 
-        // Logout
-        function logout() {
-            if (confirm("Are you sure you want to logout?")) {
-                localStorage.clear();
-                window.location.reload();
-            }
-        }
-    </script>
+// ================= RENDER =================
+function renderProfile(data) {
+    document.getElementById('welcome-name').textContent = "Welcome, " + data.fullName;
+    document.getElementById('name').textContent = data.fullName;
+    document.getElementById('role').textContent = data.role;
+    document.getElementById('phone').textContent = data.phone;
+    document.getElementById('email').textContent = data.email;
+    document.getElementById('join').textContent = data.joinDate;
+    document.getElementById('natid').textContent = data.nationalID;
+    document.getElementById('status').textContent = data.status;
+
+    if (data.photoUrl) {
+        document.getElementById('photo').src = data.photoUrl;
+    }
+
+    document.getElementById('savings').textContent =
+        "KSh " + Number(data.totalSavings).toLocaleString();
+
+    document.getElementById('total-fines').textContent =
+        "KSh " + Number(data.totalFinesPaid).toLocaleString();
+
+    document.getElementById('regfees').textContent =
+        "KSh " + Number(data.regFees).toLocaleString();
+}
+
+// ================= ADMIN =================
+async function loadAdminDashboardData() {
+    const memberId = localStorage.getItem("memberId");
+
+    const res = await fetch(
+        WEB_APP_URL + `?action=getAdminData&memberId=${memberId}`
+    );
+
+    const data = await res.json();
+
+    if (!data.success) return;
+
+    const a = data.adminData;
+
+    document.getElementById('admin-cash-in-hand').textContent =
+        "KSh " + Number(a.cashInHand).toLocaleString();
+
+    document.getElementById('admin-total-savings').textContent =
+        "KSh " + Number(a.totalMemberSavings).toLocaleString();
+
+    document.getElementById('admin-total-fines').textContent =
+        "KSh " + Number(a.totalFinesCollected).toLocaleString();
+
+    document.getElementById('admin-total-expenses').textContent =
+        "KSh " + Number(a.totalExpenses).toLocaleString();
+}
+
+function toggleAdminView() {
+    const memberView = document.getElementById('member-view');
+    const adminView = document.getElementById('admin-dashboard-view');
+
+    if (adminView.classList.contains('hidden')) {
+        memberView.classList.add('hidden');
+        adminView.classList.remove('hidden');
+        loadAdminDashboardData();
+    } else {
+        memberView.classList.remove('hidden');
+        adminView.classList.add('hidden');
+    }
+}
+
+// ================= AUTO LOGIN =================
+window.onload = function () {
+    const saved = localStorage.getItem("memberData");
+    if (saved) {
+        showDashboard(JSON.parse(saved));
+    }
+};
+
+// ================= LOGOUT =================
+function logout() {
+    localStorage.clear();
+    location.reload();
+}
+</script>
 
     <!-- WhatsApp Widget -->
     <div style="position: fixed; bottom: 25px; right: 25px; z-index: 10000;">
