@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Kakelo Unity CBO Portal</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -11,13 +12,15 @@
 
 </head>
 
-<body class="bg-slate-100 min-h-screen p-6">
+<body class="bg-slate-100 min-h-screen">
 
 <!-- LOGIN -->
-<div id="login-screen" class="flex items-center justify-center min-h-screen">
-<div class="bg-white p-8 rounded-2xl shadow w-full max-w-md">
+<div id="login-screen" class="flex items-center justify-center min-h-screen p-6">
+<div class="bg-white p-8 rounded-2xl shadow w-full max-w-md text-center">
 
-<h2 class="text-2xl font-bold mb-6 text-center">Member Login</h2>
+<img src="YOUR_LOGO_URL" class="mx-auto h-20 mb-4">
+
+<h2 class="text-2xl font-bold mb-6 text-teal-800">Member Login</h2>
 
 <form id="loginForm" class="space-y-4">
 <input id="memberId" class="w-full p-3 border rounded" placeholder="Member ID" required>
@@ -29,14 +32,14 @@
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="hidden max-w-6xl mx-auto">
+<div id="dashboard" class="hidden max-w-6xl mx-auto p-6">
 
 <header class="flex justify-between items-center mb-6">
 <h2 id="welcome-name" class="text-2xl font-bold text-teal-800"></h2>
-<button onclick="logout()" class="text-red-600">Logout</button>
+<button onclick="logout()" class="text-red-600 font-semibold">Logout</button>
 </header>
 
-<!-- ACTION BUTTONS -->
+<!-- ACTIONS -->
 <div class="flex gap-3 mb-6 flex-wrap">
 <button onclick="downloadPDF()" class="bg-blue-600 text-white px-4 py-2 rounded">PDF</button>
 <button onclick="emailStatement()" class="bg-green-600 text-white px-4 py-2 rounded">Email</button>
@@ -44,19 +47,21 @@
 </div>
 
 <!-- PROFILE -->
-<div class="bg-white p-6 rounded-2xl shadow mb-6 flex gap-6 items-center">
+<div class="bg-white p-6 rounded-2xl shadow mb-6 flex flex-col md:flex-row gap-6 items-center">
 
 <img id="photo" class="w-32 h-32 rounded-full object-cover border">
 
-<div>
+<div class="flex-1">
 <h3 id="name" class="text-xl font-bold"></h3>
-<p id="role"></p>
+<p id="role" class="text-teal-600"></p>
 
+<div class="grid grid-cols-2 gap-2 mt-3 text-sm">
 <p>📞 <span id="phone"></span></p>
 <p>📧 <span id="email"></span></p>
 <p>📅 <span id="join"></span></p>
 <p>🆔 <span id="natid"></span></p>
 <p>📊 <span id="status"></span></p>
+</div>
 </div>
 
 </div>
@@ -104,7 +109,7 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
+const WEB_APP_URL = "PASTE_YOUR_SCRIPT_URL";
 
 // LOGIN
 document.getElementById("loginForm").addEventListener("submit", async e=>{
@@ -154,9 +159,9 @@ document.getElementById("join").textContent = m.joinDate;
 document.getElementById("natid").textContent = m.nationalID;
 document.getElementById("status").textContent = m.status;
 
-document.getElementById("savings").textContent = "KSh " + m.totalSavings;
-document.getElementById("fines").textContent = "KSh " + m.totalFinesPaid;
-document.getElementById("regfees").textContent = "KSh " + m.regFees;
+document.getElementById("savings").textContent = "KSh " + Number(m.totalSavings).toLocaleString();
+document.getElementById("fines").textContent = "KSh " + Number(m.totalFinesPaid).toLocaleString();
+document.getElementById("regfees").textContent = "KSh " + Number(m.regFees).toLocaleString();
 
 document.getElementById("photo").src = m.photoUrl || "https://via.placeholder.com/150";
 }
@@ -164,10 +169,10 @@ document.getElementById("photo").src = m.photoUrl || "https://via.placeholder.co
 // SAVINGS
 function renderSavings(list){
 document.getElementById("savingsHistory").innerHTML = list.map(s=>`
-<div class="flex justify-between border-b py-2">
+<div class="flex justify-between border-b py-2 text-sm">
+<span>${s.transactionId}</span>
 <span>${s.date}</span>
-<span>${s.type}</span>
-<span>KSh ${s.amount}</span>
+<span>KSh ${Number(s.amount).toLocaleString()}</span>
 </div>
 `).join('');
 }
@@ -183,8 +188,8 @@ document.getElementById("loanHistory").innerHTML = loans.map(l=>`
 </div>
 
 <p>Date: ${l.date}</p>
-<p>Amount: KSh ${l.amount}</p>
-<p>Outstanding: KSh ${l.outstanding}</p>
+<p>Amount: KSh ${Number(l.amount).toLocaleString()}</p>
+<p>Outstanding: KSh ${Number(l.outstanding).toLocaleString()}</p>
 <p>Next Due: ${l.nextDue}</p>
 
 <div class="bg-gray-200 h-2 mt-2">
@@ -221,13 +226,17 @@ datasets:[{label:'Savings',data:data.map(i=>i.amount)}]
 function downloadPDF(){
 const { jsPDF } = window.jspdf;
 const doc = new jsPDF();
-
 const data = JSON.parse(localStorage.getItem("data"));
 
 let y=10;
+
+doc.text("Kakelo Unity Statement",10,y); y+=10;
+doc.text(`Name: ${data.member.fullName}`,10,y); y+=8;
+doc.text(`Member ID: ${data.member.memberId}`,10,y); y+=10;
+
 data.savingsHistory.forEach(s=>{
-doc.text(`${s.date} | ${s.type} | ${s.amount}`,10,y);
-y+=8;
+doc.text(`${s.transactionId} | ${s.date} | ${s.amount}`,10,y);
+y+=6;
 });
 
 doc.save("statement.pdf");
@@ -237,19 +246,23 @@ doc.save("statement.pdf");
 async function emailStatement(){
 const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
 await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
-alert("Sent");
+alert("Statement sent to email");
 }
 
 // MEMBER CARD
 function printCard(){
 const m = JSON.parse(localStorage.getItem("data")).member;
+
 const w = window.open("");
 
 w.document.write(`
-<h2>Kakelo Unity CBO</h2>
-<img src="${m.photoUrl}" width="100">
-<p>${m.fullName}</p>
-<p>${m.memberId}</p>
+<h2 style="text-align:center;">Kakelo Unity CBO</h2>
+<img src="${m.photoUrl}" width="100" style="display:block;margin:auto;">
+<p><b>${m.fullName}</b></p>
+<p>ID: ${m.memberId}</p>
+<p>Phone: ${m.phone}</p>
+<p>Status: ${m.status}</p>
+<p>Joined: ${m.joinDate}</p>
 `);
 
 w.print();
