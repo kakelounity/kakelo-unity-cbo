@@ -1,289 +1,219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Member Portal - Kakelo Unity CBO</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        .dashboard-card { transition: all 0.3s ease; }
-        .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
-        .fade-in { animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kakelo Unity CBO Portal</title>
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K02NEQDESG"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-K02NEQDESG');
-    </script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f766e">
-    <link rel="apple-touch-icon" href="Kakelo Unity Logo (2).png">
 </head>
-<body class="bg-slate-50 min-h-screen font-sans antialiased">
 
-    <!-- LOGIN SCREEN -->
-    <div id="login-screen" class="min-h-screen bg-gradient-to-br from-teal-50 to-slate-50 flex items-center justify-center p-6">
-        <div class="bg-white rounded-3xl shadow-2xl p-10 w-full max-w-md">
-            <div class="text-center mb-10">
-                <img src="Kakelo Unity Logo (2).png" alt="Kakelo Unity CBO" class="mx-auto h-20 mb-4">
-                <h2 class="text-3xl font-bold text-teal-800">Member Portal</h2>
-                <p class="text-slate-600 mt-2">Sign in to access your account</p>
-            </div>
+<body class="bg-gray-100 p-6">
 
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Member ID</label>
-                    <input type="text" id="memberId" class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 text-lg" placeholder="e.g. KU001" required>
-                </div>
+<!-- LOGIN -->
+<div id="login-screen" class="max-w-md mx-auto bg-white p-6 rounded shadow">
+<h2 class="text-xl font-bold mb-4">Member Login</h2>
 
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Password</label>
-                    <input type="password" id="password" class="w-full px-5 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-500 text-lg" placeholder="Enter your password" required>
-                </div>
+<form id="loginForm">
+<input id="memberId" placeholder="Member ID" class="w-full p-3 border mb-3 rounded" required>
+<input id="password" type="password" placeholder="Password" class="w-full p-3 border mb-3 rounded" required>
 
-                <button type="submit" id="loginBtn" class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-3xl font-semibold text-lg transition-all">
-                    Login
-                </button>
-            </form>
+<button class="bg-teal-600 text-white w-full p-3 rounded">Login</button>
+</form>
+</div>
 
-            <div id="loginMessage" class="mt-6 text-center text-sm hidden"></div>
-        </div>
-    </div>
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden max-w-6xl mx-auto">
 
-    <!-- DASHBOARD -->
-    <div id="dashboard" class="hidden max-w-6xl mx-auto pt-10 px-6 pb-20 fade-in">
-        <header class="flex justify-between items-center mb-8">
-            <h2 id="welcome-name" class="text-3xl font-bold text-teal-800"></h2>
-            <button onclick="logout()" class="flex items-center gap-2 text-red-600 hover:text-red-800 font-medium">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </button>
-        </header>
+<h2 id="welcome" class="text-2xl font-bold mb-4"></h2>
 
-        <!-- Admin Button -->
-        <div id="admin-button-container" class="hidden mb-8">
-            <button onclick="toggleAdminView()" class="flex items-center gap-3 bg-amber-600 hover:bg-amber-700 text-white px-8 py-4 rounded-2xl font-semibold transition shadow-md">
-                <i class="fa-solid fa-chart-line text-xl"></i>
-                <span id="admin-btn-text">View Group Dashboard</span>
-            </button>
-        </div>
+<button onclick="logout()" class="mb-4 bg-red-500 text-white px-4 py-2 rounded">Logout</button>
 
-        <!-- MEMBER VIEW -->
-        <div id="member-view">
-            <!-- Profile -->
-            <div class="dashboard-card bg-white rounded-3xl shadow p-8 mb-8">
-                <div class="flex flex-col md:flex-row gap-8 items-start">
-                    <img id="photo" src="https://via.placeholder.com/140?text=Photo" alt="Profile Photo" class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-teal-100">
-                    <div class="flex-1">
-                        <h3 id="name" class="text-2xl font-bold text-teal-900"></h3>
-                        <p id="role" class="text-teal-700 font-medium mt-1"></p>
-                        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-                            <p><i class="fa-solid fa-phone mr-2"></i><span id="phone"></span></p>
-                            <p><i class="fa-solid fa-envelope mr-2"></i><span id="email"></span></p>
-                            <p><i class="fa-solid fa-calendar-days mr-2"></i>Joined: <span id="join"></span></p>
-                            <p><i class="fa-solid fa-id-card mr-2"></i>ID: <span id="natid"></span></p>
-                            <p><i class="fa-solid fa-circle-info mr-2"></i>Status: <span id="status" class="font-semibold"></span></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<button onclick="downloadPDF()" class="mb-4 bg-blue-600 text-white px-4 py-2 rounded">
+Download Statement
+</button>
 
-            <!-- Financial Summary -->
-            <div class="grid md:grid-cols-3 gap-6 mb-8">
-                <div class="dashboard-card bg-white rounded-3xl shadow p-8">
-                    <h4 class="text-lg font-semibold text-teal-800 mb-2">Total Savings</h4>
-                    <p id="savings" class="text-5xl font-bold text-teal-700">KSh 0</p>
-                </div>
-                <div class="dashboard-card bg-white rounded-3xl shadow p-8">
-                    <h4 class="text-lg font-semibold text-amber-800 mb-2">Total Fines Paid</h4>
-                    <p id="total-fines" class="text-5xl font-bold text-amber-600">KSh 0</p>
-                </div>
-                <div class="dashboard-card bg-white rounded-3xl shadow p-8">
-                    <h4 class="text-lg font-semibold text-teal-800 mb-2">Reg. Fees Paid</h4>
-                    <p id="regfees" class="text-5xl font-bold text-purple-600">KSh 0</p>
-                </div>
-            </div>
+<!-- PROFILE -->
+<div class="bg-white p-4 rounded shadow mb-4">
+<p><b>Name:</b> <span id="name"></span></p>
+<p><b>Total Savings:</b> <span id="savings"></span></p>
+<p><b>Total Fines:</b> <span id="fines"></span></p>
+</div>
 
-            <!-- Keep your existing Upcoming Events, Recent Savings, Loans, M-Pesa, Change Password, Feedback sections here -->
-            <!-- (I kept them as they were in your file) -->
-        </div>
+<!-- SAVINGS -->
+<div class="bg-white p-4 rounded shadow mb-4">
+<h3 class="font-bold mb-2">Savings History</h3>
+<div id="savingsHistory"></div>
+</div>
 
-        <!-- ADMIN DASHBOARD -->
-        <div id="admin-dashboard-view" class="hidden">
-            <h2 class="text-3xl font-bold text-amber-800 mb-8 flex items-center gap-3">
-                <i class="fa-solid fa-chart-line"></i> Group Dashboard (Admin View)
-            </h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <div class="dashboard-card bg-white rounded-3xl shadow p-8">
-                    <h4 class="text-lg font-semibold text-slate-600">Cash in Hand</h4>
-                    <p id="admin-cash-in-hand" class="text-4xl font-bold text-green-700 mt-3">KSh 0</p>
-                </div>
-                <div class="dashboard-card bg-white rounded-3xl shadow p-8">
-                    <h4 class="text-lg font-semibold text-slate-600">Total Member Savings</h4>
-                    <p id="admin-total-savings" class="text-4xl font-bold text-teal-700 mt-3">KSh 0</p>
-                </div>
-                <div class="dashboard-card bg-white rounded-3xl shadow p-8">
-                    <h4 class="text-lg font-semibold text-slate-600">Total Fines Collected</h4>
-                    <p id="admin-total-fines" class="text-4xl font-bold text-amber-600 mt-3">KSh 0</p>
-                </div>
-                <div class="dashboard-card bg-white rounded-3xl shadow p-8">
-                    <h4 class="text-lg font-semibold text-slate-600">Total Expenses</h4>
-                    <p id="admin-total-expenses" class="text-4xl font-bold text-red-600 mt-3">KSh 0</p>
-                </div>
-            </div>
-            <button onclick="toggleAdminView()" class="mt-8 text-teal-700 hover:text-teal-800 font-medium flex items-center gap-2">
-                ← Back to My Dashboard
-            </button>
-        </div>
-    </div>
+<!-- LOANS -->
+<div class="bg-white p-4 rounded shadow mb-4">
+<h3 class="font-bold mb-2">Loans</h3>
+<div id="loanHistory"></div>
+</div>
 
-   <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
+<!-- EVENTS -->
+<div class="bg-white p-4 rounded shadow mb-4">
+<h3 class="font-bold mb-2">Events</h3>
+<div id="events"></div>
+</div>
+
+<!-- ANNOUNCEMENTS -->
+<div class="bg-white p-4 rounded shadow mb-4">
+<h3 class="font-bold mb-2">Announcements</h3>
+<div id="announcements"></div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminSection" class="hidden bg-yellow-100 p-4 rounded shadow">
+<h3 class="font-bold mb-2">Admin Dashboard</h3>
+<p>Cash: <span id="cash"></span></p>
+<p>Total Savings: <span id="totalSavings"></span></p>
+<p>Fines: <span id="totalFines"></span></p>
+<p>Expenses: <span id="expenses"></span></p>
+</div>
+
+</div>
+
+<script>
+const WEB_APP_URL ="https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
 // LOGIN
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+e.preventDefault();
 
-    const memberId = document.getElementById('memberId').value.trim().toUpperCase();
-    const password = document.getElementById('password').value.trim();
-    const btn = document.getElementById('loginBtn');
+const memberId = document.getElementById('memberId').value.trim().toUpperCase();
+const password = document.getElementById('password').value.trim();
 
-    btn.disabled = true;
-    btn.textContent = "Logging in...";
+const res = await fetch(WEB_APP_URL,{
+method:'POST',
+headers:{'Content-Type':'application/x-www-form-urlencoded'},
+body:new URLSearchParams({action:'login',memberId,password})
+});
 
-    try {
-        const res = await fetch(WEB_APP_URL, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: new URLSearchParams({
-                action: 'login',
-                memberId,
-                password
-            })
-        });
+const data = await res.json();
 
-        const data = await res.json();
+if(!data.success) return alert(data.message);
 
-        if (!data.success) throw new Error(data.message);
-
-        localStorage.setItem("memberId", memberId);
-        localStorage.setItem("memberData", JSON.stringify(data.member));
-
-        showDashboard(data.member);
-
-    } catch (err) {
-        alert(err.message);
-    }
-
-    btn.disabled = false;
-    btn.textContent = "Login";
+localStorage.setItem("data", JSON.stringify(data));
+showDashboard(data);
 });
 
 // SHOW DASHBOARD
-function showDashboard(member) {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('dashboard').classList.remove('hidden');
+function showDashboard(data){
+document.getElementById('login-screen').classList.add('hidden');
+document.getElementById('dashboard').classList.remove('hidden');
 
-    renderProfile(member);
+renderProfile(data.member);
+renderSavings(data.savingsHistory);
+renderLoans(data.loans);
+renderEvents(data.events);
+renderAnnouncements(data.announcements);
 
-    if (member.isAdmin) {
-        document.getElementById('admin-button-container').classList.remove('hidden');
-    }
+if(data.member.isAdmin){
+document.getElementById('adminSection').classList.remove('hidden');
+loadAdmin();
+}
 }
 
-// RENDER PROFILE
-function renderProfile(data) {
-    document.getElementById('welcome-name').textContent = "Welcome, " + data.fullName;
-    document.getElementById('name').textContent = data.fullName;
-    document.getElementById('role').textContent = data.role;
-    document.getElementById('phone').textContent = data.phone;
-    document.getElementById('email').textContent = data.email;
-    document.getElementById('join').textContent = data.joinDate;
-    document.getElementById('natid').textContent = data.nationalID;
-    document.getElementById('status').textContent = data.status;
-
-    if (data.photoUrl) {
-        document.getElementById('photo').src = data.photoUrl;
-    }
-
-    document.getElementById('savings').textContent =
-        "KSh " + Number(data.totalSavings).toLocaleString();
-
-    document.getElementById('total-fines').textContent =
-        "KSh " + Number(data.totalFinesPaid).toLocaleString();
-
-    document.getElementById('regfees').textContent =
-        "KSh " + Number(data.regFees).toLocaleString();
+// PROFILE
+function renderProfile(m){
+document.getElementById('welcome').textContent = "Welcome " + m.fullName;
+document.getElementById('name').textContent = m.fullName;
+document.getElementById('savings').textContent = "KSh " + m.totalSavings.toLocaleString();
+document.getElementById('fines').textContent = "KSh " + m.totalFinesPaid.toLocaleString();
 }
 
-// ADMIN
-async function loadAdminDashboardData() {
-    const memberId = localStorage.getItem("memberId");
-
-    const res = await fetch(
-        WEB_APP_URL + `?action=getAdminData&memberId=${memberId}`
-    );
-
-    const data = await res.json();
-
-    if (!data.success) return;
-
-    const a = data.adminData;
-
-    document.getElementById('admin-cash-in-hand').textContent =
-        "KSh " + Number(a.cashInHand).toLocaleString();
-
-    document.getElementById('admin-total-savings').textContent =
-        "KSh " + Number(a.totalMemberSavings).toLocaleString();
-
-    document.getElementById('admin-total-fines').textContent =
-        "KSh " + Number(a.totalFinesCollected).toLocaleString();
-
-    document.getElementById('admin-total-expenses').textContent =
-        "KSh " + Number(a.totalExpenses).toLocaleString();
+// SAVINGS
+function renderSavings(list){
+const el = document.getElementById('savingsHistory');
+el.innerHTML = list.map(i=>`
+<div class="border-b py-2">
+${i.date} | ${i.type} | KSh ${i.amount}
+</div>`).join('');
 }
 
-function toggleAdminView() {
-    const memberView = document.getElementById('member-view');
-    const adminView = document.getElementById('admin-dashboard-view');
+// LOANS
+function renderLoans(list){
+const el = document.getElementById('loanHistory');
+el.innerHTML = list.map(l=>`
+<div class="border-b py-2">
+Loan: ${l.amount} | ${l.status} | Balance: ${l.balance}
+</div>`).join('');
+}
 
-    if (adminView.classList.contains('hidden')) {
-        memberView.classList.add('hidden');
-        adminView.classList.remove('hidden');
-        loadAdminDashboardData();
-    } else {
-        memberView.classList.remove('hidden');
-        adminView.classList.add('hidden');
-    }
+// EVENTS
+function renderEvents(list){
+const el = document.getElementById('events');
+el.innerHTML = list.map(e=>`
+<div class="border-b py-2">
+${e.title} - ${e.date} (${e.location})
+</div>`).join('');
+}
+
+// ANNOUNCEMENTS
+function renderAnnouncements(list){
+const el = document.getElementById('announcements');
+el.innerHTML = list.map(a=>`
+<div class="border-b py-2">
+${a.message} (${a.date})
+</div>`).join('');
+}
+
+// ADMIN LOAD
+async function loadAdmin(){
+const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
+
+const res = await fetch(`${WEB_APP_URL}?action=getAdminData&memberId=${memberId}`);
+const data = await res.json();
+
+if(!data.success) return;
+
+const a = data.adminData;
+document.getElementById('cash').textContent = a.cashInHand;
+document.getElementById('totalSavings').textContent = a.totalMemberSavings;
+document.getElementById('totalFines').textContent = a.totalFinesCollected;
+document.getElementById('expenses').textContent = a.totalExpenses;
+}
+
+// PDF
+function downloadPDF(){
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+
+const data = JSON.parse(localStorage.getItem("data"));
+const m = data.member;
+
+let y = 10;
+doc.text("Kakelo Unity Statement",10,y); y+=10;
+doc.text("Name: "+m.fullName,10,y); y+=10;
+doc.text("Savings: "+m.totalSavings,10,y); y+=10;
+
+data.savingsHistory.forEach(s=>{
+doc.text(`${s.date} | ${s.type} | ${s.amount}`,10,y);
+y+=8;
+if(y>280){ doc.addPage(); y=10; }
+});
+
+doc.save("statement.pdf");
 }
 
 // AUTO LOGIN
-window.onload = function () {
-    const saved = localStorage.getItem("memberData");
-    if (saved) {
-        showDashboard(JSON.parse(saved));
-    }
-};
+window.onload = ()=>{
+const saved = localStorage.getItem("data");
+if(saved){
+showDashboard(JSON.parse(saved));
+}
+}
 
 // LOGOUT
-function logout() {
-    localStorage.clear();
-    location.reload();
+function logout(){
+localStorage.clear();
+location.reload();
 }
 </script>
-    <!-- WhatsApp Widget -->
-    <div style="position: fixed; bottom: 25px; right: 25px; z-index: 10000;">
-        <a href="https://wa.me/254707118312?text=Hello%20Kakelo%20Unity%20CBO" target="_blank" 
-           style="display: flex; align-items: center; justify-content: center; width: 65px; height: 65px; background-color: #25D366; color: white; border-radius: 50%; box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); text-decoration: none; font-size: 32px;">
-            <i class="fa-brands fa-whatsapp"></i>
-        </a>
-    </div>
+
 </body>
 </html>
