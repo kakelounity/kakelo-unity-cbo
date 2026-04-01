@@ -26,14 +26,14 @@
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="hidden max-w-6xl mx-auto">
+<div id="dashboard" class="hidden max-w-7xl mx-auto">
 
 <h2 id="welcome" class="text-2xl font-bold mb-4"></h2>
 
 <div class="flex gap-2 flex-wrap mb-4">
 <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded">Logout</button>
-<button onclick="downloadPDF()" class="bg-blue-600 text-white px-4 py-2 rounded">Download PDF</button>
-<button onclick="emailStatement()" class="bg-green-600 text-white px-4 py-2 rounded">Email Statement</button>
+<button onclick="downloadPDF()" class="bg-blue-600 text-white px-4 py-2 rounded">PDF</button>
+<button onclick="emailStatement()" class="bg-green-600 text-white px-4 py-2 rounded">Email</button>
 <button onclick="printCard()" class="bg-purple-600 text-white px-4 py-2 rounded">Member Card</button>
 </div>
 
@@ -52,16 +52,13 @@ class="w-32 h-32 rounded-full border-4 border-teal-200 object-cover">
 <p>📞 <span id="phone"></span></p>
 <p>📧 <span id="email"></span></p>
 <p>📅 Joined: <span id="join"></span></p>
-<p>🆔 ID: <span id="natid"></span></p>
-<p>📊 Status: <span id="status"></span></p>
+<p>🆔 <span id="natid"></span></p>
+<p>📊 <span id="status"></span></p>
 </div>
 
-<!-- PHOTO -->
 <div class="mt-4">
 <input type="file" accept="image/*" onchange="uploadPhoto(event)">
-<button onclick="openCamera()" class="mt-2 bg-gray-700 text-white px-3 py-1 rounded">Camera</button>
 </div>
-
 </div>
 </div>
 
@@ -72,15 +69,24 @@ class="w-32 h-32 rounded-full border-4 border-teal-200 object-cover">
 </div>
 </div>
 
-<!-- SAVINGS HISTORY -->
+<!-- SAVINGS -->
 <div class="bg-white p-4 rounded shadow mb-4">
 <h3 class="font-bold mb-2">Savings History</h3>
 <div id="savingsHistory"></div>
 </div>
 
+<!-- LOANS -->
+<div class="bg-white p-4 rounded shadow mb-4">
+<h3 class="font-bold mb-2">Loan History</h3>
+<div id="loanHistory"></div>
+</div>
+
 <!-- ADMIN -->
 <div id="adminSection" class="hidden bg-white p-4 rounded shadow">
-<h3 class="font-bold mb-4">Admin Financial Analytics</h3>
+<h3 class="font-bold mb-4">Admin Analytics</h3>
+
+<p>Total Loans: <span id="adminLoans"></span></p>
+<p>Total Outstanding: <span id="adminOutstanding"></span></p>
 
 <canvas id="chart"></canvas>
 </div>
@@ -110,16 +116,18 @@ localStorage.setItem("data", JSON.stringify(data));
 showDashboard(data);
 });
 
-// SHOW DASHBOARD
+// SHOW
 function showDashboard(data){
-document.getElementById("login-screen").classList.add("hidden");
-document.getElementById("dashboard").classList.remove("hidden");
+login-screen.classList.add("hidden");
+dashboard.classList.remove("hidden");
 
 renderProfile(data.member);
 renderSavings(data.savingsHistory);
+renderLoans(data.loans);
 
 if(data.member.isAdmin){
-document.getElementById("adminSection").classList.remove("hidden");
+adminSection.classList.remove("hidden");
+loadAdmin();
 renderChart(data.savingsHistory);
 }
 }
@@ -143,10 +151,15 @@ regfees.textContent = "KSh " + Number(m.regFees).toLocaleString();
 photo.src = m.photoUrl || "https://via.placeholder.com/150";
 }
 
-// SAVINGS HISTORY (WITH DATES ✅)
+// SAVINGS
 function renderSavings(list){
+if(!list.length){
+savingsHistory.innerHTML="No records";
+return;
+}
+
 savingsHistory.innerHTML = list.map(s=>`
-<div class="border-b py-2 flex justify-between">
+<div class="border-b py-2 flex justify-between text-sm">
 <span>${s.date}</span>
 <span>${s.type}</span>
 <span>KSh ${Number(s.amount).toLocaleString()}</span>
@@ -154,52 +167,70 @@ savingsHistory.innerHTML = list.map(s=>`
 `).join('');
 }
 
+// LOANS
+function renderLoans(loans){
+if(!loans.length){
+loanHistory.innerHTML="No loans";
+return;
+}
+
+loanHistory.innerHTML = loans.map(l=>`
+<div class="p-4 mb-3 bg-gray-50 rounded shadow">
+
+<div class="flex justify-between">
+<b>Loan ${l.loanId}</b>
+<span>${l.status}</span>
+</div>
+
+<p>Date: ${l.date}</p>
+<p>Amount: KSh ${Number(l.amount).toLocaleString()}</p>
+<p>Total: KSh ${Number(l.total).toLocaleString()}</p>
+<p>Outstanding: KSh ${Number(l.outstanding).toLocaleString()}</p>
+<p>Next Due: ${l.nextDue}</p>
+
+<div class="w-full bg-gray-200 h-2 mt-2">
+<div class="bg-green-600 h-2" style="width:${100-(l.outstanding/l.total*100)}%"></div>
+</div>
+
+</div>
+`).join('');
+}
+
+// ADMIN
+async function loadAdmin(){
+const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
+
+const res = await fetch(`${WEB_APP_URL}?action=getAdminData&memberId=${memberId}`);
+const data = await res.json();
+
+adminLoans.textContent = data.adminData.totalLoans;
+adminOutstanding.textContent = data.adminData.totalOutstanding;
+}
+
 // CHART
 function renderChart(data){
-new Chart(document.getElementById("chart"),{
+new Chart(chart,{
 type:'line',
 data:{
 labels:data.map(i=>i.date),
-datasets:[{
-label:'Savings Trend',
-data:data.map(i=>i.amount)
-}]
+datasets:[{label:'Savings',data:data.map(i=>i.amount)}]
 }
 });
 }
 
-// PHOTO PREVIEW
-function uploadPhoto(e){
-const file = e.target.files[0];
-if(!file) return;
-
-const reader = new FileReader();
-reader.onload = ()=> photo.src = reader.result;
-reader.readAsDataURL(file);
-}
-
-// CAMERA (basic)
-function openCamera(){
-navigator.mediaDevices.getUserMedia({video:true})
-.then(()=> alert("Camera opened (extend capture logic if needed)"));
-}
-
-// PDF WITH DATES ✅
+// PDF
 function downloadPDF(){
 const { jsPDF } = window.jspdf;
 const doc = new jsPDF();
-
 const data = JSON.parse(localStorage.getItem("data"));
 
-let y = 10;
+let y=10;
 
-doc.text("Kakelo Unity Statement",10,y); y+=10;
-doc.text("Name: "+data.member.fullName,10,y); y+=10;
+doc.text("Statement",10,y); y+=10;
 
 data.savingsHistory.forEach(s=>{
-doc.text(`${s.date} | ${s.type} | KSh ${s.amount}`,10,y);
+doc.text(`${s.date} | ${s.type} | ${s.amount}`,10,y);
 y+=8;
-if(y>280){doc.addPage(); y=10;}
 });
 
 doc.save("statement.pdf");
@@ -208,28 +239,30 @@ doc.save("statement.pdf");
 // EMAIL
 async function emailStatement(){
 const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
-
-const res = await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
-const data = await res.json();
-
-alert(data.message || "Sent");
+await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
+alert("Sent");
 }
 
 // MEMBER CARD
 function printCard(){
 const m = JSON.parse(localStorage.getItem("data")).member;
 
-const win = window.open("","","width=400,height=600");
-
-win.document.write(`
-<h2 style="text-align:center;">Kakelo Unity CBO</h2>
-<img src="${m.photoUrl}" width="120" style="display:block;margin:auto;">
-<p><b>${m.fullName}</b></p>
-<p>ID: ${m.memberId}</p>
-<p>Status: ${m.status}</p>
+const w = window.open("");
+w.document.write(`
+<h2>Kakelo Unity CBO</h2>
+<img src="${m.photoUrl}" width="100">
+<p>${m.fullName}</p>
+<p>${m.memberId}</p>
 `);
+w.print();
+}
 
-win.print();
+// PHOTO
+function uploadPhoto(e){
+const file = e.target.files[0];
+const reader = new FileReader();
+reader.onload = ()=> photo.src = reader.result;
+reader.readAsDataURL(file);
 }
 
 // AUTO LOGIN
