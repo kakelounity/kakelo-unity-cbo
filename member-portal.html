@@ -1,280 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Kakelo Unity CBO Portal</title>
+<title>Member Portal</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 </head>
 
-<body class="bg-slate-100 p-4">
+<body class="bg-gray-100 p-4">
 
-<!-- LOGIN -->
-<div id="login-screen" class="max-w-md mx-auto bg-white p-6 rounded-2xl shadow">
-<h2 class="text-xl font-bold mb-4">Member Login</h2>
+<div id="login-screen" class="max-w-md mx-auto bg-white p-6 rounded">
+<h2 class="text-xl mb-4">Login</h2>
 
 <form id="loginForm">
-<input id="memberId" class="w-full p-3 border mb-3 rounded" placeholder="Member ID" required>
-<input id="password" type="password" class="w-full p-3 border mb-3 rounded" placeholder="Password" required>
-<button class="w-full bg-teal-700 text-white p-3 rounded">Login</button>
+<input id="memberId" class="w-full p-2 border mb-2" placeholder="Member ID">
+<input id="password" type="password" class="w-full p-2 border mb-2" placeholder="Password">
+<button class="bg-teal-600 text-white p-2 w-full">Login</button>
 </form>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="hidden max-w-7xl mx-auto">
+<div id="dashboard" class="hidden max-w-6xl mx-auto">
 
-<h2 id="welcome" class="text-2xl font-bold mb-4"></h2>
+<h2 id="welcome"></h2>
 
-<div class="flex gap-2 flex-wrap mb-4">
-<button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded">Logout</button>
-<button onclick="downloadPDF()" class="bg-blue-600 text-white px-4 py-2 rounded">PDF</button>
-<button onclick="emailStatement()" class="bg-green-600 text-white px-4 py-2 rounded">Email</button>
-<button onclick="printCard()" class="bg-purple-600 text-white px-4 py-2 rounded">Member Card</button>
+<button onclick="logout()" class="bg-red-500 text-white p-2">Logout</button>
+<button onclick="downloadPDF()" class="bg-blue-500 text-white p-2">PDF</button>
+<button onclick="emailStatement()" class="bg-green-500 text-white p-2">Email</button>
+
+<div class="bg-white p-4 mt-4">
+<h3 id="name"></h3>
+<img id="photo" width="100">
+<p id="role"></p>
+<p id="phone"></p>
+<p id="email"></p>
 </div>
 
-<!-- PROFILE -->
-<div class="bg-white p-6 rounded-2xl shadow mb-6">
-<div class="flex flex-col md:flex-row gap-6 items-center">
-
-<img id="photo" src="https://via.placeholder.com/150"
-class="w-32 h-32 rounded-full border-4 border-teal-200 object-cover">
-
-<div class="flex-1 text-center md:text-left">
-<h3 id="name" class="text-2xl font-bold text-teal-800"></h3>
-<p id="role" class="text-teal-600"></p>
-
-<div class="grid grid-cols-2 gap-2 mt-4 text-sm">
-<p>📞 <span id="phone"></span></p>
-<p>📧 <span id="email"></span></p>
-<p>📅 Joined: <span id="join"></span></p>
-<p>🆔 <span id="natid"></span></p>
-<p>📊 <span id="status"></span></p>
-</div>
-
-<div class="mt-4">
-<input type="file" accept="image/*" onchange="uploadPhoto(event)">
-</div>
-</div>
-</div>
-
-<div class="grid md:grid-cols-3 gap-4 mt-6">
-<div class="bg-slate-50 p-4 rounded">Savings: <b id="savings"></b></div>
-<div class="bg-slate-50 p-4 rounded">Fines: <b id="fines"></b></div>
-<div class="bg-slate-50 p-4 rounded">Reg Fees: <b id="regfees"></b></div>
-</div>
-</div>
-
-<!-- SAVINGS -->
-<div class="bg-white p-4 rounded shadow mb-4">
-<h3 class="font-bold mb-2">Savings History</h3>
+<h3>Savings</h3>
 <div id="savingsHistory"></div>
-</div>
 
-<!-- LOANS -->
-<div class="bg-white p-4 rounded shadow mb-4">
-<h3 class="font-bold mb-2">Loan History</h3>
+<h3>Loans</h3>
 <div id="loanHistory"></div>
-</div>
-
-<!-- ADMIN -->
-<div id="adminSection" class="hidden bg-white p-4 rounded shadow">
-<h3 class="font-bold mb-4">Admin Analytics</h3>
-
-<p>Total Loans: <span id="adminLoans"></span></p>
-<p>Total Outstanding: <span id="adminOutstanding"></span></p>
-
-<canvas id="chart"></canvas>
-</div>
 
 </div>
 
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
-// LOGIN
-loginForm.addEventListener('submit', async e=>{
+document.getElementById("loginForm").addEventListener("submit", async e=>{
 e.preventDefault();
 
 const memberId = document.getElementById("memberId").value.toUpperCase();
 const password = document.getElementById("password").value;
 
 const res = await fetch(WEB_APP_URL,{
-method:'POST',
-headers:{'Content-Type':'application/x-www-form-urlencoded'},
-body:new URLSearchParams({action:'login',memberId,password})
+method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded"},
+body:new URLSearchParams({memberId,password})
 });
 
 const data = await res.json();
-if(!data.success) return alert(data.message);
+
+if(!data.success){
+alert(data.message);
+return;
+}
 
 localStorage.setItem("data", JSON.stringify(data));
+
 showDashboard(data);
 });
 
-// SHOW
 function showDashboard(data){
-login-screen.classList.add("hidden");
-dashboard.classList.remove("hidden");
+document.getElementById("login-screen").classList.add("hidden");
+document.getElementById("dashboard").classList.remove("hidden");
 
-renderProfile(data.member);
+document.getElementById("welcome").textContent = data.member.fullName;
+
 renderSavings(data.savingsHistory);
 renderLoans(data.loans);
-
-if(data.member.isAdmin){
-adminSection.classList.remove("hidden");
-loadAdmin();
-renderChart(data.savingsHistory);
-}
 }
 
-// PROFILE
-function renderProfile(m){
-welcome.textContent = "Welcome " + m.fullName;
-
-name.textContent = m.fullName;
-role.textContent = m.role;
-phone.textContent = m.phone;
-email.textContent = m.email;
-join.textContent = m.joinDate;
-natid.textContent = m.nationalID;
-status.textContent = m.status;
-
-savings.textContent = "KSh " + Number(m.totalSavings).toLocaleString();
-fines.textContent = "KSh " + Number(m.totalFinesPaid).toLocaleString();
-regfees.textContent = "KSh " + Number(m.regFees).toLocaleString();
-
-photo.src = m.photoUrl || "https://via.placeholder.com/150";
-}
-
-// SAVINGS
 function renderSavings(list){
-if(!list.length){
-savingsHistory.innerHTML="No records";
-return;
+document.getElementById("savingsHistory").innerHTML = list.map(s=>`
+<div>${s.date} | ${s.type} | ${s.amount}</div>
+`).join("");
 }
 
-savingsHistory.innerHTML = list.map(s=>`
-<div class="border-b py-2 flex justify-between text-sm">
-<span>${s.date}</span>
-<span>${s.type}</span>
-<span>KSh ${Number(s.amount).toLocaleString()}</span>
-</div>
-`).join('');
-}
-
-// LOANS
 function renderLoans(loans){
-if(!loans.length){
-loanHistory.innerHTML="No loans";
-return;
-}
-
-loanHistory.innerHTML = loans.map(l=>`
-<div class="p-4 mb-3 bg-gray-50 rounded shadow">
-
-<div class="flex justify-between">
-<b>Loan ${l.loanId}</b>
-<span>${l.status}</span>
+document.getElementById("loanHistory").innerHTML = loans.map(l=>`
+<div>
+Loan ${l.loanId} | ${l.date} | ${l.amount} | Outstanding: ${l.outstanding}
 </div>
-
-<p>Date: ${l.date}</p>
-<p>Amount: KSh ${Number(l.amount).toLocaleString()}</p>
-<p>Total: KSh ${Number(l.total).toLocaleString()}</p>
-<p>Outstanding: KSh ${Number(l.outstanding).toLocaleString()}</p>
-<p>Next Due: ${l.nextDue}</p>
-
-<div class="w-full bg-gray-200 h-2 mt-2">
-<div class="bg-green-600 h-2" style="width:${100-(l.outstanding/l.total*100)}%"></div>
-</div>
-
-</div>
-`).join('');
+`).join("");
 }
 
-// ADMIN
-async function loadAdmin(){
-const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
-
-const res = await fetch(`${WEB_APP_URL}?action=getAdminData&memberId=${memberId}`);
-const data = await res.json();
-
-adminLoans.textContent = data.adminData.totalLoans;
-adminOutstanding.textContent = data.adminData.totalOutstanding;
+function logout(){
+localStorage.clear();
+location.reload();
 }
 
-// CHART
-function renderChart(data){
-new Chart(chart,{
-type:'line',
-data:{
-labels:data.map(i=>i.date),
-datasets:[{label:'Savings',data:data.map(i=>i.amount)}]
-}
-});
-}
-
-// PDF
 function downloadPDF(){
 const { jsPDF } = window.jspdf;
 const doc = new jsPDF();
+
 const data = JSON.parse(localStorage.getItem("data"));
 
 let y=10;
 
-doc.text("Statement",10,y); y+=10;
-
 data.savingsHistory.forEach(s=>{
-doc.text(`${s.date} | ${s.type} | ${s.amount}`,10,y);
-y+=8;
+doc.text(`${s.date} ${s.amount}`,10,y);
+y+=10;
 });
 
 doc.save("statement.pdf");
 }
 
-// EMAIL
 async function emailStatement(){
 const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
 await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
 alert("Sent");
-}
-
-// MEMBER CARD
-function printCard(){
-const m = JSON.parse(localStorage.getItem("data")).member;
-
-const w = window.open("");
-w.document.write(`
-<h2>Kakelo Unity CBO</h2>
-<img src="${m.photoUrl}" width="100">
-<p>${m.fullName}</p>
-<p>${m.memberId}</p>
-`);
-w.print();
-}
-
-// PHOTO
-function uploadPhoto(e){
-const file = e.target.files[0];
-const reader = new FileReader();
-reader.onload = ()=> photo.src = reader.result;
-reader.readAsDataURL(file);
-}
-
-// AUTO LOGIN
-window.onload = ()=>{
-const saved = localStorage.getItem("data");
-if(saved) showDashboard(JSON.parse(saved));
-}
-
-// LOGOUT
-function logout(){
-localStorage.clear();
-location.reload();
 }
 </script>
 
