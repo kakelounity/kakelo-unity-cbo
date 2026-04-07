@@ -15,19 +15,16 @@
 <!-- LOGIN SCREEN -->
 <div id="login-screen" class="flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
-        <img src="Kakelo Unity Logo (2).png" class="mx-auto h-20 mb-6" alt="Kakelo Unity Logo">
+        <img src="Kakelo Unity Logo (2).png" class="mx-auto h-20 mb-6" alt="Logo">
         <h2 class="text-3xl font-bold mb-6 text-teal-800">Member Portal</h2>
 
         <form id="loginForm" class="space-y-4">
-            <input id="memberId" 
-                   class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
+            <input id="memberId" class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
                    placeholder="Member ID (e.g. KU001)" required>
-            
-            <input id="password" type="password" 
-                   class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
+            <input id="password" type="password" class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
                    placeholder="Password" required>
 
-            <button id="loginBtn" type="submit"
+            <button id="loginBtn" type="submit" 
                     class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-xl font-semibold transition flex items-center justify-center gap-2">
                 <span id="loginText">Login</span>
                 <span id="loginSpinner" class="hidden animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
@@ -47,7 +44,7 @@
     <div class="flex flex-wrap gap-3 mb-8">
         <button onclick="downloadPDF()" 
                 class="bg-teal-700 hover:bg-teal-800 text-white px-6 py-3 rounded-xl flex items-center gap-2">
-            📄 Download Beautiful Statement (PDF)
+            📄 Download Statement
         </button>
         <button onclick="emailStatement()" 
                 class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl flex items-center gap-2">
@@ -114,7 +111,25 @@
             </div>
         </div>
 
-        <!-- Bulk Email Button -->
+        <!-- Group Financial Statement -->
+        <div class="mb-10">
+            <div class="flex justify-between items-center mb-4">
+                <h4 class="font-semibold text-teal-800">Group Financial Statement</h4>
+                <button onclick="downloadGroupFinancialPDF()" 
+                        class="bg-teal-700 hover:bg-teal-800 text-white px-5 py-2 rounded-xl text-sm flex items-center gap-2">
+                    📄 Download Group P&L & Balance Sheet
+                </button>
+            </div>
+            <div class="flex gap-3 mb-4">
+                <button onclick="showBalanceSheet('monthly')" id="monthlyBtn"
+                        class="px-5 py-2 rounded-xl bg-teal-700 text-white font-medium">Monthly</button>
+                <button onclick="showBalanceSheet('quarterly')" id="quarterlyBtn"
+                        class="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 font-medium">Quarterly</button>
+            </div>
+            <div id="balanceSheetContainer" class="bg-slate-50 rounded-2xl p-6 min-h-[200px]"></div>
+        </div>
+
+        <!-- Bulk Email -->
         <div class="bg-emerald-50 border border-emerald-200 p-8 rounded-3xl mb-8">
             <h4 class="font-semibold text-emerald-700 mb-4">Treasurer Bulk Action</h4>
             <button onclick="emailAllStatements()" 
@@ -123,9 +138,6 @@
                 <span id="bulkEmailText">📧 Email Statement to Active Members Only</span>
                 <span id="bulkEmailSpinner" class="hidden animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
             </button>
-            <p class="text-xs text-emerald-600 mt-4 text-center">
-                This will send personalized PDF statements only to members with "Active" status.
-            </p>
         </div>
 
         <h4 class="font-semibold mb-4">Monthly Savings Trend</h4>
@@ -138,7 +150,7 @@
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
-// ==================== IMPROVED LOGIN WITH DEBUGGING ====================
+// ==================== LOGIN ====================
 document.getElementById("loginForm").addEventListener("submit", async e => {
     e.preventDefault();
 
@@ -159,12 +171,10 @@ document.getElementById("loginForm").addEventListener("submit", async e => {
             body: new URLSearchParams({ action: "login", memberId, password })
         });
 
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-
         const data = await res.json();
 
         if (!data.success) {
-            alert("Login failed: " + (data.message || "Invalid credentials"));
+            alert(data.message || "Invalid Member ID or Password");
             return;
         }
 
@@ -172,8 +182,7 @@ document.getElementById("loginForm").addEventListener("submit", async e => {
         showDashboard(data);
 
     } catch (err) {
-        console.error("Login error:", err);
-        alert("Connection failed.\n\nPlease make sure:\n1. You have redeployed the Web App\n2. You are NOT using Live Server (open file directly)\n3. The WEB_APP_URL is correct");
+        alert("Connection error. Please check your internet and try again.");
     } finally {
         loginBtn.disabled = false;
         loginText.classList.remove("hidden");
@@ -266,64 +275,116 @@ async function loadAdmin() {
             options: { responsive: true }
         });
 
-        const sorted = Object.entries(data.adminData.memberTotals).sort((a,b) => b[1]-a[1]).slice(0,5);
+        // Top 5 Savers with Names
+        const topSavers = Object.entries(data.adminData.memberNames || {})
+            .sort((a,b) => b[1] - a[1])
+            .slice(0, 5);
+
         new Chart(document.getElementById("rankingChart"), {
             type: 'bar',
             data: {
-                labels: sorted.map(i => i[0]),
-                datasets: [{ label: "Top Savers", data: sorted.map(i => i[1]), backgroundColor: "#14b8a6" }]
+                labels: topSavers.map(i => i[0]),
+                datasets: [{ label: "Top Savers", data: topSavers.map(i => i[1]), backgroundColor: "#14b8a6" }]
             },
             options: { responsive: true }
         });
-    } catch (e) {
-        console.error("Admin data load failed", e);
+
+        showBalanceSheet('monthly');
+
+    } catch (e) {}
+}
+
+// ==================== BALANCE SHEET DISPLAY ====================
+async function showBalanceSheet(period) {
+    const container = document.getElementById("balanceSheetContainer");
+    container.innerHTML = `<p class="text-center text-slate-500 py-8">Loading balance sheet...</p>`;
+
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=getBalanceSheet&period=${period}`);
+        const result = await res.json();
+
+        if (!result.success) {
+            container.innerHTML = `<p class="text-red-600">${result.message || "Failed to load"}</p>`;
+            return;
+        }
+
+        let html = `<table class="w-full text-sm">`;
+        html += `<thead><tr class="bg-teal-700 text-white">`;
+        html += `<th class="p-3 text-left">Period</th>`;
+        html += `<th class="p-3 text-right">Income</th>`;
+        html += `<th class="p-3 text-right">Expenses</th>`;
+        html += `<th class="p-3 text-right">Net Surplus</th>`;
+        html += `<th class="p-3 text-right">Cumulative Balance</th></tr></thead><tbody>`;
+
+        result.data.forEach(row => {
+            html += `<tr class="border-b hover:bg-slate-100">`;
+            html += `<td class="p-3">${row.period}</td>`;
+            html += `<td class="p-3 text-right">KSh ${Number(row.income).toLocaleString()}</td>`;
+            html += `<td class="p-3 text-right">KSh ${Number(row.expenses).toLocaleString()}</td>`;
+            html += `<td class="p-3 text-right font-semibold ${row.net >= 0 ? 'text-green-600' : 'text-red-600'}">KSh ${Number(row.net).toLocaleString()}</td>`;
+            html += `<td class="p-3 text-right font-bold">KSh ${Number(row.cumulative).toLocaleString()}</td>`;
+            html += `</tr>`;
+        });
+
+        html += `</tbody></table>`;
+        container.innerHTML = html;
+
+    } catch (err) {
+        container.innerHTML = `<p class="text-red-600">Error loading balance sheet.</p>`;
     }
 }
 
-// ==================== DOWNLOAD PDF ====================
+// ==================== DOWNLOAD MEMBER STATEMENT (SACCO STYLE) ====================
 async function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const data = JSON.parse(localStorage.getItem("data"));
     const m = data.member;
 
+    const timestamp = new Date().toLocaleDateString('en-GB', { 
+        day: '2-digit', month: 'long', year: 'numeric' 
+    }) + " at " + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    // Header with Logo
     try {
         const img = new Image();
         img.src = "Kakelo Unity Logo (2).png";
         await new Promise(resolve => {
             img.onload = () => {
-                const logoWidth = 32;
-                const logoHeight = (img.height / img.width) * logoWidth;
-                doc.addImage(img, 'PNG', 20, 12, logoWidth, logoHeight);
+                doc.addImage(img, 'PNG', 20, 12, 35, 35);
                 resolve();
             };
-            img.onerror = () => resolve();
         });
     } catch (e) {}
 
     doc.setFontSize(16);
     doc.setTextColor(15, 118, 110);
-    doc.text("Kakelo Unity CBO", 58, 22);
+    doc.text("Kakelo Unity CBO", 65, 22);
 
     doc.setFontSize(13);
-    doc.text("Member Statement", 58, 30);
+    doc.text("Member Statement", 65, 30);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Generated: " + timestamp, 65, 38);
 
     doc.setDrawColor(15, 118, 110);
-    doc.setLineWidth(0.6);
-    doc.line(20, 38, 190, 38);
+    doc.line(20, 48, 190, 48);
 
-    let y = 50;
+    let y = 58;
 
-    doc.setFontSize(13);
+    // Member Info
+    doc.setFontSize(12);
     doc.setTextColor(15, 118, 110);
     doc.text("Member Information", 20, y);
     y += 8;
 
     doc.autoTable({
         startY: y,
-        head: [['Field', 'Value']],
+        head: [['Field', 'Details']],
         body: [
             ['Full Name', m.fullName],
+            ['Member ID', m.memberId],
             ['Role', m.role],
             ['Phone', m.phone || '—'],
             ['Email', m.email || '—'],
@@ -332,15 +393,14 @@ async function downloadPDF() {
             ['Status', m.status || '—']
         ],
         theme: 'striped',
-        headStyles: { fillColor: [15, 118, 110], textColor: 255, fontStyle: 'bold' },
-        styles: { fontSize: 10, cellPadding: 5 },
-        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 55 } },
-        alternateRowStyles: { fillColor: [240, 253, 250] }
+        headStyles: { fillColor: [15, 118, 110], textColor: 255 },
+        styles: { fontSize: 10 }
     });
 
-    y = doc.lastAutoTable.finalY + 15;
+    y = doc.lastAutoTable.finalY + 12;
 
-    doc.setFontSize(13);
+    // Summary
+    doc.setFontSize(12);
     doc.setTextColor(15, 118, 110);
     doc.text("Account Summary", 20, y);
     y += 8;
@@ -354,65 +414,132 @@ async function downloadPDF() {
             ['Registration Fees', Number(m.regFees || 0).toLocaleString()]
         ],
         theme: 'grid',
-        headStyles: { fillColor: [234, 179, 8], textColor: 255, fontStyle: 'bold' },
-        styles: { fontSize: 11, halign: 'right', cellPadding: 6 },
-        columnStyles: { 0: { halign: 'left', cellWidth: 110 } }
+        headStyles: { fillColor: [234, 179, 8] },
+        styles: { fontSize: 11, halign: 'right' },
+        columnStyles: { 0: { halign: 'left' } }
     });
 
-    y = doc.lastAutoTable.finalY + 15;
+    y = doc.lastAutoTable.finalY + 12;
 
-    doc.setFontSize(13);
+    // Savings History
+    doc.setFontSize(12);
     doc.setTextColor(15, 118, 110);
     doc.text("Savings History", 20, y);
     y += 8;
 
     const savingsBody = (data.savingsHistory || []).map(s => [
-        s.date || '', s.transactionId || '', s.type || '',
-        `KSh ${Number(s.amount || 0).toLocaleString()}`, s.notes || ''
+        s.date, s.transactionId, s.type, `KSh ${Number(s.amount).toLocaleString()}`, s.notes || ''
     ]);
 
     doc.autoTable({
         startY: y,
         head: [['Date', 'Transaction ID', 'Type', 'Amount', 'Notes']],
-        body: savingsBody.length ? savingsBody : [['No transactions yet', '', '', '', '']],
+        body: savingsBody.length ? savingsBody : [['No transactions', '', '', '', '']],
         theme: 'striped',
-        headStyles: { fillColor: [15, 118, 110], textColor: 255 },
-        styles: { fontSize: 9.5, cellPadding: 4 },
-        alternateRowStyles: { fillColor: [240, 253, 250] }
+        headStyles: { fillColor: [15, 118, 110] },
+        styles: { fontSize: 9 }
     });
 
-    y = doc.lastAutoTable.finalY + 15;
+    y = doc.lastAutoTable.finalY + 12;
 
-    doc.setFontSize(13);
+    // Loan History
+    doc.setFontSize(12);
     doc.setTextColor(15, 118, 110);
     doc.text("Loan History", 20, y);
     y += 8;
 
     const loanBody = (data.loans || []).map(l => [
-        l.date || '', l.loanId || '', l.status || '',
-        `KSh ${Number(l.amount || 0).toLocaleString()}`,
-        `KSh ${Number(l.outstanding || 0).toLocaleString()}`,
-        l.nextDue || ''
+        l.date, l.loanId, l.status, `KSh ${Number(l.amount).toLocaleString()}`, 
+        `KSh ${Number(l.outstanding).toLocaleString()}`, l.nextDue || ''
     ]);
 
     doc.autoTable({
         startY: y,
         head: [['Date', 'Loan ID', 'Status', 'Amount', 'Outstanding', 'Next Due']],
-        body: loanBody.length ? loanBody : [['No loans found', '', '', '', '', '']],
+        body: loanBody.length ? loanBody : [['No loans', '', '', '', '', '']],
         theme: 'striped',
-        headStyles: { fillColor: [15, 118, 110], textColor: 255 },
-        styles: { fontSize: 9.5, cellPadding: 4 }
+        headStyles: { fillColor: [15, 118, 110] },
+        styles: { fontSize: 9 }
     });
 
+    // Footer
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text("Thank you for being a valued member of Kakelo Unity CBO", 105, 285, { align: "center" });
 
-    const fileName = `${m.fullName.replace(/[^a-zA-Z0-9 ]/g, '_')}_Kakelo_Unity_Statement.pdf`;
+    const fileName = `${m.fullName.replace(/[^a-zA-Z0-9 ]/g, '_')}_Statement.pdf`;
     doc.save(fileName);
 }
 
-// ==================== EMAIL SINGLE STATEMENT ====================
+// ==================== DOWNLOAD GROUP FINANCIAL STATEMENT PDF ====================
+async function downloadGroupFinancialPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Header with Logo
+    try {
+        const img = new Image();
+        img.src = "Kakelo Unity Logo (2).png";
+        await new Promise(resolve => {
+            img.onload = () => {
+                doc.addImage(img, 'PNG', 20, 12, 35, 35);
+                resolve();
+            };
+        });
+    } catch (e) {}
+
+    doc.setFontSize(16);
+    doc.setTextColor(15, 118, 110);
+    doc.text("Kakelo Unity CBO", 65, 22);
+
+    doc.setFontSize(13);
+    doc.text("Group Financial Statement", 65, 30);
+
+    const timestamp = new Date().toLocaleDateString('en-GB', { 
+        day: '2-digit', month: 'long', year: 'numeric' 
+    }) + " at " + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Generated: " + timestamp, 65, 38);
+
+    doc.setDrawColor(15, 118, 110);
+    doc.line(20, 48, 190, 48);
+
+    let y = 58;
+
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=getBalanceSheet&period=monthly`);
+        const result = await res.json();
+
+        if (result.success) {
+            const tableData = result.data.map(row => [
+                row.period,
+                `KSh ${Number(row.income).toLocaleString()}`,
+                `KSh ${Number(row.expenses).toLocaleString()}`,
+                `KSh ${Number(row.net).toLocaleString()}`,
+                `KSh ${Number(row.cumulative).toLocaleString()}`
+            ]);
+
+            doc.autoTable({
+                startY: y,
+                head: [['Period', 'Income', 'Expenses', 'Net Surplus', 'Cumulative Balance']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [15, 118, 110], textColor: 255 },
+                styles: { fontSize: 10, cellPadding: 5 }
+            });
+        }
+    } catch (e) {}
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Prepared for Treasurer", 105, 285, { align: "center" });
+
+    doc.save("Kakelo_Unity_Group_Financial_Statement.pdf");
+}
+
+// ==================== OTHER FUNCTIONS ====================
 async function emailStatement() {
     const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
     try {
@@ -428,7 +555,6 @@ async function emailStatement() {
     }
 }
 
-// ==================== EMAIL ACTIVE MEMBERS ONLY ====================
 async function emailAllStatements() {
     if (!confirm("Send statements to Active Members Only?\n\nThis cannot be undone.")) return;
 
