@@ -179,7 +179,7 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";   // ← UPDATE THIS
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";   // ← UPDATE THIS WITH YOUR REAL URL
 
 let monthlyChartInstance = null;
 let rankingChartInstance = null;
@@ -287,7 +287,7 @@ function renderLoans(loans) {
     `).join('') || '<p class="text-slate-500 py-4">No loans found.</p>';
 }
 
-// ==================== ADMIN LOAD ====================
+// ==================== ADMIN CHARTS ====================
 async function loadAdmin() {
     const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
     try {
@@ -356,16 +356,17 @@ async function loadAdmin() {
     }
 }
 
-// ==================== FULL WORKING DOWNLOAD MEMBER STATEMENT ====================
+// ==================== MEMBER STATEMENT PDF ====================
 async function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const data = JSON.parse(localStorage.getItem("data"));
-    if (!data || !data.member) {
+    const stored = localStorage.getItem("data");
+    if (!stored) {
         alert("Please login first");
         return;
     }
+    const data = JSON.parse(stored);
     const m = data.member;
 
     const timestamp = new Date().toLocaleDateString('en-GB', { 
@@ -376,9 +377,11 @@ async function downloadPDF() {
     try {
         const img = new Image();
         img.src = "Kakelo Unity Logo (2).png";
-        await new Promise(resolve => img.onload = () => {
-            doc.addImage(img, 'PNG', 20, 12, 35, 35);
-            resolve();
+        await new Promise(resolve => {
+            img.onload = () => {
+                doc.addImage(img, 'PNG', 20, 12, 35, 35);
+                resolve();
+            };
         });
     } catch (e) {}
 
@@ -398,7 +401,6 @@ async function downloadPDF() {
 
     let y = 58;
 
-    // Member Information
     doc.setFontSize(12);
     doc.setTextColor(15, 118, 110);
     doc.text("Member Information", 20, y);
@@ -424,7 +426,6 @@ async function downloadPDF() {
 
     y = doc.lastAutoTable.finalY + 12;
 
-    // Account Summary
     doc.setFontSize(12);
     doc.setTextColor(15, 118, 110);
     doc.text("Account Summary", 20, y);
@@ -446,7 +447,6 @@ async function downloadPDF() {
 
     y = doc.lastAutoTable.finalY + 12;
 
-    // Savings History
     doc.setFontSize(12);
     doc.setTextColor(15, 118, 110);
     doc.text("Savings History", 20, y);
@@ -468,7 +468,6 @@ async function downloadPDF() {
 
     y = doc.lastAutoTable.finalY + 12;
 
-    // Loan History
     doc.setFontSize(12);
     doc.setTextColor(15, 118, 110);
     doc.text("Loan History", 20, y);
@@ -489,13 +488,85 @@ async function downloadPDF() {
         styles: { fontSize: 9 }
     });
 
-    // Footer
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text("Thank you for being a valued member of Kakelo Unity CBO", 105, 285, { align: "center" });
 
     const fileName = `${m.fullName.replace(/[^a-zA-Z0-9 ]/g, '_')}_Statement.pdf`;
     doc.save(fileName);
+}
+
+// ==================== GROUP FINANCIAL STATEMENT PDF ====================
+async function downloadGroupFinancialPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const timestamp = new Date().toLocaleDateString('en-GB', { 
+        day: '2-digit', month: 'long', year: 'numeric' 
+    }) + " at " + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    try {
+        const img = new Image();
+        img.src = "Kakelo Unity Logo (2).png";
+        await new Promise(resolve => {
+            img.onload = () => {
+                doc.addImage(img, 'PNG', 20, 12, 35, 35);
+                resolve();
+            };
+        });
+    } catch (e) {}
+
+    doc.setFontSize(16);
+    doc.setTextColor(15, 118, 110);
+    doc.text("Kakelo Unity CBO", 65, 22);
+
+    doc.setFontSize(13);
+    doc.text("Group Financial Statement", 65, 30);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Generated: " + timestamp, 65, 38);
+
+    doc.setDrawColor(15, 118, 110);
+    doc.line(20, 48, 190, 48);
+
+    let y = 58;
+
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=getBalanceSheet&period=monthly`);
+        const result = await res.json();
+
+        if (result.success && result.data && result.data.length > 0) {
+            const tableBody = result.data.map(row => [
+                row.period,
+                `KSh ${Number(row.income || 0).toLocaleString()}`,
+                `KSh ${Number(row.expenses || 0).toLocaleString()}`,
+                `KSh ${Number(row.net || 0).toLocaleString()}`,
+                `KSh ${Number(row.cumulative || 0).toLocaleString()}`
+            ]);
+
+            doc.autoTable({
+                startY: y,
+                head: [['Period', 'Income', 'Expenses', 'Net Surplus', 'Cumulative Balance']],
+                body: tableBody,
+                theme: 'striped',
+                headStyles: { fillColor: [15, 118, 110], textColor: 255 },
+                styles: { fontSize: 10, cellPadding: 5 }
+            });
+        } else {
+            doc.setFontSize(12);
+            doc.text("No balance sheet data available yet.", 20, y + 20);
+        }
+    } catch (err) {
+        doc.setFontSize(12);
+        doc.text("Error loading balance sheet data.", 20, y + 20);
+    }
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Prepared for Treasurer - Kakelo Unity CBO", 105, 285, { align: "center" });
+
+    doc.save("Kakelo_Unity_Group_Financial_Statement.pdf");
 }
 
 // ==================== CHART DOWNLOADS ====================
@@ -515,25 +586,65 @@ function downloadRankingChart() {
     link.click();
 }
 
-// ==================== OTHER FUNCTIONS ====================
+// ==================== EMAIL FUNCTIONS ====================
 async function emailStatement() {
-    const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
+    const stored = localStorage.getItem("data");
+    if (!stored) {
+        alert("Please login first");
+        return;
+    }
+    const data = JSON.parse(stored);
+    const memberId = data.member.memberId;
+
     try {
-        await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
-        alert("✅ Your statement has been sent to your email.");
+        const res = await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
+        const result = await res.json();
+
+        if (result.success) {
+            alert(`✅ Statement sent from CBO organization email to:\n${data.member.email}\n\nPlease check Inbox, Sent Mail, and Spam folder.`);
+        } else {
+            alert("❌ Failed: " + (result.message || "Unknown error"));
+        }
     } catch (err) {
-        alert("Failed to send email.");
+        alert("Connection error. Please try again.");
     }
 }
 
 async function emailAllStatements() {
     if (!confirm("Send statements to all active members?")) return;
-    // Add your full bulk email code here if needed
-    alert("Bulk email triggered (add full function if required)");
+
+    const btn = document.getElementById("bulkEmailBtn");
+    const text = document.getElementById("bulkEmailText");
+    const spinner = document.getElementById("bulkEmailSpinner");
+
+    btn.disabled = true;
+    text.classList.add("hidden");
+    spinner.classList.remove("hidden");
+
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=emailAllStatements`);
+        const result = await res.json();
+
+        if (result.success) {
+            alert(`✅ Success! ${result.sent} statements sent to active members.`);
+        } else {
+            alert("❌ " + (result.message || "Failed to send statements"));
+        }
+    } catch (err) {
+        alert("Connection error.");
+    } finally {
+        btn.disabled = false;
+        text.classList.remove("hidden");
+        spinner.classList.add("hidden");
+    }
 }
 
+// ==================== OTHER FUNCTIONS ====================
 function logout() {
     localStorage.clear();
     location.reload();
 }
 </script>
+
+</body>
+</html>
