@@ -179,7 +179,7 @@
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";   // ← CHANGE THIS TO YOUR ACTUAL URL
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";   // ← UPDATE THIS
 
 let monthlyChartInstance = null;
 let rankingChartInstance = null;
@@ -212,13 +212,11 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
             return;
         }
 
-        // Save data and show dashboard
         localStorage.setItem("data", JSON.stringify(data));
         showDashboard(data);
 
     } catch (err) {
-        console.error(err);
-        alert("Connection error. Please check your internet and try again.");
+        alert("Connection error. Please try again.");
     } finally {
         loginBtn.disabled = false;
         loginText.classList.remove("hidden");
@@ -228,13 +226,11 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
 // ==================== SHOW DASHBOARD ====================
 function showDashboard(data) {
-    // Hide login, show dashboard
     document.getElementById("login-screen").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
 
     const m = data.member;
 
-    // Header & Profile
     document.getElementById("welcome").textContent = `Welcome, ${m.fullName}`;
     document.getElementById("name").textContent = m.fullName;
     document.getElementById("role").textContent = m.role || "";
@@ -245,16 +241,13 @@ function showDashboard(data) {
     document.getElementById("status").textContent = m.status || "—";
     document.getElementById("photo").src = m.photoUrl || "https://via.placeholder.com/150";
 
-    // Summary cards
     document.getElementById("savings").textContent = `KSh ${Number(m.totalSavings || 0).toLocaleString()}`;
     document.getElementById("fines").textContent = `KSh ${Number(m.totalFinesPaid || 0).toLocaleString()}`;
     document.getElementById("regfees").textContent = `KSh ${Number(m.regFees || 0).toLocaleString()}`;
 
-    // Render history
     renderSavings(data.savingsHistory || []);
     renderLoans(data.loans || []);
 
-    // Show admin section if user is admin
     if (m.isAdmin) {
         document.getElementById("adminSection").classList.remove("hidden");
         loadAdmin();
@@ -294,7 +287,7 @@ function renderLoans(loans) {
     `).join('') || '<p class="text-slate-500 py-4">No loans found.</p>';
 }
 
-// ==================== ADMIN CHARTS ====================
+// ==================== ADMIN LOAD ====================
 async function loadAdmin() {
     const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
     try {
@@ -305,7 +298,7 @@ async function loadAdmin() {
         document.getElementById("adminSavings").textContent = `KSh ${Number(admin.totalSavings || 0).toLocaleString()}`;
         document.getElementById("adminExpenses").textContent = `KSh ${Number(admin.totalExpenses || 0).toLocaleString()}`;
 
-        // Monthly Savings Trend
+        // Monthly Trend
         if (monthlyChartInstance) monthlyChartInstance.destroy();
         monthlyChartInstance = new Chart(document.getElementById("monthlyChart"), {
             type: 'line',
@@ -359,8 +352,150 @@ async function loadAdmin() {
         });
 
     } catch (err) {
-        console.error("Failed to load admin data:", err);
+        console.error(err);
     }
+}
+
+// ==================== FULL WORKING DOWNLOAD MEMBER STATEMENT ====================
+async function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const data = JSON.parse(localStorage.getItem("data"));
+    if (!data || !data.member) {
+        alert("Please login first");
+        return;
+    }
+    const m = data.member;
+
+    const timestamp = new Date().toLocaleDateString('en-GB', { 
+        day: '2-digit', month: 'long', year: 'numeric' 
+    }) + " at " + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+    // Header with Logo
+    try {
+        const img = new Image();
+        img.src = "Kakelo Unity Logo (2).png";
+        await new Promise(resolve => img.onload = () => {
+            doc.addImage(img, 'PNG', 20, 12, 35, 35);
+            resolve();
+        });
+    } catch (e) {}
+
+    doc.setFontSize(16);
+    doc.setTextColor(15, 118, 110);
+    doc.text("Kakelo Unity CBO", 65, 22);
+
+    doc.setFontSize(13);
+    doc.text("Member Statement", 65, 30);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Generated: " + timestamp, 65, 38);
+
+    doc.setDrawColor(15, 118, 110);
+    doc.line(20, 48, 190, 48);
+
+    let y = 58;
+
+    // Member Information
+    doc.setFontSize(12);
+    doc.setTextColor(15, 118, 110);
+    doc.text("Member Information", 20, y);
+    y += 8;
+
+    doc.autoTable({
+        startY: y,
+        head: [['Field', 'Details']],
+        body: [
+            ['Full Name', m.fullName],
+            ['Member ID', m.memberId],
+            ['Role', m.role || '—'],
+            ['Phone', m.phone || '—'],
+            ['Email', m.email || '—'],
+            ['Joined', m.joinDate || '—'],
+            ['National ID', m.nationalID || '—'],
+            ['Status', m.status || '—']
+        ],
+        theme: 'striped',
+        headStyles: { fillColor: [15, 118, 110], textColor: 255 },
+        styles: { fontSize: 10 }
+    });
+
+    y = doc.lastAutoTable.finalY + 12;
+
+    // Account Summary
+    doc.setFontSize(12);
+    doc.setTextColor(15, 118, 110);
+    doc.text("Account Summary", 20, y);
+    y += 8;
+
+    doc.autoTable({
+        startY: y,
+        head: [['Description', 'Amount (KSh)']],
+        body: [
+            ['Total Savings', Number(m.totalSavings || 0).toLocaleString()],
+            ['Total Fines Paid', Number(m.totalFinesPaid || 0).toLocaleString()],
+            ['Registration Fees', Number(m.regFees || 0).toLocaleString()]
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [234, 179, 8] },
+        styles: { fontSize: 11, halign: 'right' },
+        columnStyles: { 0: { halign: 'left' } }
+    });
+
+    y = doc.lastAutoTable.finalY + 12;
+
+    // Savings History
+    doc.setFontSize(12);
+    doc.setTextColor(15, 118, 110);
+    doc.text("Savings History", 20, y);
+    y += 8;
+
+    const savingsBody = (data.savingsHistory || []).map(s => [
+        s.date || '', s.transactionId || '', s.type || '', 
+        `KSh ${Number(s.amount || 0).toLocaleString()}`, s.notes || ''
+    ]);
+
+    doc.autoTable({
+        startY: y,
+        head: [['Date', 'Transaction ID', 'Type', 'Amount', 'Notes']],
+        body: savingsBody.length ? savingsBody : [['No transactions', '', '', '', '']],
+        theme: 'striped',
+        headStyles: { fillColor: [15, 118, 110] },
+        styles: { fontSize: 9 }
+    });
+
+    y = doc.lastAutoTable.finalY + 12;
+
+    // Loan History
+    doc.setFontSize(12);
+    doc.setTextColor(15, 118, 110);
+    doc.text("Loan History", 20, y);
+    y += 8;
+
+    const loanBody = (data.loans || []).map(l => [
+        l.date || '', l.loanId || '', l.status || '', 
+        `KSh ${Number(l.amount || 0).toLocaleString()}`, 
+        `KSh ${Number(l.outstanding || 0).toLocaleString()}`, l.nextDue || ''
+    ]);
+
+    doc.autoTable({
+        startY: y,
+        head: [['Date', 'Loan ID', 'Status', 'Amount', 'Outstanding', 'Next Due']],
+        body: loanBody.length ? loanBody : [['No loans', '', '', '', '', '']],
+        theme: 'striped',
+        headStyles: { fillColor: [15, 118, 110] },
+        styles: { fontSize: 9 }
+    });
+
+    // Footer
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Thank you for being a valued member of Kakelo Unity CBO", 105, 285, { align: "center" });
+
+    const fileName = `${m.fullName.replace(/[^a-zA-Z0-9 ]/g, '_')}_Statement.pdf`;
+    doc.save(fileName);
 }
 
 // ==================== CHART DOWNLOADS ====================
@@ -380,17 +515,12 @@ function downloadRankingChart() {
     link.click();
 }
 
-// ==================== OTHER FUNCTIONS (Add your existing ones here) ====================
-async function downloadPDF() {
-    // Your existing downloadPDF function (SACCO style)
-    alert("Download Statement feature is ready. Add your full downloadPDF code here if missing.");
-}
-
+// ==================== OTHER FUNCTIONS ====================
 async function emailStatement() {
     const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
     try {
         await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
-        alert("✅ Statement has been sent to your email.");
+        alert("✅ Your statement has been sent to your email.");
     } catch (err) {
         alert("Failed to send email.");
     }
@@ -398,17 +528,8 @@ async function emailStatement() {
 
 async function emailAllStatements() {
     if (!confirm("Send statements to all active members?")) return;
-    // Your existing bulk email code
-    alert("Bulk email function called.");
-}
-
-async function showBalanceSheet(period) {
-    // Your existing balance sheet code
-    alert(`Showing ${period} balance sheet.`);
-}
-
-async function downloadGroupFinancialPDF() {
-    alert("Group Financial Statement download ready.");
+    // Add your full bulk email code here if needed
+    alert("Bulk email triggered (add full function if required)");
 }
 
 function logout() {
@@ -416,6 +537,3 @@ function logout() {
     location.reload();
 }
 </script>
-
-</body>
-</html>
