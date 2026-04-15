@@ -5,30 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kakelo Unity CBO - Member Portal</title>
 
-    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- FIX: Font Awesome (needed for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <link rel="icon" href="Kakelo Unity Logo (2).png">
 </head>
 
 <body class="bg-slate-100">
 
-<!-- LOGIN -->
+<!-- LOGIN SCREEN -->
 <div id="login-screen" class="flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
-        <img src="Kakelo Unity Logo (2).png" class="mx-auto h-20 mb-6">
-        <h2 class="text-3xl font-bold text-teal-800 mb-6">Kakelo Unity CBO</h2>
+        <img src="Kakelo Unity Logo (2).png" class="mx-auto h-20 mb-6" alt="Kakelo Unity Logo">
+        <h2 class="text-3xl font-bold mb-6 text-teal-800">Member Portal</h2>
 
         <form id="loginForm" class="space-y-4">
-            <input id="memberId" class="w-full p-4 border rounded-xl" placeholder="Member ID" required>
-            <input id="password" type="password" class="w-full p-4 border rounded-xl" placeholder="Password" required>
+            <input id="memberId" class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
+                   placeholder="Member ID (e.g. KU001)" required>
 
-            <button id="loginBtn" class="w-full bg-teal-700 text-white py-4 rounded-xl">
-                <span id="loginText">Login</span>
-                <span id="loginSpinner" class="hidden animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
+            <input id="password" type="password" class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
+                   placeholder="Password" required>
+
+            <button type="submit" 
+                    class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-xl font-semibold transition">
+                Login
             </button>
         </form>
     </div>
@@ -37,163 +41,262 @@
 <!-- DASHBOARD -->
 <div id="dashboard" class="hidden max-w-6xl mx-auto p-6">
 
-<header class="flex justify-between mb-6">
-    <h2 id="welcome" class="text-2xl font-bold text-teal-800"></h2>
-    <button onclick="logout()" class="text-red-600">Logout</button>
-</header>
+    <header class="flex justify-between items-center mb-8">
+        <h2 id="welcome" class="text-3xl font-bold text-teal-800"></h2>
 
-<!-- PROFILE -->
-<div class="bg-white p-6 rounded-2xl shadow mb-6">
-    <h3 id="name" class="text-xl font-bold"></h3>
-    <p id="role" class="text-teal-600"></p>
-</div>
+        <button onclick="logout()" 
+                class="px-5 py-2 text-red-600 hover:text-red-700 font-semibold flex items-center gap-2">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </header>
 
-<!-- SAVINGS -->
-<div class="bg-white p-6 rounded-2xl shadow mb-6">
-    <h3 class="font-bold mb-4">Savings</h3>
-    <div id="savingsHistory"></div>
-</div>
+    <!-- Quick Actions -->
+    <div class="flex flex-wrap gap-3 mb-8">
+        <button onclick="downloadPDF()" 
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl flex items-center gap-2">
+            <i class="fa-solid fa-file-pdf"></i> Download PDF
+        </button>
 
-<!-- ADMIN -->
-<div id="adminSection" class="hidden bg-white p-6 rounded-2xl shadow">
-    <h3 class="text-xl font-bold text-amber-700 mb-4">Admin Panel</h3>
+        <button onclick="emailStatement()" 
+                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl flex items-center gap-2">
+            <i class="fa-solid fa-envelope"></i> Email Statement
+        </button>
+    </div>
 
-    <p>Total Savings: <span id="adminSavings"></span></p>
-    <p>Total Expenses: <span id="adminExpenses"></span></p>
-</div>
+    <!-- Profile -->
+    <div class="bg-white p-8 rounded-3xl shadow mb-8 flex flex-col lg:flex-row gap-8 items-center">
+        <img id="photo" class="w-40 h-40 rounded-2xl border-4 border-teal-100 object-cover" alt="Member Photo">
 
+        <div class="flex-1">
+            <h3 id="name" class="text-2xl font-bold text-slate-800"></h3>
+            <p id="role" class="text-teal-600 font-medium text-lg"></p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mt-6 text-sm">
+                <p><span class="font-medium">📞 Phone:</span> <span id="phone"></span></p>
+                <p><span class="font-medium">📧 Email:</span> <span id="email"></span></p>
+                <p><span class="font-medium">📅 Joined:</span> <span id="join"></span></p>
+                <p><span class="font-medium">🆔 ID:</span> <span id="natid"></span></p>
+                <p><span class="font-medium">📊 Status:</span> <span id="status"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-3xl shadow">
+            <h4 class="text-slate-500 text-sm">Total Savings</h4>
+            <p id="savings" class="text-3xl font-bold text-teal-700 mt-2"></p>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow">
+            <h4 class="text-slate-500 text-sm">Total Fines Paid</h4>
+            <p id="fines" class="text-3xl font-bold text-amber-600 mt-2"></p>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow">
+            <h4 class="text-slate-500 text-sm">Registration Fees</h4>
+            <p id="regfees" class="text-3xl font-bold text-blue-600 mt-2"></p>
+        </div>
+    </div>
+
+    <!-- Savings History -->
+    <div class="bg-white p-8 rounded-3xl shadow mb-8">
+        <h3 class="font-bold text-xl mb-5">Savings History</h3>
+        <div id="savingsHistory" class="space-y-4"></div>
+    </div>
+
+    <!-- Loan History -->
+    <div class="bg-white p-8 rounded-3xl shadow mb-8">
+        <h3 class="font-bold text-xl mb-5">Loan History</h3>
+        <div id="loanHistory" class="space-y-4"></div>
+    </div>
+
+    <!-- ADMIN SECTION -->
+    <div id="adminSection" class="hidden bg-white p-8 rounded-3xl shadow">
+
+        <h3 class="text-2xl font-bold text-amber-700 mb-6">Admin Dashboard</h3>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-10">
+            <div class="bg-teal-50 p-6 rounded-2xl">
+                <h4 class="text-teal-700">Total Group Savings</h4>
+                <p id="adminSavings" class="text-4xl font-bold text-teal-800 mt-2"></p>
+            </div>
+
+            <div class="bg-amber-50 p-6 rounded-2xl">
+                <h4 class="text-amber-700">Total Expenses</h4>
+                <p id="adminExpenses" class="text-4xl font-bold text-amber-800 mt-2"></p>
+            </div>
+        </div>
+
+        <h4 class="font-semibold mb-4">Monthly Savings Trend</h4>
+        <canvas id="monthlyChart" class="mb-10"></canvas>
+
+        <h4 class="font-semibold mb-4">Top 5 Savers</h4>
+        <canvas id="rankingChart"></canvas>
+    </div>
 </div>
 
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
-// ================= SESSION =================
-const SESSION_TIME = 5 * 60 * 1000;
-
-function startSession(){
-    localStorage.setItem("loginTime", Date.now());
-}
-
-function checkSession(){
-    const loginTime = localStorage.getItem("loginTime");
-    if(!loginTime) return;
-
-    if(Date.now() - loginTime > SESSION_TIME){
-        alert("Session expired");
-        logout();
-    }
-}
-setInterval(checkSession,10000);
-
-// ================= LOGIN =================
-document.getElementById("loginForm").addEventListener("submit", async (e)=>{
+/* LOGIN */
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const memberId = document.getElementById("memberId").value.toUpperCase();
+    const memberId = document.getElementById("memberId").value.trim().toUpperCase();
     const password = document.getElementById("password").value;
 
-    const res = await fetch(WEB_APP_URL,{
-        method:"POST",
-        body:new URLSearchParams({action:"login",memberId,password})
-    });
+    try {
+        const res = await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: new URLSearchParams({ action: "login", memberId, password })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    if(!data.success){
-        alert("Login failed");
-        return;
+        if (!data.success) {
+            alert(data.message || "Login failed");
+            return;
+        }
+
+        localStorage.setItem("data", JSON.stringify(data));
+        showDashboard(data);
+
+    } catch (err) {
+        alert("Connection error. Please try again.");
     }
-
-    localStorage.setItem("data",JSON.stringify(data));
-    startSession();
-    showDashboard(data);
 });
 
-// AUTO LOGIN
-window.onload = ()=>{
-    const stored = localStorage.getItem("data");
-    if(stored){
-        showDashboard(JSON.parse(stored));
-    }
-};
-
-// ================= ROLES =================
-function isAdmin(role){
-    return ["Chairperson","Vice Chair","Secretary","Treasurer"].includes(role);
-}
-
-function isTreasurer(role){
-    return role === "Treasurer";
-}
-
-// ================= DASHBOARD =================
-function showDashboard(data){
+function showDashboard(data) {
     document.getElementById("login-screen").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
 
     const m = data.member;
 
-    document.getElementById("welcome").innerText = "Welcome " + m.fullName;
-    document.getElementById("name").innerText = m.fullName;
-    document.getElementById("role").innerText = m.role;
+    document.getElementById("welcome").textContent = `Welcome, ${m.fullName}`;
+    document.getElementById("name").textContent = m.fullName;
+    document.getElementById("role").textContent = m.role;
+    document.getElementById("phone").textContent = m.phone;
+    document.getElementById("email").textContent = m.email;
+    document.getElementById("join").textContent = m.joinDate;
+    document.getElementById("natid").textContent = m.nationalID;
+    document.getElementById("status").textContent = m.status;
+
+    document.getElementById("photo").src = m.photoUrl || "https://via.placeholder.com/150";
+
+    document.getElementById("savings").textContent = `KSh ${Number(m.totalSavings).toLocaleString()}`;
+    document.getElementById("fines").textContent = `KSh ${Number(m.totalFinesPaid).toLocaleString()}`;
+    document.getElementById("regfees").textContent = `KSh ${Number(m.regFees).toLocaleString()}`;
 
     renderSavings(data.savingsHistory || []);
+    renderLoans(data.loans || []);
 
-    if(isAdmin(m.role)){
+    if (m.isAdmin) {
         document.getElementById("adminSection").classList.remove("hidden");
         loadAdmin();
     }
 }
 
-// ================= SAVINGS =================
-function renderSavings(list){
-    const role = JSON.parse(localStorage.getItem("data")).member.role;
-
-    document.getElementById("savingsHistory").innerHTML = list.map(s=>`
-        <div class="border p-3 mb-3 rounded-xl flex justify-between">
-            <span>${s.transactionId} - KSh ${s.amount}</span>
-
-            ${isTreasurer(role)?`
-                <div>
-                    <button onclick="editRecord('${s.transactionId}')">✏️</button>
-                    <button onclick="deleteRecord('${s.transactionId}')">🗑️</button>
-                </div>
-            `:""}
+/* RENDER SAVINGS */
+function renderSavings(list) {
+    document.getElementById("savingsHistory").innerHTML = list.map(s => `
+        <div class="border-l-4 border-teal-600 pl-4 py-3 bg-slate-50 rounded-r-xl">
+            <div class="flex justify-between">
+                <span class="font-medium">${s.transactionId}</span>
+                <span class="font-semibold text-teal-700">KSh ${Number(s.amount).toLocaleString()}</span>
+            </div>
+            <div class="text-xs text-slate-600">${s.date} • ${s.type}</div>
         </div>
-    `).join("");
+    `).join('');
 }
 
-// ================= TREASURER =================
-function editRecord(id){
-    const amount = prompt("New amount:");
-    if(!amount) return;
-
-    fetch(WEB_APP_URL,{
-        method:"POST",
-        body:new URLSearchParams({action:"editRecord",id,amount})
-    }).then(()=>location.reload());
+/* RENDER LOANS */
+function renderLoans(loans) {
+    document.getElementById("loanHistory").innerHTML = loans.map(l => `
+        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+            <div class="flex justify-between">
+                <span class="font-bold">${l.loanId}</span>
+                <span class="px-3 py-1 text-xs rounded-full ${l.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">
+                    ${l.status}
+                </span>
+            </div>
+        </div>
+    `).join('');
 }
 
-function deleteRecord(id){
-    if(!confirm("Delete?")) return;
+/* ADMIN */
+async function loadAdmin() {
+    const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
 
-    fetch(WEB_APP_URL,{
-        method:"POST",
-        body:new URLSearchParams({action:"deleteRecord",id})
-    }).then(()=>location.reload());
-}
-
-// ================= ADMIN =================
-async function loadAdmin(){
-    const res = await fetch(WEB_APP_URL + "?action=getAdminData");
+    const res = await fetch(`${WEB_APP_URL}?action=getAdminData&memberId=${memberId}`);
     const data = await res.json();
 
-    document.getElementById("adminSavings").innerText = data.totalSavings;
-    document.getElementById("adminExpenses").innerText = data.totalExpenses;
+    document.getElementById("adminSavings").textContent =
+        `KSh ${data.adminData.totalSavings.toLocaleString()}`;
+
+    document.getElementById("adminExpenses").textContent =
+        `KSh ${data.adminData.totalExpenses.toLocaleString()}`;
+
+    new Chart(document.getElementById("monthlyChart"), {
+        type: 'line',
+        data: {
+            labels: Object.keys(data.adminData.monthly),
+            datasets: [{
+                label: "Monthly Savings",
+                data: Object.values(data.adminData.monthly),
+                borderColor: "#0f766e",
+                tension: 0.4
+            }]
+        }
+    });
+
+    const sorted = Object.entries(data.adminData.memberTotals)
+        .sort((a,b) => b[1] - a[1])
+        .slice(0,5);
+
+    new Chart(document.getElementById("rankingChart"), {
+        type: 'bar',
+        data: {
+            labels: sorted.map(i => i[0]),
+            datasets: [{
+                label: "Top Savers",
+                data: sorted.map(i => i[1]),
+                backgroundColor: "#14b8a6"
+            }]
+        }
+    });
 }
 
-// ================= LOGOUT =================
-function logout(){
+/* PDF */
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const data = JSON.parse(localStorage.getItem("data"));
+
+    let y = 20;
+    doc.text("Kakelo Unity CBO Statement", 20, y);
+    y += 15;
+
+    doc.text(data.member.fullName, 20, y);
+    y += 20;
+
+    data.savingsHistory.forEach(s => {
+        doc.text(`${s.date} | ${s.transactionId} | KSh ${s.amount}`, 20, y);
+        y += 10;
+    });
+
+    doc.save(`${data.member.fullName}_statement.pdf`);
+}
+
+/* EMAIL */
+async function emailStatement() {
+    const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
+    await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
+    alert("Statement sent to email.");
+}
+
+/* LOGOUT */
+function logout() {
     localStorage.clear();
     location.reload();
 }
