@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Kakelo Unity Community Based Organization</title>
+    
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="navbar.js" defer></script>
+    <script src="footer.js" defer></script>
+</head>
+
+<body class="bg-white text-slate-800 font-sans">
+
+    <!-- Navbar -->
+    <div id="navbar-container"></div>
+<!-- ABOUT SECTION - Clean Layout with Balanced Text & Photo -->
+<section class="pt-20 pb-20 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+        
+        <!-- Centered Main Heading -->
+        <div class="text-center mb-16">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-teal-800">
+                About Us
+            </h1>
+            <p class="mt-4 text-xl text-slate-600 max-w-2xl mx-auto">
+                Empowering communities through unity, opportunity, and sustainable development.
+            </p>
+        </div>
+
+        <!-- Content Grid: Text Left, Large Photo Right -->
+        <div class="grid lg:grid-cols-2 gap-16 items-center">
+            
+            <!-- Left: Text - Height matched to photo -->
+            <div class="flex flex-col justify-center min-h-[520px]">
+                <div class="space-y-8">
+                    <p class="text-lg text-slate-600 leading-relaxed">
+                        Kakelo Unity CBO is a registered community-based organization dedicated to 
+                        improving lives through youth empowerment, education support, entrepreneurship, 
+                        and community outreach programs in Kakelo Location, Rachuonyo East Sub-County, Homabay County.
+                    </p>
+                    <p class="text-lg text-slate-600 leading-relaxed">
+                        Our mission is to create inclusive opportunities that strengthen families, 
+                        uplift vulnerable groups, and inspire lasting social change in our community.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right: Large Photo -->
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+                <img src="community2.jpeg" 
+                     alt="Kakelo Unity CBO team and community activities"
+                     class="w-full h-full object-cover aspect-[4/3] lg:aspect-square min-h-[520px]">
+            </div>
+
+        </div>
+    </div>
+</section>
+    <!-- MISSION & VISION -->
+    <section class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="bg-white rounded-3xl shadow-xl p-10">
+                    <div class="w-14 h-14 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-bullseye text-3xl"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold text-teal-800 mb-4">Our Mission</h3>
+                    <p class="text-slate-600 leading-relaxed text-lg">
+                        To empower communities by providing sustainable programs that foster education, 
+                        leadership, economic growth, and social wellbeing.
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-xl p-10">
+                    <div class="w-14 h-14 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-eye text-3xl"></i>
+                    </div>
+                    <h3 class="text-3xl font-bold text-teal-800 mb-4">Our Vision</h3>
+                    <p class="text-slate-600 leading-relaxed text-lg">
+                        A thriving and united community where every individual has equal opportunity 
+                        to succeed and contribute positively.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CALL TO ACTION -->
+    <section class="bg-white py-24 border-t">
+        <div class="max-w-4xl mx-auto text-center px-6">
+            <h2 class="text-4xl font-bold mb-6 text-teal-800">Be Part of Our Journey</h2>
+            <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
+                Join Kakelo Unity CBO in transforming lives and building stronger communities.
+            </p>
+            <a href="contact.html" 
+               class="inline-block bg-orange-500 hover:bg-orange-600 text-white px-12 py-5 rounded-2xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl">
+                Contact Us Today
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/254707118312" target="_blank"
+       class="whatsapp-float fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <script src="./ui.js"></script>
+
+</body>
+</html>

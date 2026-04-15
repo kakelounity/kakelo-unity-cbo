@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Partners - Kakelo Unity CBO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Navbar -->
+    <script src="navbar.js" defer></script>
+    
+    <style>
+        .hero-bg {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.55)), 
+                              url('Partner with Us.png');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .partner-card {
+            transition: all 0.4s ease;
+        }
+        .partner-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Shared Navbar -->
+    <div id="navbar-container"></div>
+
+ <!-- HERO SECTION - White Background with Photo on Right -->
+<section class="bg-white py-20 border-b">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+            <!-- Left: Text Content -->
+            <div class="text-center lg:text-left">
+                <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6 text-teal-800">
+                    Our Partners
+                </h1>
+                <p class="text-xl text-slate-600 max-w-2xl">
+                    We collaborate with organizations and individuals who share our vision 
+                    of empowering communities and transforming lives.
+                </p>
+            </div>
+
+            <!-- Right: Photo -->
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl">
+                <img src="Partner with Us.png" 
+                     alt="Kakelo Unity CBO Partners and Collaborations"
+                     class="w-full h-full object-cover aspect-video lg:aspect-auto min-h-[380px]">
+                
+                <!-- Optional subtle overlay for polish -->
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-black/20"></div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+    <!-- PARTNERS GRID -->
+    <section class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+
+                <!-- Partner 1 -->
+                <div class="partner-card bg-white rounded-3xl shadow-xl p-10 text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-handshake text-5xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Community Leaders</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        Local leaders and elders help us understand community needs and guide our programs 
+                        to ensure they are relevant and sustainable.
+                    </p>
+                </div>
+
+                <!-- Partner 2 -->
+                <div class="partner-card bg-white rounded-3xl shadow-xl p-10 text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-school text-5xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Schools & Educational Institutions</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        We work closely with schools to provide mentorship, learning materials, 
+                        and career guidance for students.
+                    </p>
+                </div>
+
+                <!-- Partner 3 -->
+                <div class="partner-card bg-white rounded-3xl shadow-xl p-10 text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-building-ngo text-5xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">NGOs & Development Agencies</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        Strategic partnerships with other NGOs allow us to implement larger projects 
+                        and share best practices for sustainable development.
+                    </p>
+                </div>
+
+                <!-- Partner 4 -->
+                <div class="partner-card bg-white rounded-3xl shadow-xl p-10 text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-briefcase text-5xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Corporate & Business Partners</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        Businesses support our entrepreneurship training, provide internships, 
+                        and offer funding for youth-led initiatives.
+                    </p>
+                </div>
+
+                <!-- Partner 5 -->
+                <div class="partner-card bg-white rounded-3xl shadow-xl p-10 text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-user-group text-5xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Volunteers & Individuals</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        Dedicated volunteers contribute their time, skills, and passion to make 
+                        every program successful and impactful.
+                    </p>
+                </div>
+
+                <!-- Partner 6 -->
+                <div class="partner-card bg-white rounded-3xl shadow-xl p-10 text-center">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-globe text-5xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Global Supporters</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        International friends and donors help us grow through financial support, 
+                        expertise, and global networking opportunities.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+  <!-- CALL TO ACTION - Clean White Background -->
+<section class="bg-white py-24 border-t">
+    <div class="max-w-4xl mx-auto text-center px-6">
+        <h2 class="text-4xl font-bold mb-6 text-teal-800">Become Our Partner</h2>
+        <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
+            If you share our vision of community transformation, we would love to explore 
+            how we can work together for greater impact.
+        </p>
+        <a href="contact.html" 
+           class="inline-block bg-teal-700 hover:bg-teal-800 text-white px-12 py-5 rounded-2xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl">
+            Partner With Us Today
+        </a>
+    </div>
+</section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/254707118312" target="_blank"
+       class="whatsapp-float fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Scroll to Top -->
+    <button id="scrollTopBtn" 
+            onclick="scrollToTop()" 
+            class="fixed bottom-24 right-6 bg-teal-700 hover:bg-teal-800 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hidden z-40">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="./ui.js"></script>
+    <script src="footer.js"></script>
+
+</body>
+</html>

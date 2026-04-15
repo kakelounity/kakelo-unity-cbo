@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Kakelo Unity CBO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Navbar -->
+    <script src="navbar.js" defer></script>
+    
+    <style>
+        .contact-card {
+            transition: all 0.4s ease;
+        }
+        .contact-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+        }
+        .form-input:focus {
+            border-color: #0f766e;
+            box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.15);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Shared Navbar -->
+    <div id="navbar-container"></div>
+
+    <!-- HERO SECTION -->
+    <section class="bg-teal-800 text-white py-24">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+                Get In Touch
+            </h1>
+            <p class="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed">
+                Reach out to Kakelo Unity CBO — we would love to hear from you and 
+                explore how we can work together for greater community impact.
+            </p>
+        </div>
+    </section>
+
+    <!-- CONTACT SECTION -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-start">
+
+                <!-- Google Map -->
+                <div class="rounded-3xl overflow-hidden shadow-2xl h-[480px] lg:sticky lg:top-8">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15959.999999999998!2d34.8167!3d-0.4667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zM8KwMjgnMDAuMCJTIDM0wrA0OScwMC4wIkU!5e0!3m2!1sen!2ske!4v1744200000000"
+                        width="100%"
+                        height="100%"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+
+                <!-- Contact Info + Form -->
+                <div class="space-y-12">
+
+                    <!-- Contact Details -->
+                    <div class="grid sm:grid-cols-2 gap-8">
+                        
+                        <div class="contact-card bg-slate-50 p-8 rounded-3xl">
+                            <div class="flex items-start gap-5">
+                                <div class="w-12 h-12 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-location-dot text-3xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg mb-1">Our Location</h4>
+                                    <p class="text-slate-600 leading-relaxed">
+                                        Rachuonyo East Sub-County<br>
+                                        Homabay County, Kenya
+                                    </p>
+                                    <p class="text-sm text-slate-500 mt-2">Kakelo Kamroth</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-card bg-slate-50 p-8 rounded-3xl">
+                            <div class="flex items-start gap-5">
+                                <div class="w-12 h-12 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-phone text-3xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg mb-1">Call Us</h4>
+                                    <a href="tel:+254707118312" 
+                                       class="block text-slate-600 hover:text-teal-700 text-lg font-medium transition">
+                                        +254 707 118 312
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contact-card bg-slate-50 p-8 rounded-3xl sm:col-span-2">
+                            <div class="flex items-start gap-5">
+                                <div class="w-12 h-12 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-envelope text-3xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-lg mb-1">Email Us</h4>
+                                    <a href="mailto:kakelounitycbo@gmail.com" 
+                                       class="text-slate-600 hover:text-teal-700 transition text-lg">
+                                        kakelounitycbo@gmail.com
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="bg-slate-50 p-10 rounded-3xl shadow-lg">
+                        <h3 class="text-2xl font-semibold text-teal-800 mb-8">Send us a Message</h3>
+                        
+                        <form id="contactForm" class="space-y-6">
+                            <div>
+                                <input type="text" name="name" placeholder="Your Full Name *" required
+                                    class="form-input w-full px-6 py-5 border border-slate-300 rounded-2xl focus:outline-none text-lg">
+                            </div>
+                            
+                            <div>
+                                <input type="email" name="email" placeholder="Your Email Address *" required
+                                    class="form-input w-full px-6 py-5 border border-slate-300 rounded-2xl focus:outline-none text-lg">
+                            </div>
+                            
+                            <div>
+                                <textarea name="message" rows="6" placeholder="Your Message *" required
+                                    class="form-input w-full px-6 py-5 border border-slate-300 rounded-2xl focus:outline-none text-lg resize-y min-h-[140px]"></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full bg-teal-700 hover:bg-teal-800 active:bg-teal-900 
+                                       text-white py-5 rounded-2xl font-semibold text-lg 
+                                       transition-all duration-300 shadow-md hover:shadow-lg">
+                                SEND MESSAGE
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/254707118312" target="_blank"
+       class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Scroll to Top -->
+    <button id="scrollTopBtn" 
+            onclick="scrollToTop()" 
+            class="fixed bottom-24 right-6 bg-teal-700 hover:bg-teal-800 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hidden z-40">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="./ui.js"></script>
+    <script src="footer.js"></script>
+
+    <!-- Form Feedback -->
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert("✅ Thank you! Your message has been received.\n\nWe'll get back to you as soon as possible.");
+            this.reset();
+        });
+    </script>
+
+</body>
+</html>

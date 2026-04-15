@@ -4,29 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kakelo Unity CBO - Member Portal</title>
+
+    <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
     <link rel="icon" href="Kakelo Unity Logo (2).png">
 </head>
+
 <body class="bg-slate-100">
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="login-screen" class="flex items-center justify-center min-h-screen">
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
-        <img src="Kakelo Unity Logo (2).png" class="mx-auto h-20 mb-6" alt="Logo">
-        <h2 class="text-3xl font-bold mb-6 text-teal-800">Kakelo Unity CBO</h2>
-        <p class="text-slate-500 mb-6">Member Portal</p>
+        <img src="Kakelo Unity Logo (2).png" class="mx-auto h-20 mb-6">
+        <h2 class="text-3xl font-bold text-teal-800 mb-6">Kakelo Unity CBO</h2>
 
         <form id="loginForm" class="space-y-4">
-            <input id="memberId" class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
-                   placeholder="Member ID (e.g. KU001)" required>
-            <input id="password" type="password" class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
-                   placeholder="Password" required>
+            <input id="memberId" class="w-full p-4 border rounded-xl" placeholder="Member ID" required>
+            <input id="password" type="password" class="w-full p-4 border rounded-xl" placeholder="Password" required>
 
-            <button id="loginBtn" type="submit" 
-                    class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-xl font-semibold transition flex items-center justify-center gap-2">
+            <button id="loginBtn" class="w-full bg-teal-700 text-white py-4 rounded-xl">
                 <span id="loginText">Login</span>
                 <span id="loginSpinner" class="hidden animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
             </button>
@@ -37,610 +37,163 @@
 <!-- DASHBOARD -->
 <div id="dashboard" class="hidden max-w-6xl mx-auto p-6">
 
-    <header class="flex justify-between items-center mb-8">
-        <h2 id="welcome" class="text-3xl font-bold text-teal-800"></h2>
-        <button onclick="logout()" class="px-6 py-2 text-red-600 hover:text-red-700 font-semibold">Logout</button>
-    </header>
+<header class="flex justify-between mb-6">
+    <h2 id="welcome" class="text-2xl font-bold text-teal-800"></h2>
+    <button onclick="logout()" class="text-red-600">Logout</button>
+</header>
 
-    <div class="flex flex-wrap gap-3 mb-8">
-        <button onclick="downloadPDF()" 
-                class="bg-teal-700 hover:bg-teal-800 text-white px-6 py-3 rounded-xl flex items-center gap-2">
-            📄 Download Statement
-        </button>
-        <button onclick="emailStatement()" 
-                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl flex items-center gap-2">
-            ✉️ Email My Statement
-        </button>
-    </div>
+<!-- PROFILE -->
+<div class="bg-white p-6 rounded-2xl shadow mb-6">
+    <h3 id="name" class="text-xl font-bold"></h3>
+    <p id="role" class="text-teal-600"></p>
+</div>
 
-    <!-- Profile -->
-    <div class="bg-white p-8 rounded-3xl shadow mb-8 flex flex-col lg:flex-row gap-8 items-center">
-        <img id="photo" class="w-40 h-40 rounded-2xl border-4 border-teal-100 object-cover" alt="Member Photo">
-        <div class="flex-1">
-            <h3 id="name" class="text-2xl font-bold text-slate-800"></h3>
-            <p id="role" class="text-teal-600 font-medium text-lg"></p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mt-6 text-sm">
-                <p><span class="font-medium">📞 Phone:</span> <span id="phone"></span></p>
-                <p><span class="font-medium">📧 Email:</span> <span id="email"></span></p>
-                <p><span class="font-medium">📅 Joined:</span> <span id="join"></span></p>
-                <p><span class="font-medium">🆔 National ID:</span> <span id="natid"></span></p>
-                <p><span class="font-medium">📊 Status:</span> <span id="status"></span></p>
-            </div>
-        </div>
-    </div>
+<!-- SAVINGS -->
+<div class="bg-white p-6 rounded-2xl shadow mb-6">
+    <h3 class="font-bold mb-4">Savings</h3>
+    <div id="savingsHistory"></div>
+</div>
 
-    <!-- Summary -->
-    <div class="grid md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white p-6 rounded-3xl shadow">
-            <h4 class="text-slate-500 text-sm">Total Savings</h4>
-            <p id="savings" class="text-3xl font-bold text-teal-700 mt-2"></p>
-        </div>
-        <div class="bg-white p-6 rounded-3xl shadow">
-            <h4 class="text-slate-500 text-sm">Total Fines Paid</h4>
-            <p id="fines" class="text-3xl font-bold text-amber-600 mt-2"></p>
-        </div>
-        <div class="bg-white p-6 rounded-3xl shadow">
-            <h4 class="text-slate-500 text-sm">Registration Fees</h4>
-            <p id="regfees" class="text-3xl font-bold text-blue-600 mt-2"></p>
-        </div>
-    </div>
+<!-- ADMIN -->
+<div id="adminSection" class="hidden bg-white p-6 rounded-2xl shadow">
+    <h3 class="text-xl font-bold text-amber-700 mb-4">Admin Panel</h3>
 
-    <!-- Savings History -->
-    <div class="bg-white p-8 rounded-3xl shadow mb-8">
-        <h3 class="font-bold text-xl mb-5 text-teal-800">Savings History</h3>
-        <div id="savingsHistory" class="space-y-4"></div>
-    </div>
+    <p>Total Savings: <span id="adminSavings"></span></p>
+    <p>Total Expenses: <span id="adminExpenses"></span></p>
+</div>
 
-    <!-- Loan History -->
-    <div class="bg-white p-8 rounded-3xl shadow mb-8">
-        <h3 class="font-bold text-xl mb-5 text-teal-800">Loan History</h3>
-        <div id="loanHistory" class="space-y-4"></div>
-    </div>
-
-    <!-- ADMIN SECTION -->
-    <div id="adminSection" class="hidden bg-white p-8 rounded-3xl shadow">
-
-        <h3 class="text-2xl font-bold text-amber-700 mb-6">Treasurer Dashboard</h3>
-
-        <!-- Totals -->
-        <div class="grid md:grid-cols-2 gap-6 mb-10">
-            <div class="bg-teal-50 p-6 rounded-2xl">
-                <h4 class="text-teal-700">Total Group Savings</h4>
-                <p id="adminSavings" class="text-4xl font-bold text-teal-800 mt-2"></p>
-            </div>
-            <div class="bg-amber-50 p-6 rounded-2xl">
-                <h4 class="text-amber-700">Total Expenses</h4>
-                <p id="adminExpenses" class="text-4xl font-bold text-amber-800 mt-2"></p>
-            </div>
-        </div>
-
-        <!-- Group Financial Statement -->
-        <div class="mb-10">
-            <div class="flex justify-between items-center mb-4">
-                <h4 class="font-semibold text-teal-800">Group Financial Statement</h4>
-                <button onclick="downloadGroupFinancialPDF()" 
-                        class="bg-teal-700 hover:bg-teal-800 text-white px-5 py-2 rounded-xl text-sm flex items-center gap-2">
-                    📄 Download P&L & Balance Sheet
-                </button>
-            </div>
-            <div class="flex gap-3 mb-4">
-                <button onclick="showBalanceSheet('monthly')" id="monthlyBtn"
-                        class="px-5 py-2 rounded-xl bg-teal-700 text-white font-medium">Monthly</button>
-                <button onclick="showBalanceSheet('quarterly')" id="quarterlyBtn"
-                        class="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 font-medium">Quarterly</button>
-            </div>
-            <div id="balanceSheetContainer" class="bg-slate-50 rounded-2xl p-6 min-h-[200px]"></div>
-        </div>
-
-        <!-- Bulk Email -->
-        <div class="bg-emerald-50 border border-emerald-200 p-8 rounded-3xl mb-10">
-            <button onclick="emailAllStatements()" id="bulkEmailBtn"
-                    class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-semibold flex items-center justify-center gap-3">
-                <span id="bulkEmailText">📧 Email Statements to Active Members Only</span>
-                <span id="bulkEmailSpinner" class="hidden animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-            </button>
-        </div>
-
-        <!-- Monthly Savings Trend -->
-        <div class="mb-12">
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h4 class="font-semibold text-teal-800 text-xl">Monthly Savings Trend</h4>
-                    <p class="text-sm text-slate-500">Group savings performance over time</p>
-                </div>
-                <button onclick="downloadMonthlyChart()" 
-                        class="bg-teal-700 hover:bg-teal-800 text-white px-6 py-3 rounded-2xl text-sm font-medium flex items-center gap-2">
-                    📥 Download Trend Chart
-                </button>
-            </div>
-            <div class="bg-white p-6 rounded-3xl shadow">
-                <canvas id="monthlyChart" height="130"></canvas>
-            </div>
-        </div>
-
-        <!-- Top 5 Savers -->
-        <div>
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h4 class="font-semibold text-teal-800 text-xl">Top 5 Savers</h4>
-                    <p class="text-sm text-slate-500">Highest contributing members</p>
-                </div>
-                <button onclick="downloadRankingChart()" 
-                        class="bg-teal-700 hover:bg-teal-800 text-white px-6 py-3 rounded-2xl text-sm font-medium flex items-center gap-2">
-                    📥 Download Ranking Chart
-                </button>
-            </div>
-            <div class="bg-white p-6 rounded-3xl shadow">
-                <canvas id="rankingChart" height="160"></canvas>
-            </div>
-        </div>
-
-    </div>
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";   // ← UPDATE THIS WITH YOUR REAL URL
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
-let monthlyChartInstance = null;
-let rankingChartInstance = null;
+// ================= SESSION =================
+const SESSION_TIME = 5 * 60 * 1000;
 
-// ==================== LOGIN ====================
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
+function startSession(){
+    localStorage.setItem("loginTime", Date.now());
+}
+
+function checkSession(){
+    const loginTime = localStorage.getItem("loginTime");
+    if(!loginTime) return;
+
+    if(Date.now() - loginTime > SESSION_TIME){
+        alert("Session expired");
+        logout();
+    }
+}
+setInterval(checkSession,10000);
+
+// ================= LOGIN =================
+document.getElementById("loginForm").addEventListener("submit", async (e)=>{
     e.preventDefault();
 
-    const loginBtn = document.getElementById("loginBtn");
-    const loginText = document.getElementById("loginText");
-    const loginSpinner = document.getElementById("loginSpinner");
-
-    loginBtn.disabled = true;
-    loginText.classList.add("hidden");
-    loginSpinner.classList.remove("hidden");
-
-    const memberId = document.getElementById("memberId").value.trim().toUpperCase();
+    const memberId = document.getElementById("memberId").value.toUpperCase();
     const password = document.getElementById("password").value;
 
-    try {
-        const res = await fetch(WEB_APP_URL, {
-            method: "POST",
-            body: new URLSearchParams({ action: "login", memberId, password })
-        });
+    const res = await fetch(WEB_APP_URL,{
+        method:"POST",
+        body:new URLSearchParams({action:"login",memberId,password})
+    });
 
-        const data = await res.json();
+    const data = await res.json();
 
-        if (!data.success) {
-            alert(data.message || "Invalid Member ID or Password");
-            return;
-        }
-
-        localStorage.setItem("data", JSON.stringify(data));
-        showDashboard(data);
-
-    } catch (err) {
-        alert("Connection error. Please try again.");
-    } finally {
-        loginBtn.disabled = false;
-        loginText.classList.remove("hidden");
-        loginSpinner.classList.add("hidden");
+    if(!data.success){
+        alert("Login failed");
+        return;
     }
+
+    localStorage.setItem("data",JSON.stringify(data));
+    startSession();
+    showDashboard(data);
 });
 
-// ==================== SHOW DASHBOARD ====================
-function showDashboard(data) {
+// AUTO LOGIN
+window.onload = ()=>{
+    const stored = localStorage.getItem("data");
+    if(stored){
+        showDashboard(JSON.parse(stored));
+    }
+};
+
+// ================= ROLES =================
+function isAdmin(role){
+    return ["Chairperson","Vice Chair","Secretary","Treasurer"].includes(role);
+}
+
+function isTreasurer(role){
+    return role === "Treasurer";
+}
+
+// ================= DASHBOARD =================
+function showDashboard(data){
     document.getElementById("login-screen").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
 
     const m = data.member;
 
-    document.getElementById("welcome").textContent = `Welcome, ${m.fullName}`;
-    document.getElementById("name").textContent = m.fullName;
-    document.getElementById("role").textContent = m.role || "";
-    document.getElementById("phone").textContent = m.phone || "—";
-    document.getElementById("email").textContent = m.email || "—";
-    document.getElementById("join").textContent = m.joinDate || "—";
-    document.getElementById("natid").textContent = m.nationalID || "—";
-    document.getElementById("status").textContent = m.status || "—";
-    document.getElementById("photo").src = m.photoUrl || "https://via.placeholder.com/150";
-
-    document.getElementById("savings").textContent = `KSh ${Number(m.totalSavings || 0).toLocaleString()}`;
-    document.getElementById("fines").textContent = `KSh ${Number(m.totalFinesPaid || 0).toLocaleString()}`;
-    document.getElementById("regfees").textContent = `KSh ${Number(m.regFees || 0).toLocaleString()}`;
+    document.getElementById("welcome").innerText = "Welcome " + m.fullName;
+    document.getElementById("name").innerText = m.fullName;
+    document.getElementById("role").innerText = m.role;
 
     renderSavings(data.savingsHistory || []);
-    renderLoans(data.loans || []);
 
-    if (m.isAdmin) {
+    if(isAdmin(m.role)){
         document.getElementById("adminSection").classList.remove("hidden");
         loadAdmin();
     }
 }
 
-function renderSavings(list) {
-    const container = document.getElementById("savingsHistory");
-    container.innerHTML = list.map(s => `
-        <div class="border-l-4 border-teal-600 pl-4 py-3 bg-slate-50 rounded-r-xl">
-            <div class="flex justify-between">
-                <span class="font-medium">${s.transactionId} — ${s.date}</span>
-                <span class="font-semibold text-teal-700">KSh ${Number(s.amount).toLocaleString()}</span>
-            </div>
-            <div class="text-xs text-slate-600">${s.type} ${s.notes ? '• ' + s.notes : ''}</div>
+// ================= SAVINGS =================
+function renderSavings(list){
+    const role = JSON.parse(localStorage.getItem("data")).member.role;
+
+    document.getElementById("savingsHistory").innerHTML = list.map(s=>`
+        <div class="border p-3 mb-3 rounded-xl flex justify-between">
+            <span>${s.transactionId} - KSh ${s.amount}</span>
+
+            ${isTreasurer(role)?`
+                <div>
+                    <button onclick="editRecord('${s.transactionId}')">✏️</button>
+                    <button onclick="deleteRecord('${s.transactionId}')">🗑️</button>
+                </div>
+            `:""}
         </div>
-    `).join('') || '<p class="text-slate-500 py-4">No savings recorded yet.</p>';
+    `).join("");
 }
 
-function renderLoans(loans) {
-    const container = document.getElementById("loanHistory");
-    container.innerHTML = loans.map(l => `
-        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-            <div class="flex justify-between mb-3">
-                <span class="font-bold">${l.loanId}</span>
-                <span class="px-4 py-1 text-xs font-medium rounded-full ${l.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">
-                    ${l.status}
-                </span>
-            </div>
-            <div class="grid grid-cols-2 gap-4 text-sm">
-                <p><span class="text-slate-500">Date:</span> ${l.date}</p>
-                <p><span class="text-slate-500">Amount:</span> KSh ${Number(l.amount).toLocaleString()}</p>
-                <p><span class="text-slate-500">Outstanding:</span> KSh ${Number(l.outstanding).toLocaleString()}</p>
-                <p><span class="text-slate-500">Next Due:</span> ${l.nextDue || '—'}</p>
-            </div>
-        </div>
-    `).join('') || '<p class="text-slate-500 py-4">No loans found.</p>';
+// ================= TREASURER =================
+function editRecord(id){
+    const amount = prompt("New amount:");
+    if(!amount) return;
+
+    fetch(WEB_APP_URL,{
+        method:"POST",
+        body:new URLSearchParams({action:"editRecord",id,amount})
+    }).then(()=>location.reload());
 }
 
-// ==================== ADMIN CHARTS ====================
-async function loadAdmin() {
-    const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=getAdminData&memberId=${memberId}`);
-        const result = await res.json();
-        const admin = result.adminData || {};
+function deleteRecord(id){
+    if(!confirm("Delete?")) return;
 
-        document.getElementById("adminSavings").textContent = `KSh ${Number(admin.totalSavings || 0).toLocaleString()}`;
-        document.getElementById("adminExpenses").textContent = `KSh ${Number(admin.totalExpenses || 0).toLocaleString()}`;
-
-        // Monthly Trend
-        if (monthlyChartInstance) monthlyChartInstance.destroy();
-        monthlyChartInstance = new Chart(document.getElementById("monthlyChart"), {
-            type: 'line',
-            data: {
-                labels: Object.keys(admin.monthly || {}),
-                datasets: [{
-                    label: 'Monthly Savings (KSh)',
-                    data: Object.values(admin.monthly || {}),
-                    borderColor: '#0f766e',
-                    backgroundColor: 'rgba(15, 118, 110, 0.1)',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'top' } },
-                scales: { y: { beginAtZero: true } }
-            }
-        });
-
-        // Top 5 Savers
-        const topSavers = Object.entries(admin.memberNames || {})
-            .map(([name]) => ({ name, amount: Number(admin.memberTotals[name] || 0) }))
-            .sort((a, b) => b.amount - a.amount)
-            .slice(0, 5);
-
-        if (rankingChartInstance) rankingChartInstance.destroy();
-        rankingChartInstance = new Chart(document.getElementById("rankingChart"), {
-            type: 'bar',
-            data: {
-                labels: topSavers.map(item => item.name),
-                datasets: [{
-                    label: 'Savings (KSh)',
-                    data: topSavers.map(item => item.amount),
-                    backgroundColor: '#14b8a6',
-                    borderColor: '#0f766e',
-                    borderWidth: 2,
-                    borderRadius: 6
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { x: { beginAtZero: true } }
-            }
-        });
-
-    } catch (err) {
-        console.error(err);
-    }
+    fetch(WEB_APP_URL,{
+        method:"POST",
+        body:new URLSearchParams({action:"deleteRecord",id})
+    }).then(()=>location.reload());
 }
 
-// ==================== MEMBER STATEMENT PDF ====================
-async function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+// ================= ADMIN =================
+async function loadAdmin(){
+    const res = await fetch(WEB_APP_URL + "?action=getAdminData");
+    const data = await res.json();
 
-    const stored = localStorage.getItem("data");
-    if (!stored) {
-        alert("Please login first");
-        return;
-    }
-    const data = JSON.parse(stored);
-    const m = data.member;
-
-    const timestamp = new Date().toLocaleDateString('en-GB', { 
-        day: '2-digit', month: 'long', year: 'numeric' 
-    }) + " at " + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-    // Header with Logo
-    try {
-        const img = new Image();
-        img.src = "Kakelo Unity Logo (2).png";
-        await new Promise(resolve => {
-            img.onload = () => {
-                doc.addImage(img, 'PNG', 20, 12, 35, 35);
-                resolve();
-            };
-        });
-    } catch (e) {}
-
-    doc.setFontSize(16);
-    doc.setTextColor(15, 118, 110);
-    doc.text("Kakelo Unity CBO", 65, 22);
-
-    doc.setFontSize(13);
-    doc.text("Member Statement", 65, 30);
-
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Generated: " + timestamp, 65, 38);
-
-    doc.setDrawColor(15, 118, 110);
-    doc.line(20, 48, 190, 48);
-
-    let y = 58;
-
-    doc.setFontSize(12);
-    doc.setTextColor(15, 118, 110);
-    doc.text("Member Information", 20, y);
-    y += 8;
-
-    doc.autoTable({
-        startY: y,
-        head: [['Field', 'Details']],
-        body: [
-            ['Full Name', m.fullName],
-            ['Member ID', m.memberId],
-            ['Role', m.role || '—'],
-            ['Phone', m.phone || '—'],
-            ['Email', m.email || '—'],
-            ['Joined', m.joinDate || '—'],
-            ['National ID', m.nationalID || '—'],
-            ['Status', m.status || '—']
-        ],
-        theme: 'striped',
-        headStyles: { fillColor: [15, 118, 110], textColor: 255 },
-        styles: { fontSize: 10 }
-    });
-
-    y = doc.lastAutoTable.finalY + 12;
-
-    doc.setFontSize(12);
-    doc.setTextColor(15, 118, 110);
-    doc.text("Account Summary", 20, y);
-    y += 8;
-
-    doc.autoTable({
-        startY: y,
-        head: [['Description', 'Amount (KSh)']],
-        body: [
-            ['Total Savings', Number(m.totalSavings || 0).toLocaleString()],
-            ['Total Fines Paid', Number(m.totalFinesPaid || 0).toLocaleString()],
-            ['Registration Fees', Number(m.regFees || 0).toLocaleString()]
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [234, 179, 8] },
-        styles: { fontSize: 11, halign: 'right' },
-        columnStyles: { 0: { halign: 'left' } }
-    });
-
-    y = doc.lastAutoTable.finalY + 12;
-
-    doc.setFontSize(12);
-    doc.setTextColor(15, 118, 110);
-    doc.text("Savings History", 20, y);
-    y += 8;
-
-    const savingsBody = (data.savingsHistory || []).map(s => [
-        s.date || '', s.transactionId || '', s.type || '', 
-        `KSh ${Number(s.amount || 0).toLocaleString()}`, s.notes || ''
-    ]);
-
-    doc.autoTable({
-        startY: y,
-        head: [['Date', 'Transaction ID', 'Type', 'Amount', 'Notes']],
-        body: savingsBody.length ? savingsBody : [['No transactions', '', '', '', '']],
-        theme: 'striped',
-        headStyles: { fillColor: [15, 118, 110] },
-        styles: { fontSize: 9 }
-    });
-
-    y = doc.lastAutoTable.finalY + 12;
-
-    doc.setFontSize(12);
-    doc.setTextColor(15, 118, 110);
-    doc.text("Loan History", 20, y);
-    y += 8;
-
-    const loanBody = (data.loans || []).map(l => [
-        l.date || '', l.loanId || '', l.status || '', 
-        `KSh ${Number(l.amount || 0).toLocaleString()}`, 
-        `KSh ${Number(l.outstanding || 0).toLocaleString()}`, l.nextDue || ''
-    ]);
-
-    doc.autoTable({
-        startY: y,
-        head: [['Date', 'Loan ID', 'Status', 'Amount', 'Outstanding', 'Next Due']],
-        body: loanBody.length ? loanBody : [['No loans', '', '', '', '', '']],
-        theme: 'striped',
-        headStyles: { fillColor: [15, 118, 110] },
-        styles: { fontSize: 9 }
-    });
-
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Thank you for being a valued member of Kakelo Unity CBO", 105, 285, { align: "center" });
-
-    const fileName = `${m.fullName.replace(/[^a-zA-Z0-9 ]/g, '_')}_Statement.pdf`;
-    doc.save(fileName);
+    document.getElementById("adminSavings").innerText = data.totalSavings;
+    document.getElementById("adminExpenses").innerText = data.totalExpenses;
 }
 
-// ==================== GROUP FINANCIAL STATEMENT PDF ====================
-async function downloadGroupFinancialPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-
-    const timestamp = new Date().toLocaleDateString('en-GB', { 
-        day: '2-digit', month: 'long', year: 'numeric' 
-    }) + " at " + new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-
-    try {
-        const img = new Image();
-        img.src = "Kakelo Unity Logo (2).png";
-        await new Promise(resolve => {
-            img.onload = () => {
-                doc.addImage(img, 'PNG', 20, 12, 35, 35);
-                resolve();
-            };
-        });
-    } catch (e) {}
-
-    doc.setFontSize(16);
-    doc.setTextColor(15, 118, 110);
-    doc.text("Kakelo Unity CBO", 65, 22);
-
-    doc.setFontSize(13);
-    doc.text("Group Financial Statement", 65, 30);
-
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Generated: " + timestamp, 65, 38);
-
-    doc.setDrawColor(15, 118, 110);
-    doc.line(20, 48, 190, 48);
-
-    let y = 58;
-
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=getBalanceSheet&period=monthly`);
-        const result = await res.json();
-
-        if (result.success && result.data && result.data.length > 0) {
-            const tableBody = result.data.map(row => [
-                row.period,
-                `KSh ${Number(row.income || 0).toLocaleString()}`,
-                `KSh ${Number(row.expenses || 0).toLocaleString()}`,
-                `KSh ${Number(row.net || 0).toLocaleString()}`,
-                `KSh ${Number(row.cumulative || 0).toLocaleString()}`
-            ]);
-
-            doc.autoTable({
-                startY: y,
-                head: [['Period', 'Income', 'Expenses', 'Net Surplus', 'Cumulative Balance']],
-                body: tableBody,
-                theme: 'striped',
-                headStyles: { fillColor: [15, 118, 110], textColor: 255 },
-                styles: { fontSize: 10, cellPadding: 5 }
-            });
-        } else {
-            doc.setFontSize(12);
-            doc.text("No balance sheet data available yet.", 20, y + 20);
-        }
-    } catch (err) {
-        doc.setFontSize(12);
-        doc.text("Error loading balance sheet data.", 20, y + 20);
-    }
-
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text("Prepared for Treasurer - Kakelo Unity CBO", 105, 285, { align: "center" });
-
-    doc.save("Kakelo_Unity_Group_Financial_Statement.pdf");
-}
-
-// ==================== CHART DOWNLOADS ====================
-function downloadMonthlyChart() {
-    if (!monthlyChartInstance) return alert("Chart not loaded yet");
-    const link = document.createElement('a');
-    link.download = 'Kakelo_Unity_Monthly_Savings_Trend.png';
-    link.href = monthlyChartInstance.toBase64Image();
-    link.click();
-}
-
-function downloadRankingChart() {
-    if (!rankingChartInstance) return alert("Chart not loaded yet");
-    const link = document.createElement('a');
-    link.download = 'Kakelo_Unity_Top_5_Savers.png';
-    link.href = rankingChartInstance.toBase64Image();
-    link.click();
-}
-
-// ==================== EMAIL FUNCTIONS ====================
-async function emailStatement() {
-    const stored = localStorage.getItem("data");
-    if (!stored) {
-        alert("Please login first");
-        return;
-    }
-    const data = JSON.parse(stored);
-    const memberId = data.member.memberId;
-
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
-        const result = await res.json();
-
-        if (result.success) {
-            alert(`✅ Statement sent from CBO organization email to:\n${data.member.email}\n\nPlease check Inbox, Sent Mail, and Spam folder.`);
-        } else {
-            alert("❌ Failed: " + (result.message || "Unknown error"));
-        }
-    } catch (err) {
-        alert("Connection error. Please try again.");
-    }
-}
-
-async function emailAllStatements() {
-    if (!confirm("Send statements to all active members?")) return;
-
-    const btn = document.getElementById("bulkEmailBtn");
-    const text = document.getElementById("bulkEmailText");
-    const spinner = document.getElementById("bulkEmailSpinner");
-
-    btn.disabled = true;
-    text.classList.add("hidden");
-    spinner.classList.remove("hidden");
-
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=emailAllStatements`);
-        const result = await res.json();
-
-        if (result.success) {
-            alert(`✅ Success! ${result.sent} statements sent to active members.`);
-        } else {
-            alert("❌ " + (result.message || "Failed to send statements"));
-        }
-    } catch (err) {
-        alert("Connection error.");
-    } finally {
-        btn.disabled = false;
-        text.classList.remove("hidden");
-        spinner.classList.add("hidden");
-    }
-}
-
-// ==================== OTHER FUNCTIONS ====================
-function logout() {
+// ================= LOGOUT =================
+function logout(){
     localStorage.clear();
     location.reload();
 }

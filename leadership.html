@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leadership Team - Kakelo Unity CBO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Navbar -->
+    <script src="navbar.js" defer></script>
+    
+    <style>
+        .leader-card {
+            transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        .leader-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 60px -15px rgb(0 0 0 / 0.25);
+        }
+        
+        .leader-image {
+            transition: transform 0.7s ease;
+        }
+        .leader-card:hover .leader-image {
+            transform: scale(1.08);
+        }
+        
+        .role-badge {
+            display: inline-block;
+            background-color: #0f766e;
+            color: white;
+            font-size: 0.875rem;
+            padding: 4px 16px;
+            border-radius: 9999px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Shared Navbar -->
+    <div id="navbar-container"></div>
+
+    <!-- HERO SECTION -->
+    <section class="bg-teal-800 text-white py-24">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+                Our Leadership Team
+            </h1>
+            <p class="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed">
+                Meet the passionate and dedicated individuals guiding Kakelo Unity CBO 
+                toward sustainable community transformation and lasting impact.
+            </p>
+        </div>
+    </section>
+
+    <!-- LEADERSHIP GRID -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
+
+                <!-- Leader 1: Isack Ouma -->
+                <div class="leader-card bg-white rounded-3xl shadow-xl overflow-hidden text-center">
+                    <div class="relative">
+                        <img src="Isack Ouma.jpeg" 
+                             alt="Isack Ouma - Team Leader" 
+                             class="leader-image w-full h-80 object-cover">
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-slate-800">Isack Ouma</h3>
+                        <p class="role-badge mt-3">Team Leader</p>
+                        <p class="text-sm text-slate-500 mt-8 leading-relaxed">
+                            Visionary leader committed to youth empowerment, 
+                            strategic planning, and sustainable community development.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Leader 2: Leah Okeyo -->
+                <div class="leader-card bg-white rounded-3xl shadow-xl overflow-hidden text-center">
+                    <div class="relative">
+                        <img src="Leah Okeyo.jpg" 
+                             alt="Leah Okeyo - Assistant Team Leader" 
+                             class="leader-image w-full h-80 object-cover">
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-slate-800">Leah Okeyo</h3>
+                        <p class="role-badge mt-3">Assistant Team Leader</p>
+                        <p class="text-sm text-slate-500 mt-8 leading-relaxed">
+                            Passionate advocate for women and youth empowerment 
+                            with strong focus on program implementation.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Leader 3: Phanice Asher -->
+                <div class="leader-card bg-white rounded-3xl shadow-xl overflow-hidden text-center">
+                    <div class="relative">
+                        <img src="Phanice Asher.jpeg" 
+                             alt="Phanice Asher - Office Administrator" 
+                             class="leader-image w-full h-80 object-cover">
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-slate-800">Phanice Asher</h3>
+                        <p class="role-badge mt-3">Office Administrator</p>
+                        <p class="text-sm text-slate-500 mt-8 leading-relaxed">
+                            Ensures smooth daily operations and maintains excellent 
+                            community engagement and coordination.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Leader 4: Amos Owuor -->
+                <div class="leader-card bg-white rounded-3xl shadow-xl overflow-hidden text-center">
+                    <div class="relative">
+                        <img src="Amos Owuor.jpeg" 
+                             alt="Amos Owuor - Finance Steward" 
+                             class="leader-image w-full h-80 object-cover">
+                    </div>
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-slate-800">Amos Owuor</h3>
+                        <p class="role-badge mt-3">Finance Steward</p>
+                        <p class="text-sm text-slate-500 mt-8 leading-relaxed">
+                            Manages financial resources with transparency and accountability 
+                            to maximize community impact.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- CALL TO ACTION -->
+    <section class="bg-slate-100 py-20">
+        <div class="max-w-4xl mx-auto text-center px-6">
+            <h2 class="text-3xl font-bold text-teal-800 mb-4">Want to Join Our Team?</h2>
+            <p class="text-slate-600 mb-8 max-w-md mx-auto">
+                We are always looking for passionate individuals who share our vision 
+                of building a stronger and more united community.
+            </p>
+            <a href="member-register.html" 
+               class="inline-block bg-teal-700 hover:bg-teal-800 text-white px-10 py-4 rounded-2xl font-semibold text-lg transition-all">
+                Become a Member
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/254707118312" target="_blank"
+       class="whatsapp-float fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Scroll to Top -->
+    <button id="scrollTopBtn" 
+            onclick="scrollToTop()" 
+            class="fixed bottom-24 right-6 bg-teal-700 hover:bg-teal-800 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hidden z-40">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="./ui.js"></script>
+    <script src="footer.js"></script>
+
+</body>
+</html>

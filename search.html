@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search - Kakelo Unity CBO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Navbar -->
+    <script src="navbar.js" defer></script>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Navbar -->
+    <div id="navbar-container"></div>
+
+    <!-- HERO -->
+    <section class="bg-gradient-to-r from-teal-800 to-teal-700 text-white py-24">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+                Search Our Website
+            </h1>
+            <p class="text-xl text-teal-100 max-w-3xl mx-auto">
+                Find information about our programs, leadership, impact, events, and more.
+            </p>
+        </div>
+    </section>
+
+    <!-- SEARCH SECTION -->
+    <section class="py-20 bg-gradient-to-b from-white to-slate-100 min-h-screen">
+        <div class="max-w-4xl mx-auto px-6">
+
+            <!-- Search Input Card -->
+            <div class="bg-white rounded-3xl shadow-xl p-8 mb-12">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInput"
+                        placeholder="Search for programs, leadership, events, donations..."
+                        class="w-full border border-slate-300 rounded-2xl px-6 py-5 text-lg focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
+                        onkeyup="if(event.key === 'Enter') performSearch()">
+                    
+                    <button onclick="performSearch()"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 bg-teal-700 hover:bg-teal-800 text-white px-8 py-3 rounded-2xl font-semibold transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div id="searchResults" class="space-y-6"></div>
+
+            <!-- Initial State -->
+            <div id="initialState" class="text-center py-20 text-slate-400">
+                <i class="fa-solid fa-search text-6xl mb-6"></i>
+                <p class="text-lg">What are you looking for today?</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/254707118312" target="_blank"
+       class="whatsapp-float fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Scroll to Top -->
+    <button id="scrollTopBtn" 
+            onclick="scrollToTop()" 
+            class="fixed bottom-24 right-6 bg-teal-700 hover:bg-teal-800 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hidden z-40">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="./ui.js"></script>
+    <script src="footer.js"></script>
+
+    <!-- SEARCH SCRIPT -->
+    <script>
+        const pages = [
+            {
+                title: "Home",
+                url: "index.html",
+                description: "Welcome to Kakelo Unity CBO. Learn about our mission and community work."
+            },
+            {
+                title: "Our Programs",
+                url: "programs.html",
+                description: "Youth empowerment, education support, economic empowerment, community outreach, agriculture, and health awareness."
+            },
+            {
+                title: "Our Leadership",
+                url: "leadership.html",
+                description: "Meet Isack Ouma, Leah Okeyo, Phanice Asher, Amos Owuor and the rest of our team."
+            },
+            {
+                title: "Our Impact",
+                url: "impact.html",
+                description: "Success stories, youth empowered, students supported, and families helped."
+            },
+            {
+                title: "Gallery",
+                url: "gallery.html",
+                description: "Photos from our events, programs, and community activities."
+            },
+            {
+                title: "Events",
+                url: "events.html",
+                description: "Upcoming and past community events and activities."
+            },
+            {
+                title: "Donate",
+                url: "donate.html",
+                description: "Support our mission through donations."
+            },
+            {
+                title: "Contact Us",
+                url: "contact.html",
+                description: "Get in touch with Kakelo Unity CBO."
+            },
+            {
+                title: "Member Portal",
+                url: "member-portal.html",
+                description: "Login to your member dashboard and savings account."
+            },
+            {
+                title: "Volunteer With Us",
+                url: "volunteer.html",
+                description: "Join our team and volunteer your time and skills."
+            }
+        ];
+
+        function performSearch() {
+            const query = document.getElementById("searchInput").value.toLowerCase().trim();
+            const resultsContainer = document.getElementById("searchResults");
+            const initialState = document.getElementById("initialState");
+
+            initialState.style.display = "none";
+
+            if (!query) {
+                resultsContainer.innerHTML = `
+                    <div class="bg-amber-50 border border-amber-200 text-amber-700 p-8 rounded-3xl text-center">
+                        Please type something to search...
+                    </div>
+                `;
+                return;
+            }
+
+            const filtered = pages.filter(page =>
+                page.title.toLowerCase().includes(query) ||
+                page.description.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 text-red-600 p-8 rounded-3xl text-center">
+                        No results found for "<strong>${query}</strong>".<br>
+                        Try different keywords like "youth", "donate", or "leadership".
+                    </div>
+                `;
+                return;
+            }
+
+            resultsContainer.innerHTML = filtered.map(page => `
+                <a href="${page.url}" 
+                   class="block bg-white shadow hover:shadow-2xl transition-all rounded-3xl p-8 border border-slate-100 hover:border-teal-300 group">
+                    <h3 class="text-2xl font-bold text-teal-800 mb-3 group-hover:text-teal-700">${page.title}</h3>
+                    <p class="text-slate-600 leading-relaxed">${page.description}</p>
+                    <div class="mt-4 text-teal-700 text-sm font-medium flex items-center gap-2">
+                        Visit Page 
+                        <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+                    </div>
+                </a>
+            `).join("");
+        }
+
+        // Allow pressing Enter in the search box
+        document.getElementById("searchInput").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                performSearch();
+            }
+        });
+    </script>
+
+</body>
+</html>

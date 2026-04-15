@@ -1,0 +1,169 @@
+document.addEventListener("DOMContentLoaded", function () {
+    const navbarContainer = document.getElementById("navbar-container");
+
+    if (!navbarContainer) {
+        console.warn("Navbar container (#navbar-container) not found.");
+        return;
+    }
+
+    navbarContainer.innerHTML = `
+        <!-- TOP SEARCH BAR -->
+        <div class="bg-slate-100 border-b border-slate-200 py-3">
+            <div class="max-w-7xl mx-auto px-6 flex justify-end">
+                <button onclick="toggleSearchPopup()" 
+                        class="flex items-center gap-3 text-slate-600 hover:text-teal-700 transition-colors duration-200">
+                    <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                    <span class="text-sm font-medium hidden sm:inline">Search the website...</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SEARCH POPUP -->
+        <div id="searchPopup" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-xl mx-4">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-teal-800">Search Kakelo Unity CBO</h3>
+                    <button onclick="toggleSearchPopup()" 
+                            class="text-slate-400 hover:text-red-500 text-3xl leading-none transition-colors">
+                        ×
+                    </button>
+                </div>
+                
+                <form action="search.html" method="GET" class="flex gap-3">
+                    <input type="text" name="q" required 
+                           placeholder="Type keywords... (e.g. youth programs, donation)"
+                           class="flex-1 px-6 py-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600 text-lg">
+                    <button type="submit" 
+                            class="bg-teal-700 hover:bg-teal-800 text-white px-10 rounded-2xl font-semibold transition-all">
+                        Search
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- MAIN NAVBAR -->
+        <nav class="bg-white shadow-sm sticky top-0 z-50 border-b border-slate-100">
+            <div class="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
+
+                <!-- Logo -->
+                <a href="index.html" class="flex items-center gap-4 group">
+                    <img src="Kakelo Unity Logo (2).png" 
+                         alt="Kakelo Unity CBO Logo" 
+                         class="h-14 transition-transform group-hover:scale-105">
+                    <div>
+                        <h1 class="text-2xl font-bold text-teal-800 tracking-tight">Kakelo Unity</h1>
+                        <p class="text-xs text-slate-500 -mt-1">Community Based Organization</p>
+                    </div>
+                </a>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-8 text-base font-medium">
+
+                    <a href="index.html" class="nav-link text-slate-700 hover:text-teal-700 transition-colors">Home</a>
+
+                    <!-- About Dropdown -->
+                    <div class="relative group">
+                        <button onclick="toggleDropdown(this)" 
+                                class="nav-link text-slate-700 hover:text-teal-700 flex items-center gap-1.5">
+                            About Us
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform"></i>
+                        </button>
+                        <div class="dropdown-menu hidden absolute left-0 top-full bg-white shadow-xl rounded-2xl py-5 w-64 border border-slate-100 z-50">
+                            <a href="about.html" class="block px-6 py-3 hover:bg-slate-50 transition-colors">About Us</a>
+                            <a href="leadership.html" class="block px-6 py-3 hover:bg-slate-50 transition-colors">Our Leadership</a>
+                            <a href="partners.html" class="block px-6 py-3 hover:bg-slate-50 transition-colors">Our Partners</a>
+                        </div>
+                    </div>
+
+                    <!-- Programs Dropdown -->
+                    <div class="relative group">
+                        <button onclick="toggleDropdown(this)" 
+                                class="nav-link text-slate-700 hover:text-teal-700 flex items-center gap-1.5">
+                            Programs 
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform"></i>
+                        </button>
+                        <div class="dropdown-menu hidden absolute left-0 top-full bg-white shadow-xl rounded-2xl py-5 w-80 border border-slate-100 z-50">
+                            <a href="programs.html#youth" class="block px-6 py-3 hover:bg-slate-50 transition-colors">Youth Empowerment</a>
+                            <a href="programs.html#education" class="block px-6 py-3 hover:bg-slate-50 transition-colors">Education Support</a>
+                            <a href="programs.html#economic" class="block px-6 py-3 hover:bg-slate-50 transition-colors">Economic Empowerment</a>
+                            <a href="programs.html#outreach" class="block px-6 py-3 hover:bg-slate-50 transition-colors">Community Outreach</a>
+                            <a href="programs.html#agriculture" class="block px-6 py-3 hover:bg-slate-50 transition-colors">Agricultural Initiatives</a>
+                            <a href="programs.html#health" class="block px-6 py-3 hover:bg-slate-50 transition-colors">Health Awareness</a>
+                        </div>
+                    </div>
+
+                    <a href="impact.html" class="nav-link text-slate-700 hover:text-teal-700 transition-colors">Our Impact</a>
+                    <a href="gallery.html" class="nav-link text-slate-700 hover:text-teal-700 transition-colors">Gallery</a>
+                    <a href="events.html" class="nav-link text-slate-700 hover:text-teal-700 transition-colors">Events</a>
+                    <a href="contact.html" class="nav-link text-slate-700 hover:text-teal-700 transition-colors">Contact</a>
+                    
+                    <a href="member-portal.html" 
+                       class="nav-link text-slate-700 hover:text-teal-700 transition-colors">Member Portal</a>
+                </div>
+
+                <!-- Donate Button -->
+                <a href="donate.html" 
+                   class="hidden md:flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white px-7 py-3 rounded-2xl font-semibold text-sm transition-all shadow-sm hover:shadow-md">
+                    <i class="fa-solid fa-heart"></i>
+                    DONATE NOW
+                </a>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" 
+                        class="md:hidden text-2xl text-slate-700">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    `;
+});
+
+// ================= DROPDOWN FUNCTIONS =================
+function toggleDropdown(btn) {
+    const menu = btn.nextElementSibling;
+    
+    // Close all other dropdowns
+    document.querySelectorAll(".dropdown-menu").forEach(m => {
+        if (m !== menu) m.classList.add("hidden");
+    });
+
+    menu.classList.toggle("hidden");
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener("click", function (e) {
+    if (!e.target.closest(".group")) {
+        document.querySelectorAll(".dropdown-menu").forEach(menu => {
+            menu.classList.add("hidden");
+        });
+    }
+});
+
+// ================= SEARCH POPUP =================
+function toggleSearchPopup() {
+    const popup = document.getElementById("searchPopup");
+    popup.classList.toggle("hidden");
+    
+    // Focus input when opened
+    if (!popup.classList.contains("hidden")) {
+        setTimeout(() => {
+            popup.querySelector("input").focus();
+        }, 100);
+    }
+}
+
+// ================= MOBILE MENU (Basic - you can expand later) =================
+function toggleMobileMenu() {
+    alert("Mobile menu coming soon!\n\nFor now, please use desktop view or contact us directly.");
+    // You can implement a full mobile menu later if needed
+}
+
+// Close search popup with ESC key
+document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+        const popup = document.getElementById("searchPopup");
+        if (popup && !popup.classList.contains("hidden")) {
+            toggleSearchPopup();
+        }
+    }
+});

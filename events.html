@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - Kakelo Unity CBO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="./style.css">
+    
+    <!-- Scripts -->
+    <script src="./navbar.js" defer></script>
+    <script src="./footer.js" defer></script>
+    
+    <style>
+        .event-card {
+            transition: all 0.4s ease;
+        }
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+        }
+        
+        .event-date {
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans">
+
+    <!-- Navbar -->
+    <div id="navbar-container"></div>
+
+    <!-- HERO SECTION -->
+    <section class="bg-teal-800 text-white py-24 text-center">
+        <div class="max-w-4xl mx-auto px-6">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-4">
+                Our Events
+            </h1>
+            <p class="text-xl text-teal-100 max-w-2xl mx-auto">
+                Join us in building stronger communities through meaningful gatherings, 
+                workshops, and outreach programs.
+            </p>
+        </div>
+    </section>
+
+    <!-- EVENTS SECTION -->
+    <section class="py-20 max-w-6xl mx-auto px-6">
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Event Card 1 -->
+            <div class="event-card bg-white rounded-3xl shadow-lg overflow-hidden">
+                <div class="event-date text-white px-6 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span class="font-medium">15 May 2026</span>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-2xl font-bold text-teal-800 mb-3">
+                        Youth Leadership Forum
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Empowering young leaders with mentorship, skills training, 
+                        and leadership development workshops.
+                    </p>
+                    <div class="flex items-center gap-4 text-sm text-slate-500">
+                        <div class="flex items-center gap-1">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>9:00 AM - 4:00 PM</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Kakelo Community Hall</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t px-8 py-5">
+                    <a href="#" 
+                       class="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-medium transition">
+                        Learn More 
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Event Card 2 -->
+            <div class="event-card bg-white rounded-3xl shadow-lg overflow-hidden">
+                <div class="event-date text-white px-6 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span class="font-medium">22 June 2026</span>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-2xl font-bold text-teal-800 mb-3">
+                        Community Outreach Day
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Supporting vulnerable families through food distribution, 
+                        health talks, and educational materials.
+                    </p>
+                    <div class="flex items-center gap-4 text-sm text-slate-500">
+                        <div class="flex items-center gap-1">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>10:00 AM - 3:00 PM</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Rachuonyo East Sub-County</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t px-8 py-5">
+                    <a href="#" 
+                       class="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-medium transition">
+                        Learn More 
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Event Card 3 (Placeholder) -->
+            <div class="event-card bg-white rounded-3xl shadow-lg overflow-hidden">
+                <div class="event-date text-white px-6 py-3 flex items-center gap-3">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span class="font-medium">Coming Soon</span>
+                </div>
+                <div class="p-8">
+                    <h3 class="text-2xl font-bold text-teal-800 mb-3">
+                        Entrepreneurship Training
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        Practical business skills and startup support for youth and women in our community.
+                    </p>
+                    <div class="flex items-center gap-4 text-sm text-slate-500">
+                        <div class="flex items-center gap-1">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>TBA</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Kakelo Unity CBO Centre</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="border-t px-8 py-5">
+                    <a href="#" 
+                       class="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-medium transition">
+                        Learn More 
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- View All Button -->
+        <div class="text-center mt-12">
+            <a href="#" 
+               class="inline-block bg-teal-700 hover:bg-teal-800 text-white px-10 py-4 rounded-2xl font-semibold text-lg transition-all">
+                View All Past Events
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/254707118312" target="_blank"
+       class="whatsapp-float fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Scroll to Top -->
+    <button id="scrollTopBtn" 
+            onclick="scrollToTop()" 
+            class="fixed bottom-24 right-6 bg-teal-700 hover:bg-teal-800 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hidden z-40">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Additional Scripts -->
+    <script src="./ui.js"></script>
+
+</body>
+</html>

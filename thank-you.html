@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You - Kakelo Unity CBO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Navbar & Footer -->
+    <script src="navbar.js" defer></script>
+    <script src="footer.js" defer></script>
+    
+    <style>
+        .thank-you-card {
+            animation: fadeInScale 0.8s ease-out forwards;
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.92) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .success-icon {
+            animation: popIn 0.6s ease-out forwards;
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans">
+
+    <!-- Navbar -->
+    <div id="navbar-container"></div>
+
+    <!-- THANK YOU SECTION -->
+    <section class="min-h-screen flex items-center justify-center py-20">
+        <div class="max-w-lg mx-auto px-6 text-center thank-you-card">
+            
+            <!-- Success Icon -->
+            <div class="mx-auto mb-8 w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-circle-check success-icon text-7xl"></i>
+            </div>
+
+            <!-- Logo -->
+            <img src="Kakelo Unity Logo (2).png" 
+                 alt="Kakelo Unity CBO" 
+                 class="h-16 mx-auto mb-8">
+
+            <!-- Thank You Message -->
+            <h1 class="text-5xl font-bold text-teal-800 mb-4">
+                Thank You!
+            </h1>
+            
+            <p class="text-2xl text-slate-600 mb-10 leading-relaxed">
+                Your support means the world to us and the communities we serve.
+            </p>
+
+            <div class="space-y-4">
+                <a href="index.html" 
+                   class="block w-full bg-teal-700 hover:bg-teal-800 text-white py-5 rounded-2xl font-semibold text-lg transition-all shadow-lg">
+                    ← Return to Home
+                </a>
+                
+                <a href="programs.html" 
+                   class="block w-full border border-teal-700 text-teal-700 hover:bg-teal-50 py-5 rounded-2xl font-semibold text-lg transition-all">
+                    Explore Our Programs
+                </a>
+            </div>
+
+            <!-- Appreciation Note -->
+            <p class="text-slate-500 text-sm mt-12 leading-relaxed">
+                Every contribution helps us empower more youth, support education, 
+                and build a stronger, united community in Homabay County.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/254707118312" target="_blank"
+       class="whatsapp-float fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Scroll to Top -->
+    <button id="scrollTopBtn" 
+            onclick="scrollToTop()" 
+            class="fixed bottom-24 right-6 bg-teal-700 hover:bg-teal-800 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hidden z-40">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="./ui.js"></script>
+    <script src="footer.js"></script>
+
+</body>
+</html>

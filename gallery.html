@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - Kakelo Unity CBO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Navbar -->
+    <script src="navbar.js" defer></script>
+    
+    <style>
+        .gallery-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        
+        .gallery-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+        
+        .gallery-card img {
+            transition: transform 0.6s ease;
+        }
+        
+        .gallery-card:hover img {
+            transform: scale(1.08);
+        }
+        
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+            padding: 20px;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        
+        .gallery-card:hover .gallery-overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Shared Navbar -->
+    <div id="navbar-container"></div>
+
+    <!-- HERO SECTION -->
+    <section class="bg-teal-800 text-white py-24">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+                Our Gallery
+            </h1>
+            <p class="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed">
+                Capturing moments of unity, impact, joy, and transformation across our community programs.
+            </p>
+        </div>
+    </section>
+
+    <!-- GALLERY GRID -->
+    <section class="py-20">
+        <div class="max-w-7xl mx-auto px-6">
+            
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+
+                <!-- Gallery Item -->
+                <div class="gallery-card group relative bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <img src="gallery1.jpg" 
+                         alt="Youth Leadership Training Session" 
+                         class="w-full h-72 object-cover">
+                    <div class="gallery-overlay text-white">
+                        <p class="font-medium">Youth Leadership Forum 2025</p>
+                    </div>
+                </div>
+
+                <div class="gallery-card group relative bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <img src="gallery2.jpg" 
+                         alt="Community Outreach Program" 
+                         class="w-full h-72 object-cover">
+                    <div class="gallery-overlay text-white">
+                        <p class="font-medium">Community Outreach - Food Distribution</p>
+                    </div>
+                </div>
+
+                <div class="gallery-card group relative bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <img src="gallery3.jpg" 
+                         alt="Women Empowerment Workshop" 
+                         class="w-full h-72 object-cover">
+                    <div class="gallery-overlay text-white">
+                        <p class="font-medium">Women Economic Empowerment Workshop</p>
+                    </div>
+                </div>
+
+                <div class="gallery-card group relative bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <img src="gallery4.jpg" 
+                         alt="School Children Education Support" 
+                         class="w-full h-72 object-cover">
+                    <div class="gallery-overlay text-white">
+                        <p class="font-medium">Education Support Program</p>
+                    </div>
+                </div>
+
+                <div class="gallery-card group relative bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <img src="gallery5.jpg" 
+                         alt="Clean-up Campaign" 
+                         class="w-full h-72 object-cover">
+                    <div class="gallery-overlay text-white">
+                        <p class="font-medium">Community Clean-up Campaign</p>
+                    </div>
+                </div>
+
+                <div class="gallery-card group relative bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <img src="gallery6.jpg" 
+                         alt="Entrepreneurship Training" 
+                         class="w-full h-72 object-cover">
+                    <div class="gallery-overlay text-white">
+                        <p class="font-medium">Youth Entrepreneurship Training</p>
+                    </div>
+                </div>
+
+                <div class="gallery-card group relative bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <img src="gallery7.jpg" 
+                         alt="Health Awareness Day" 
+                         class="w-full h-72 object-cover">
+                    <div class="gallery-overlay text-white">
+                        <p class="font-medium">Health & Nutrition Awareness</p>
+                    </div>
+                </div>
+
+                <div class="gallery-card group relative bg-white rounded-3xl shadow-xl overflow-hidden">
+                    <img src="gallery8.jpg" 
+                         alt="Annual General Meeting" 
+                         class="w-full h-72 object-cover">
+                    <div class="gallery-overlay text-white">
+                        <p class="font-medium">Annual Community Meeting</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Load More Button -->
+            <div class="text-center mt-16">
+                <button onclick="loadMoreImages()" 
+                        class="bg-teal-700 hover:bg-teal-800 text-white px-10 py-4 rounded-2xl font-semibold text-lg transition-all flex items-center gap-3 mx-auto">
+                    <span>Load More Photos</span>
+                    <i class="fa-solid fa-arrow-down"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Container -->
+    <div id="footer-container"></div>
+
+    <!-- Floating WhatsApp -->
+    <a href="https://wa.me/254707118312" target="_blank"
+       class="whatsapp-float fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Scroll to Top -->
+    <button id="scrollTopBtn" 
+            onclick="scrollToTop()" 
+            class="fixed bottom-24 right-6 bg-teal-700 hover:bg-teal-800 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hidden z-40">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="./ui.js"></script>
+    <script src="footer.js"></script>
+
+    <!-- Simple Lightbox Simulation -->
+    <script>
+        // Click on image to enlarge (you can later integrate a real lightbox)
+        document.querySelectorAll('.gallery-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const imgSrc = card.querySelector('img').src;
+                const altText = card.querySelector('img').alt;
+                
+                alert(`📸 Image Preview:\n\n${altText}\n\n(You can integrate a proper lightbox library here)`);
+                // Future enhancement: Open modal with full image
+            });
+        });
+
+        function loadMoreImages() {
+            alert("More photos would load here in a real implementation.\n\nGreat work on the gallery!");
+        }
+    </script>
+
+</body>
+</html>

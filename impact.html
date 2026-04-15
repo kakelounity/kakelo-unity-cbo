@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Impact - Kakelo Unity CBO</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Navbar -->
+    <script src="navbar.js" defer></script>
+    
+    <style>
+        .stat-card {
+            transition: all 0.4s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+        }
+        
+        .counter {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <!-- Shared Navbar -->
+    <div id="navbar-container"></div>
+
+    <!-- HERO SECTION -->
+    <section class="bg-teal-800 text-white py-24">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+                Our Impact
+            </h1>
+            <p class="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed">
+                Transforming lives through youth empowerment, education support, 
+                economic inclusion, and community service in Rachuonyo East.
+            </p>
+        </div>
+    </section>
+
+    <!-- IMPACT STATISTICS -->
+    <section class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+
+                <!-- Stat 1 -->
+                <div class="stat-card bg-slate-50 rounded-3xl shadow-lg p-10">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-users text-5xl"></i>
+                    </div>
+                    <h2 class="text-5xl font-bold text-teal-800 counter" data-target="500">0</h2>
+                    <p class="mt-4 text-slate-600 font-medium text-lg">Youth Empowered</p>
+                </div>
+
+                <!-- Stat 2 -->
+                <div class="stat-card bg-slate-50 rounded-3xl shadow-lg p-10">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-graduation-cap text-5xl"></i>
+                    </div>
+                    <h2 class="text-5xl font-bold text-teal-800 counter" data-target="200">0</h2>
+                    <p class="mt-4 text-slate-600 font-medium text-lg">Students Supported</p>
+                </div>
+
+                <!-- Stat 3 -->
+                <div class="stat-card bg-slate-50 rounded-3xl shadow-lg p-10">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-hand-holding-dollar text-5xl"></i>
+                    </div>
+                    <h2 class="text-5xl font-bold text-teal-800 counter" data-target="150">0</h2>
+                    <p class="mt-4 text-slate-600 font-medium text-lg">Families Supported</p>
+                </div>
+
+                <!-- Stat 4 -->
+                <div class="stat-card bg-slate-50 rounded-3xl shadow-lg p-10">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center">
+                        <i class="fa-solid fa-briefcase text-5xl"></i>
+                    </div>
+                    <h2 class="text-5xl font-bold text-teal-800 counter" data-target="80">0</h2>
+                    <p class="mt-4 text-slate-600 font-medium text-lg">Entrepreneurs Trained</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- STORIES OF CHANGE -->
+    <section class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-teal-800">Stories of Change</h2>
+                <p class="text-slate-600 mt-4 text-lg max-w-2xl mx-auto">
+                    Real voices from the community — see how your support is making a difference.
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-10">
+
+                <!-- Story 1 -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300">
+                    <div class="w-14 h-14 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-seedling text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-teal-800 mb-4">Youth Growth & Leadership</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        Over 500 young people have gained confidence, leadership skills, and practical knowledge 
+                        through our mentorship and training programs.
+                    </p>
+                </div>
+
+                <!-- Story 2 -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300">
+                    <div class="w-14 h-14 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-book-open text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-teal-800 mb-4">Education Support</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        200+ students have received school fees support, learning materials, and mentorship, 
+                        helping them stay in school and dream bigger.
+                    </p>
+                </div>
+
+                <!-- Story 3 -->
+                <div class="bg-white rounded-3xl shadow-xl p-8 hover:shadow-2xl transition-all duration-300">
+                    <div class="w-14 h-14 bg-teal-100 text-teal-700 rounded-2xl flex items-center justify-center mb-6">
+                        <i class="fa-solid fa-people-group text-4xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-teal-800 mb-4">Stronger Communities</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        Through consistent outreach, we have supported 150+ families and strengthened bonds 
+                        between community members and local leaders.
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+<!-- CALL TO ACTION -->
+<section class="bg-white text-orange-700 py-24">
+    <div class="max-w-4xl mx-auto text-center px-6">
+        <h2 class="text-4xl font-bold mb-6 text-orange-700">
+            Join Us in Creating Lasting Change
+        </h2>
+
+        <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto">
+            Every contribution brings us closer to a more empowered and united community.
+        </p>
+
+        <a href="donate.html" 
+           class="inline-block bg-orange-600 text-white hover:bg-orange-700 px-12 py-5 rounded-2xl font-semibold text-lg transition-all shadow-lg hover:shadow-xl">
+            Support Our Mission Today
+        </a>
+    </div>
+</section>
+
+<!-- Footer Container -->
+<div id="footer-container"></div>
+
+<!-- Floating WhatsApp -->
+<a href="https://wa.me/254707118312" target="_blank"
+   class="whatsapp-float fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-2xl text-3xl transition-all z-50">
+    <i class="fa-brands fa-whatsapp"></i>
+</a>
+
+<!-- Scroll to Top -->
+<button id="scrollTopBtn" 
+        onclick="scrollToTop()" 
+        class="fixed bottom-24 right-6 bg-orange-600 hover:bg-orange-700 text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all hidden z-40">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+    <!-- Scripts -->
+    <script src="./ui.js"></script>
+    <script src="footer.js"></script>
+
+    <!-- Animated Counter Script -->
+    <script>
+        function animateCounters() {
+            const counters = document.querySelectorAll('.counter');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                let count = 0;
+                const increment = Math.ceil(target / 50); // Speed of animation
+                
+                const timer = setInterval(() => {
+                    count += increment;
+                    if (count >= target) {
+                        count = target;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = count + (target > 100 ? "+" : "");
+                }, 30);
+            });
+        }
+
+        // Trigger animation when section comes into view
+        window.addEventListener('scroll', () => {
+            const statsSection = document.querySelector('.bg-white');
+            if (statsSection.getBoundingClientRect().top < window.innerHeight * 0.8) {
+                animateCounters();
+                window.removeEventListener('scroll', arguments.callee);
+            }
+        });
+    </script>
+
+</body>
+</html>

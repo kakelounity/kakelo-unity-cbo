@@ -1,0 +1,237 @@
+/* ========================================
+   KAKELO UNITY CBO - FINAL STYLE.CSS
+   Brown & Orange from Logo Well Incorporated
+======================================== */
+
+:root {
+    --primary-teal: #0f766e;      /* Main Teal from logo */
+    --accent-orange: #f97316;     /* Bright Orange from logo */
+    --accent-brown: #854d0e;      /* Brown from logo */
+    --accent-green: #10b981;      /* Green from logo */
+    --dark-text: #1e2937;
+    --light-bg: #ffffff;
+    --soft-bg: #f8fafc;
+}
+
+/* ========================
+   BASE STYLES
+======================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: var(--light-bg);
+    color: var(--dark-text);
+    line-height: 1.6;
+    scroll-behavior: smooth;
+}
+
+/* ========================
+   NAVBAR
+======================== */
+
+nav {
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+/* Top search bar */
+.top-search-bar {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+/* ========================
+   HERO SECTIONS (White Background)
+======================== */
+
+.hero-bg {
+    background: var(--light-bg);
+    color: var(--dark-text);
+}
+
+/* ========================
+   ACCENT COLORS FROM LOGO
+======================== */
+
+/* Orange Accent - Used for buttons, highlights */
+.btn-accent, .accent-orange {
+    background-color: var(--accent-orange);
+}
+
+.btn-accent:hover {
+    background-color: #ea580c;
+}
+
+/* Brown Accent - Used for secondary elements, icons */
+.accent-brown {
+    color: var(--accent-brown);
+}
+
+/* Teal Primary */
+.bg-teal-700, .btn-primary {
+    background-color: var(--primary-teal);
+}
+
+.btn-primary:hover {
+    background-color: #0c5f59;
+}
+
+/* ========================
+   CARDS & SECTIONS
+======================== */
+
+.program-card, .leader-card, .contact-card, .partner-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    transition: all 0.4s ease;
+}
+
+.program-card:hover, .leader-card:hover, .contact-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.15);
+}
+
+/* Program Icons - Mixed colors from logo */
+.program-icon {
+    font-size: 3.5rem;
+    color: var(--primary-teal);
+}
+
+.program-card:hover .program-icon {
+    color: var(--accent-orange);
+    transform: scale(1.15);
+}
+
+/* ========================
+   BUTTONS
+======================== */
+
+button, a.btn {
+    transition: all 0.3s ease;
+}
+
+button:hover, a.btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ========================
+   FORMS
+======================== */
+
+.form-input {
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    border-color: var(--primary-teal);
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.15);
+}
+
+/* ========================
+   FOOTER (Remains Teal as requested)
+======================== */
+
+footer {
+    background: #0f766e;           /* Original teal - unchanged */
+    color: white;
+}
+
+footer a {
+    color: #e0f2fe;
+}
+
+footer a:hover {
+    color: #67e8f9;
+}
+
+/* ========================
+   FLOATING ELEMENTS
+======================== */
+
+.whatsapp-float {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #25D366;
+    color: white;
+    font-size: 28px;
+    width: 58px;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.35);
+    z-index: 999;
+    transition: all 0.3s ease;
+}
+
+.whatsapp-float:hover {
+    transform: scale(1.12);
+}
+
+/* Scroll to Top */
+#scrollTopBtn {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    background: var(--primary-teal);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    z-index: 998;
+}
+
+#scrollTopBtn:hover {
+    background: #0c5f59;
+}
+
+/* ========================
+   ANIMATIONS
+======================== */
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(25px);
+    animation: fadeIn 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================
+   RESPONSIVE
+======================== */
+
+@media (max-width: 768px) {
+    .desktop-menu {
+        display: none;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-menu-btn {
+        display: none;
+    }
+}

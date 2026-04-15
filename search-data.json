@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Home",
+    "url": "index.html",
+    "keywords": ["home", "about us", "mission", "vision"]
+  },
+  {
+    "title": "Programs",
+    "url": "programs.html",
+    "keywords": ["youth development", "education", "economic empowerment"]
+  },
+  {
+    "title": "Impact",
+    "url": "impact.html",
+    "keywords": ["community impact", "achievements", "success stories"]
+  },
+  {
+    "title": "Leadership",
+    "url": "leadership.html",
+    "keywords": ["team", "leaders", "executives"]
+  },
+  {
+    "title": "Contact",
+    "url": "contact.html",
+    "keywords": ["phone", "email", "location"]
+  },
+  {
+    "title": "Member Portal",
+    "url": "member-portal.html",
+    "keywords": ["login", "members", "dashboard"]
+  }
+]
