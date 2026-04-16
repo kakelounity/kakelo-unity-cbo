@@ -5,302 +5,363 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kakelo Unity CBO - Member Portal</title>
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Tailwind CSS v4 Standalone -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- FIX: Font Awesome (needed for icons) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://drive.google.com/uc?id=YOUR_LOGO_FILE_ID&export=download">
 
-    <link rel="icon" href="Kakelo Unity Logo (2).png">
+    <style>
+        .card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+    </style>
 </head>
-
-<body class="bg-slate-100">
+<body class="bg-slate-50 font-sans">
 
 <!-- LOGIN SCREEN -->
-<div id="login-screen" class="flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center">
-        <img src="Kakelo Unity Logo (2).png" class="mx-auto h-20 mb-6" alt="Kakelo Unity Logo">
-        <h2 class="text-3xl font-bold mb-6 text-teal-800">Member Portal</h2>
+<div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-teal-50 to-slate-100">
+    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-md">
+        <div class="text-center mb-10">
+            <img src="Kakelo Unity Logo (2).png" 
+                 class="mx-auto h-24 mb-4 rounded-xl" 
+                 alt="Kakelo Unity Logo"
+                 onerror="this.src='https://via.placeholder.com/150x150/0f766e/ffffff?text=KU'">
+            <h1 class="text-3xl font-bold text-teal-800">Member Portal</h1>
+            <p class="text-slate-500 mt-2">Kakelo Unity CBO</p>
+        </div>
 
-        <form id="loginForm" class="space-y-4">
-            <input id="memberId" class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
-                   placeholder="Member ID (e.g. KU001)" required>
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Member ID</label>
+                <input id="memberId" type="text" 
+                       class="w-full p-4 border border-slate-300 rounded-2xl focus:border-teal-600 focus:ring-0 text-lg" 
+                       placeholder="KU001" required autocomplete="username">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                <input id="password" type="password" 
+                       class="w-full p-4 border border-slate-300 rounded-2xl focus:border-teal-600 focus:ring-0 text-lg" 
+                       placeholder="••••••••" required autocomplete="current-password">
+            </div>
 
-            <input id="password" type="password" class="w-full p-4 border border-slate-300 rounded-xl focus:outline-none focus:border-teal-600" 
-                   placeholder="Password" required>
-
-            <button type="submit" 
-                    class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-xl font-semibold transition">
-                Login
+            <button type="submit" id="loginBtn"
+                    class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold text-lg flex items-center justify-center gap-3 transition-all">
+                <span id="loginText">Sign In</span>
+                <i id="loginSpinner" class="fa-solid fa-spinner animate-spin hidden"></i>
             </button>
         </form>
+
+        <div class="mt-6 text-center">
+            <a href="#" onclick="forgotPassword()" class="text-teal-600 hover:text-teal-700 text-sm">Forgot Password?</a>
+        </div>
+
+        <div id="loginMessage" class="mt-6 text-center text-sm min-h-[1.25rem]"></div>
     </div>
 </div>
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="hidden max-w-6xl mx-auto p-6">
-
-    <header class="flex justify-between items-center mb-8">
-        <h2 id="welcome" class="text-3xl font-bold text-teal-800"></h2>
-
-        <button onclick="logout()" 
-                class="px-5 py-2 text-red-600 hover:text-red-700 font-semibold flex items-center gap-2">
-            <i class="fa-solid fa-right-from-bracket"></i> Logout
-        </button>
-    </header>
-
-    <!-- Quick Actions -->
-    <div class="flex flex-wrap gap-3 mb-8">
-        <button onclick="downloadPDF()" 
-                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl flex items-center gap-2">
-            <i class="fa-solid fa-file-pdf"></i> Download PDF
-        </button>
-
-        <button onclick="emailStatement()" 
-                class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl flex items-center gap-2">
-            <i class="fa-solid fa-envelope"></i> Email Statement
-        </button>
-    </div>
-
-    <!-- Profile -->
-    <div class="bg-white p-8 rounded-3xl shadow mb-8 flex flex-col lg:flex-row gap-8 items-center">
-        <img id="photo" class="w-40 h-40 rounded-2xl border-4 border-teal-100 object-cover" alt="Member Photo">
-
-        <div class="flex-1">
-            <h3 id="name" class="text-2xl font-bold text-slate-800"></h3>
-            <p id="role" class="text-teal-600 font-medium text-lg"></p>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mt-6 text-sm">
-                <p><span class="font-medium">📞 Phone:</span> <span id="phone"></span></p>
-                <p><span class="font-medium">📧 Email:</span> <span id="email"></span></p>
-                <p><span class="font-medium">📅 Joined:</span> <span id="join"></span></p>
-                <p><span class="font-medium">🆔 ID:</span> <span id="natid"></span></p>
-                <p><span class="font-medium">📊 Status:</span> <span id="status"></span></p>
+<div id="dashboard" class="hidden">
+    <!-- Top Navigation -->
+    <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="Kakelo Unity Logo (2).png" class="h-9" alt="Logo" 
+                     onerror="this.src='https://via.placeholder.com/36x36/0f766e/ffffff?text=KU'">
+                <h1 class="font-bold text-xl text-teal-800">Kakelo Unity</h1>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <span id="welcome-nav" class="hidden md:block font-medium text-slate-700"></span>
+                <button onclick="logout()" 
+                        class="px-5 py-2 text-red-600 hover:bg-red-50 rounded-2xl flex items-center gap-2 font-medium transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="hidden sm:inline">Logout</span>
+                </button>
             </div>
         </div>
-    </div>
+    </nav>
 
-    <!-- Summary Cards -->
-    <div class="grid md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-white p-6 rounded-3xl shadow">
-            <h4 class="text-slate-500 text-sm">Total Savings</h4>
-            <p id="savings" class="text-3xl font-bold text-teal-700 mt-2"></p>
+    <div class="max-w-6xl mx-auto p-6 pt-8">
+        <h2 id="welcome" class="text-4xl font-bold text-teal-800 mb-10"></h2>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-4 mb-12">
+            <button onclick="downloadStatement()" 
+                    class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-3xl font-semibold flex items-center justify-center gap-3 shadow-sm transition">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Download Statement</span>
+            </button>
+            <button onclick="emailStatement()" 
+                    class="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-3xl font-semibold flex items-center justify-center gap-3 shadow-sm transition">
+                <i class="fa-solid fa-envelope"></i>
+                <span>Email Statement</span>
+            </button>
         </div>
 
-        <div class="bg-white p-6 rounded-3xl shadow">
-            <h4 class="text-slate-500 text-sm">Total Fines Paid</h4>
-            <p id="fines" class="text-3xl font-bold text-amber-600 mt-2"></p>
-        </div>
-
-        <div class="bg-white p-6 rounded-3xl shadow">
-            <h4 class="text-slate-500 text-sm">Registration Fees</h4>
-            <p id="regfees" class="text-3xl font-bold text-blue-600 mt-2"></p>
-        </div>
-    </div>
-
-    <!-- Savings History -->
-    <div class="bg-white p-8 rounded-3xl shadow mb-8">
-        <h3 class="font-bold text-xl mb-5">Savings History</h3>
-        <div id="savingsHistory" class="space-y-4"></div>
-    </div>
-
-    <!-- Loan History -->
-    <div class="bg-white p-8 rounded-3xl shadow mb-8">
-        <h3 class="font-bold text-xl mb-5">Loan History</h3>
-        <div id="loanHistory" class="space-y-4"></div>
-    </div>
-
-    <!-- ADMIN SECTION -->
-    <div id="adminSection" class="hidden bg-white p-8 rounded-3xl shadow">
-
-        <h3 class="text-2xl font-bold text-amber-700 mb-6">Admin Dashboard</h3>
-
-        <div class="grid md:grid-cols-2 gap-6 mb-10">
-            <div class="bg-teal-50 p-6 rounded-2xl">
-                <h4 class="text-teal-700">Total Group Savings</h4>
-                <p id="adminSavings" class="text-4xl font-bold text-teal-800 mt-2"></p>
-            </div>
-
-            <div class="bg-amber-50 p-6 rounded-2xl">
-                <h4 class="text-amber-700">Total Expenses</h4>
-                <p id="adminExpenses" class="text-4xl font-bold text-amber-800 mt-2"></p>
+        <!-- Profile Card -->
+        <div class="bg-white p-8 rounded-3xl shadow-xl mb-12 flex flex-col lg:flex-row gap-10 items-center card">
+            <img id="photo" class="w-40 h-40 rounded-3xl border-4 border-teal-100 object-cover shadow-inner" 
+                 alt="Member Photo">
+            
+            <div class="flex-1">
+                <h3 id="name" class="text-3xl font-bold text-slate-800"></h3>
+                <p id="role" class="text-teal-600 text-xl mt-1"></p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5 mt-10 text-slate-700">
+                    <p><span class="font-medium text-slate-500">Phone:</span> <span id="phone"></span></p>
+                    <p><span class="font-medium text-slate-500">Email:</span> <span id="email"></span></p>
+                    <p><span class="font-medium text-slate-500">Joined:</span> <span id="join"></span></p>
+                    <p><span class="font-medium text-slate-500">National ID:</span> <span id="natid"></span></p>
+                    <p><span class="font-medium text-slate-500">Status:</span> 
+                       <span id="status" class="font-semibold"></span>
+                    </p>
+                </div>
             </div>
         </div>
 
-        <h4 class="font-semibold mb-4">Monthly Savings Trend</h4>
-        <canvas id="monthlyChart" class="mb-10"></canvas>
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white p-8 rounded-3xl shadow card">
+                <h4 class="text-slate-500 text-sm font-medium">Total Savings</h4>
+                <p id="savings" class="text-4xl font-bold text-teal-700 mt-4"></p>
+            </div>
+            <div class="bg-white p-8 rounded-3xl shadow card">
+                <h4 class="text-slate-500 text-sm font-medium">Total Fines Paid</h4>
+                <p id="fines" class="text-4xl font-bold text-amber-600 mt-4"></p>
+            </div>
+            <div class="bg-white p-8 rounded-3xl shadow card">
+                <h4 class="text-slate-500 text-sm font-medium">Registration Fees</h4>
+                <p id="regfees" class="text-4xl font-bold text-blue-600 mt-4"></p>
+            </div>
+        </div>
 
-        <h4 class="font-semibold mb-4">Top 5 Savers</h4>
-        <canvas id="rankingChart"></canvas>
+        <!-- Savings History -->
+        <div class="bg-white p-8 rounded-3xl shadow mb-10 card">
+            <h3 class="font-bold text-2xl mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-piggy-bank text-teal-600"></i>
+                Savings History
+            </h3>
+            <div id="savingsHistory" class="space-y-4"></div>
+        </div>
+
+        <!-- Loan History -->
+        <div class="bg-white p-8 rounded-3xl shadow card">
+            <h3 class="font-bold text-2xl mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-hand-holding-dollar text-amber-600"></i>
+                Loan History
+            </h3>
+            <div id="loanHistory" class="space-y-4"></div>
+        </div>
     </div>
 </div>
 
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
-/* LOGIN */
+let currentData = null;
+
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const memberId = document.getElementById("memberId").value.trim().toUpperCase();
     const password = document.getElementById("password").value;
 
+    if (!memberId || !password) {
+        showMessage("loginMessage", "Please enter Member ID and Password", "text-red-600");
+        return;
+    }
+
+    const btn = document.getElementById("loginBtn");
+    const loginText = document.getElementById("loginText");
+    const spinner = document.getElementById("loginSpinner");
+
+    btn.disabled = true;
+    loginText.classList.add("hidden");
+    spinner.classList.remove("hidden");
+    showMessage("loginMessage", "Logging in...", "text-teal-600");
+
     try {
+        const payload = JSON.stringify({ action: "login", memberId, password });
+
+        console.log("Sending login request for:", memberId);
+
         const res = await fetch(WEB_APP_URL, {
             method: "POST",
-            body: new URLSearchParams({ action: "login", memberId, password })
+            headers: { 
+                "Content-Type": "application/json"
+            },
+            body: payload
         });
 
-        const data = await res.json();
+        const text = await res.text();
+        console.log("Raw server response:", text);
 
-        if (!data.success) {
-            alert(data.message || "Login failed");
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (parseErr) {
+            console.error("Failed to parse JSON response:", parseErr);
+            showMessage("loginMessage", "Server returned invalid response. Check Web App deployment.", "text-red-600");
             return;
         }
 
-        localStorage.setItem("data", JSON.stringify(data));
-        showDashboard(data);
+        console.log("Parsed response:", data);
 
+        if (data.success) {
+            currentData = data;
+            localStorage.setItem("memberData", JSON.stringify(data));
+            showMessage("loginMessage", "Login successful!", "text-green-600");
+            showDashboard(data);
+        } else {
+            showMessage("loginMessage", data.message || "Invalid Member ID or Password", "text-red-600");
+        }
     } catch (err) {
-        alert("Connection error. Please try again.");
+        console.error("Login fetch error:", err);
+        showMessage("loginMessage", "Connection failed. Please check your internet and Web App URL.", "text-red-600");
+    } finally {
+        btn.disabled = false;
+        loginText.classList.remove("hidden");
+        spinner.classList.add("hidden");
     }
 });
+
+function showMessage(elementId, text, className = "") {
+    const el = document.getElementById(elementId);
+    el.textContent = text;
+    el.className = `mt-6 text-center text-sm ${className} ${text ? '' : 'hidden'}`;
+}
 
 function showDashboard(data) {
     document.getElementById("login-screen").classList.add("hidden");
     document.getElementById("dashboard").classList.remove("hidden");
 
-    const m = data.member;
+    const m = data.member || {};
 
-    document.getElementById("welcome").textContent = `Welcome, ${m.fullName}`;
-    document.getElementById("name").textContent = m.fullName;
-    document.getElementById("role").textContent = m.role;
-    document.getElementById("phone").textContent = m.phone;
-    document.getElementById("email").textContent = m.email;
-    document.getElementById("join").textContent = m.joinDate;
-    document.getElementById("natid").textContent = m.nationalID;
-    document.getElementById("status").textContent = m.status;
+    document.getElementById("welcome").textContent = `Welcome back, ${m.fullName || 'Member'}!`;
+    document.getElementById("welcome-nav").textContent = m.fullName || '';
 
-    document.getElementById("photo").src = m.photoUrl || "https://via.placeholder.com/150";
+    document.getElementById("name").textContent = m.fullName || '';
+    document.getElementById("role").textContent = m.role || 'Member';
+    document.getElementById("phone").textContent = m.phone || '—';
+    document.getElementById("email").textContent = m.email || '—';
+    document.getElementById("join").textContent = m.joinDate || '—';
+    document.getElementById("natid").textContent = m.nationalID || '—';
+    document.getElementById("status").textContent = m.status || 'Active';
 
-    document.getElementById("savings").textContent = `KSh ${Number(m.totalSavings).toLocaleString()}`;
-    document.getElementById("fines").textContent = `KSh ${Number(m.totalFinesPaid).toLocaleString()}`;
-    document.getElementById("regfees").textContent = `KSh ${Number(m.regFees).toLocaleString()}`;
+    const photoEl = document.getElementById("photo");
+    photoEl.src = m.photoUrl || "https://picsum.photos/id/64/160/160";
+    photoEl.onerror = () => photoEl.src = "https://picsum.photos/id/64/160/160";
+
+    document.getElementById("savings").textContent = `KSh ${Number(m.totalSavings || 0).toLocaleString()}`;
+    document.getElementById("fines").textContent = `KSh ${Number(m.totalFinesPaid || 0).toLocaleString()}`;
+    document.getElementById("regfees").textContent = `KSh ${Number(m.regFees || 0).toLocaleString()}`;
 
     renderSavings(data.savingsHistory || []);
     renderLoans(data.loans || []);
-
-    if (m.isAdmin) {
-        document.getElementById("adminSection").classList.remove("hidden");
-        loadAdmin();
-    }
 }
 
-/* RENDER SAVINGS */
 function renderSavings(list) {
-    document.getElementById("savingsHistory").innerHTML = list.map(s => `
-        <div class="border-l-4 border-teal-600 pl-4 py-3 bg-slate-50 rounded-r-xl">
-            <div class="flex justify-between">
-                <span class="font-medium">${s.transactionId}</span>
-                <span class="font-semibold text-teal-700">KSh ${Number(s.amount).toLocaleString()}</span>
+    const container = document.getElementById("savingsHistory");
+    if (list.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 italic py-8 text-center">No savings transactions yet.</p>`;
+        return;
+    }
+    container.innerHTML = list.map(s => `
+        <div class="flex justify-between items-center bg-slate-50 p-6 rounded-2xl border-l-4 border-teal-600">
+            <div>
+                <div class="font-medium">${s.transactionId || 'Transaction'}</div>
+                <div class="text-xs text-slate-500 mt-1">${s.date || ''} • ${s.type || 'Deposit'}</div>
             </div>
-            <div class="text-xs text-slate-600">${s.date} • ${s.type}</div>
+            <div class="text-right">
+                <div class="font-semibold text-teal-700 text-xl">+KSh ${Number(s.amount || 0).toLocaleString()}</div>
+            </div>
         </div>
     `).join('');
 }
 
-/* RENDER LOANS */
-function renderLoans(loans) {
-    document.getElementById("loanHistory").innerHTML = loans.map(l => `
-        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200">
-            <div class="flex justify-between">
-                <span class="font-bold">${l.loanId}</span>
-                <span class="px-3 py-1 text-xs rounded-full ${l.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">
-                    ${l.status}
+function renderLoans(list) {
+    const container = document.getElementById("loanHistory");
+    if (list.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 italic py-8 text-center">No loans yet.</p>`;
+        return;
+    }
+    container.innerHTML = list.map(l => `
+        <div class="bg-slate-50 p-6 rounded-2xl flex justify-between items-center">
+            <div>
+                <div class="font-medium">${l.loanId || 'Loan'}</div>
+                <div class="text-xs text-slate-500">${l.date || ''}</div>
+            </div>
+            <div>
+                <span class="px-4 py-1.5 rounded-full text-sm font-medium ${l.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">
+                    ${l.status || 'Unknown'}
                 </span>
             </div>
         </div>
     `).join('');
 }
 
-/* ADMIN */
-async function loadAdmin() {
-    const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
-
-    const res = await fetch(`${WEB_APP_URL}?action=getAdminData&memberId=${memberId}`);
-    const data = await res.json();
-
-    document.getElementById("adminSavings").textContent =
-        `KSh ${data.adminData.totalSavings.toLocaleString()}`;
-
-    document.getElementById("adminExpenses").textContent =
-        `KSh ${data.adminData.totalExpenses.toLocaleString()}`;
-
-    new Chart(document.getElementById("monthlyChart"), {
-        type: 'line',
-        data: {
-            labels: Object.keys(data.adminData.monthly),
-            datasets: [{
-                label: "Monthly Savings",
-                data: Object.values(data.adminData.monthly),
-                borderColor: "#0f766e",
-                tension: 0.4
-            }]
-        }
-    });
-
-    const sorted = Object.entries(data.adminData.memberTotals)
-        .sort((a,b) => b[1] - a[1])
-        .slice(0,5);
-
-    new Chart(document.getElementById("rankingChart"), {
-        type: 'bar',
-        data: {
-            labels: sorted.map(i => i[0]),
-            datasets: [{
-                label: "Top Savers",
-                data: sorted.map(i => i[1]),
-                backgroundColor: "#14b8a6"
-            }]
-        }
-    });
+async function downloadStatement() {
+    if (!currentData?.member?.memberId) return alert("Please login first");
+    
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=downloadStatement&memberId=${currentData.member.memberId}`);
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${currentData.member.fullName || 'Member'}_Statement.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        alert("Could not download statement.");
+    }
 }
 
-/* PDF */
-function downloadPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const data = JSON.parse(localStorage.getItem("data"));
-
-    let y = 20;
-    doc.text("Kakelo Unity CBO Statement", 20, y);
-    y += 15;
-
-    doc.text(data.member.fullName, 20, y);
-    y += 20;
-
-    data.savingsHistory.forEach(s => {
-        doc.text(`${s.date} | ${s.transactionId} | KSh ${s.amount}`, 20, y);
-        y += 10;
-    });
-
-    doc.save(`${data.member.fullName}_statement.pdf`);
-}
-
-/* EMAIL */
 async function emailStatement() {
-    const memberId = JSON.parse(localStorage.getItem("data")).member.memberId;
-    await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${memberId}`);
-    alert("Statement sent to email.");
+    if (!currentData?.member?.memberId) return alert("Please login first");
+    
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${currentData.member.memberId}`);
+        const data = await res.json();
+        alert(data.success ? "Statement sent to your email!" : (data.message || "Failed to send email"));
+    } catch (err) {
+        alert("Failed to send email.");
+    }
 }
 
-/* LOGOUT */
 function logout() {
-    localStorage.clear();
-    location.reload();
+    if (confirm("Are you sure you want to logout?")) {
+        localStorage.clear();
+        location.reload();
+    }
 }
-</script>
 
+function forgotPassword() {
+    alert("Password reset feature coming soon.");
+}
+
+// Auto login from localStorage
+window.onload = () => {
+    const saved = localStorage.getItem("memberData");
+    if (saved) {
+        try {
+            const data = JSON.parse(saved);
+            currentData = data;
+            showDashboard(data);
+        } catch (e) {
+            localStorage.clear();
+        }
+    }
+};
+</script>
 </body>
 </html>
