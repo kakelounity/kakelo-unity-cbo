@@ -1,367 +1,746 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kakelo Unity CBO - Member Portal</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kakelo Unity CBO - Member Portal</title>
+ <link rel="icon" href="Kakelo Unity Logo (2).png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-    <!-- Tailwind CSS v4 Standalone -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="https://drive.google.com/uc?id=YOUR_LOGO_FILE_ID&export=download">
-
-    <style>
-        .card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
-    </style>
+<style>
+  .card { transition: all 0.3s ease; }
+  .card:hover { transform: translateY(-8px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+  .tab-active { border-bottom: 3px solid #0f766e; color: #0f766e; font-weight: 600; }
+  .modal { animation: modalPop 0.3s ease; }
+  @keyframes modalPop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .chart-container { position: relative; height: 420px; }
+  .profile-card { min-height: 280px; }
+  .profile-text { font-size: 1.05rem; line-height: 1.45; }
+</style>
 </head>
-<body class="bg-slate-50 font-sans">
+<body class="bg-slate-100 font-sans">
 
-<!-- LOGIN SCREEN -->
-<div id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-teal-50 to-slate-100">
-    <div class="bg-white p-8 md:p-10 rounded-3xl shadow-2xl w-full max-w-md">
-        <div class="text-center mb-10">
-            <img src="Kakelo Unity Logo (2).png" 
-                 class="mx-auto h-24 mb-4 rounded-xl" 
-                 alt="Kakelo Unity Logo"
-                 onerror="this.src='https://via.placeholder.com/150x150/0f766e/ffffff?text=KU'">
-            <h1 class="text-3xl font-bold text-teal-800">Member Portal</h1>
-            <p class="text-slate-500 mt-2">Kakelo Unity CBO</p>
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-teal-700 to-teal-900">
+    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+      <div class="text-center mb-8">
+        <div class="mx-auto mb-6">
+          <img src="https://drive.google.com/thumbnail?id=1zn4KqLto2mUNxjcnA8VYY48K06S5UK8T&sz=w300" 
+               alt="Kakelo Unity SACCO Logo" 
+               class="mx-auto h-24 w-auto object-contain">
+        </div>
+        <h1 class="text-3xl font-bold text-teal-800">Kakelo Unity CBO</h1>
+        <p class="text-slate-500 mt-1">Member Portal</p>
+      </div>
+
+      <form id="loginForm" class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">National ID</label>
+          <input id="nationalId" type="text" class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600 text-lg" placeholder="Enter National ID" required />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+          <input id="password" type="password" class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600 text-lg" placeholder="••••••••" required />
         </div>
 
-        <form id="loginForm" class="space-y-6">
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Member ID</label>
-                <input id="memberId" type="text" 
-                       class="w-full p-4 border border-slate-300 rounded-2xl focus:border-teal-600 focus:ring-0 text-lg" 
-                       placeholder="KU001" required autocomplete="username">
-            </div>
-            
-            <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                <input id="password" type="password" 
-                       class="w-full p-4 border border-slate-300 rounded-2xl focus:border-teal-600 focus:ring-0 text-lg" 
-                       placeholder="••••••••" required autocomplete="current-password">
-            </div>
+        <button type="submit" id="loginBtn" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-4 rounded-2xl text-lg transition">
+          Login
+        </button>
+      </form>
 
-            <button type="submit" id="loginBtn"
-                    class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold text-lg flex items-center justify-center gap-3 transition-all">
-                <span id="loginText">Sign In</span>
-                <i id="loginSpinner" class="fa-solid fa-spinner animate-spin hidden"></i>
-            </button>
-        </form>
-
-        <div class="mt-6 text-center">
-            <a href="#" onclick="forgotPassword()" class="text-teal-600 hover:text-teal-700 text-sm">Forgot Password?</a>
-        </div>
-
-        <div id="loginMessage" class="mt-6 text-center text-sm min-h-[1.25rem]"></div>
+      <p id="loginMsg" class="text-center text-sm mt-6 min-h-[24px]"></p>
     </div>
-</div>
+  </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="hidden">
-    <!-- Top Navigation -->
-    <nav class="bg-white border-b sticky top-0 z-50 shadow-sm">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="Kakelo Unity Logo (2).png" class="h-9" alt="Logo" 
-                     onerror="this.src='https://via.placeholder.com/36x36/0f766e/ffffff?text=KU'">
-                <h1 class="font-bold text-xl text-teal-800">Kakelo Unity</h1>
-            </div>
-            
-            <div class="flex items-center gap-4">
-                <span id="welcome-nav" class="hidden md:block font-medium text-slate-700"></span>
-                <button onclick="logout()" 
-                        class="px-5 py-2 text-red-600 hover:bg-red-50 rounded-2xl flex items-center gap-2 font-medium transition">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span class="hidden sm:inline">Logout</span>
-                </button>
-            </div>
-        </div>
-    </nav>
+  <!-- DASHBOARD SCREEN -->
+  <div id="dashboardScreen" class="hidden min-h-screen bg-slate-100">
 
-    <div class="max-w-6xl mx-auto p-6 pt-8">
-        <h2 id="welcome" class="text-4xl font-bold text-teal-800 mb-10"></h2>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap gap-4 mb-12">
-            <button onclick="downloadStatement()" 
-                    class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-3xl font-semibold flex items-center justify-center gap-3 shadow-sm transition">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span>Download Statement</span>
-            </button>
-            <button onclick="emailStatement()" 
-                    class="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-3xl font-semibold flex items-center justify-center gap-3 shadow-sm transition">
-                <i class="fa-solid fa-envelope"></i>
-                <span>Email Statement</span>
-            </button>
-        </div>
-
-        <!-- Profile Card -->
-        <div class="bg-white p-8 rounded-3xl shadow-xl mb-12 flex flex-col lg:flex-row gap-10 items-center card">
-            <img id="photo" class="w-40 h-40 rounded-3xl border-4 border-teal-100 object-cover shadow-inner" 
-                 alt="Member Photo">
-            
-            <div class="flex-1">
-                <h3 id="name" class="text-3xl font-bold text-slate-800"></h3>
-                <p id="role" class="text-teal-600 text-xl mt-1"></p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-5 mt-10 text-slate-700">
-                    <p><span class="font-medium text-slate-500">Phone:</span> <span id="phone"></span></p>
-                    <p><span class="font-medium text-slate-500">Email:</span> <span id="email"></span></p>
-                    <p><span class="font-medium text-slate-500">Joined:</span> <span id="join"></span></p>
-                    <p><span class="font-medium text-slate-500">National ID:</span> <span id="natid"></span></p>
-                    <p><span class="font-medium text-slate-500">Status:</span> 
-                       <span id="status" class="font-semibold"></span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div class="bg-white p-8 rounded-3xl shadow card">
-                <h4 class="text-slate-500 text-sm font-medium">Total Savings</h4>
-                <p id="savings" class="text-4xl font-bold text-teal-700 mt-4"></p>
-            </div>
-            <div class="bg-white p-8 rounded-3xl shadow card">
-                <h4 class="text-slate-500 text-sm font-medium">Total Fines Paid</h4>
-                <p id="fines" class="text-4xl font-bold text-amber-600 mt-4"></p>
-            </div>
-            <div class="bg-white p-8 rounded-3xl shadow card">
-                <h4 class="text-slate-500 text-sm font-medium">Registration Fees</h4>
-                <p id="regfees" class="text-4xl font-bold text-blue-600 mt-4"></p>
-            </div>
-        </div>
-
-        <!-- Savings History -->
-        <div class="bg-white p-8 rounded-3xl shadow mb-10 card">
-            <h3 class="font-bold text-2xl mb-6 flex items-center gap-3">
-                <i class="fa-solid fa-piggy-bank text-teal-600"></i>
-                Savings History
-            </h3>
-            <div id="savingsHistory" class="space-y-4"></div>
-        </div>
-
-        <!-- Loan History -->
-        <div class="bg-white p-8 rounded-3xl shadow card">
-            <h3 class="font-bold text-2xl mb-6 flex items-center gap-3">
-                <i class="fa-solid fa-hand-holding-dollar text-amber-600"></i>
-                Loan History
-            </h3>
-            <div id="loanHistory" class="space-y-4"></div>
-        </div>
+ <!-- NAVBAR -->
+<nav class="bg-white shadow-sm border-b sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    
+    <!-- Left side: Logo + Title -->
+    <div class="flex items-center gap-4">
+      <img src="https://drive.google.com/thumbnail?id=1zn4KqLto2mUNxjcnA8VYY48K06S5UK8T&sz=w300" 
+           alt="Kakelo Unity SACCO Logo" 
+           class="h-10 w-auto object-contain">
+      <h1 class="font-bold text-3xl text-teal-800">Kakelo Unity SACCO</h1>
     </div>
-</div>
 
-<script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
+    <!-- Right side: Name, Admin Button, Logout -->
+    <div class="flex items-center gap-6">
+      <span id="navName" class="font-semibold text-slate-700 text-lg"></span>
+      
+      <button onclick="showAdminDashboard()" id="adminBtn" 
+              class="hidden flex items-center gap-2 bg-amber-100 hover:bg-amber-200 text-amber-700 px-5 py-2 rounded-2xl font-semibold text-sm">
+        <i class="fa-solid fa-chart-bar"></i>
+        <span>Admin Dashboard</span>
+      </button>
 
-let currentData = null;
+      <button onclick="logout()" class="flex items-center gap-2 text-red-600 hover:text-red-700 font-medium">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </div>
+</nav>
+    <div class="max-w-7xl mx-auto p-6">
 
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
+      <!-- Welcome -->
+      <div class="flex flex-col items-center mb-12">
+        <h2 id="welcome" class="text-4xl font-bold text-slate-800 text-center"></h2>
+        <p class="text-slate-500 mt-1 text-center">Member Portal • Kakelo Unity CBO</p>
+      </div>
 
-    const memberId = document.getElementById("memberId").value.trim().toUpperCase();
-    const password = document.getElementById("password").value;
+      <!-- Profile Card -->
+      <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow card profile-card p-10 mb-12">
+        <div class="flex flex-col md:flex-row gap-12 items-center">
+          <div id="profilePhotoContainer" class="w-52 h-52 bg-slate-200 rounded-3xl overflow-hidden border-4 border-teal-100 flex-shrink-0 shadow-inner">
+            <img id="profilePhoto" class="w-full h-full object-cover hidden" alt="Passport Photo">
+            <div id="photoPlaceholder" class="w-full h-full flex items-center justify-center text-8xl text-slate-300">
+              <i class="fa-solid fa-user"></i>
+            </div>
+          </div>
 
-    if (!memberId || !password) {
-        showMessage("loginMessage", "Please enter Member ID and Password", "text-red-600");
-        return;
-    }
+          <div class="flex-1 text-center md:text-left">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-9 text-lg">
+              <div>
+                <p class="text-slate-500 text-sm mb-1 font-medium">Full Name</p>
+                <p id="fullName" class="font-semibold profile-text"></p>
+              </div>
+              <div>
+                <p class="text-slate-500 text-sm mb-1 font-medium">Phone Number</p>
+                <p id="phone" class="font-semibold profile-text"></p>
+              </div>
+              <div>
+                <p class="text-slate-500 text-sm mb-1 font-medium">Email Address</p>
+                <p id="email" class="font-semibold profile-text"></p>
+              </div>
+              <div>
+                <p class="text-slate-500 text-sm mb-1 font-medium">Status</p>
+                <p id="status" class="font-semibold text-emerald-600 profile-text"></p>
+              </div>
+              <div class="md:col-span-2">
+                <p class="text-slate-500 text-sm mb-1 font-medium">Role</p>
+                <p id="roleDisplay" class="font-semibold profile-text"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    const btn = document.getElementById("loginBtn");
-    const loginText = document.getElementById("loginText");
-    const spinner = document.getElementById("loginSpinner");
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div class="bg-white rounded-3xl shadow card p-6">
+          <p class="text-slate-500 text-sm">My Total Savings</p>
+          <h3 id="totalSavings" class="text-4xl font-bold text-teal-700 mt-3">KSh 0</h3>
+        </div>
+        <div class="bg-white rounded-3xl shadow card p-6">
+          <p class="text-slate-500 text-sm">My Total Loans</p>
+          <h3 id="totalLoans" class="text-4xl font-bold text-amber-600 mt-3">KSh 0</h3>
+        </div>
+        <div class="bg-white rounded-3xl shadow card p-6">
+          <p class="text-slate-500 text-sm">Total Fines</p>
+          <h3 id="totalFines" class="text-4xl font-bold text-red-600 mt-3">KSh 0</h3>
+        </div>
+        <div class="bg-white rounded-3xl shadow card p-6">
+          <p class="text-slate-500 text-sm">Registration Fees</p>
+          <h3 id="regFees" class="text-4xl font-bold text-emerald-600 mt-3">KSh 0</h3>
+        </div>
+      </div>
 
-    btn.disabled = true;
-    loginText.classList.add("hidden");
-    spinner.classList.remove("hidden");
-    showMessage("loginMessage", "Logging in...", "text-teal-600");
+      <!-- Action Buttons -->
+      <div id="actionButtons" class="flex flex-wrap gap-4 mb-10"></div>
 
-    try {
-        const payload = JSON.stringify({ action: "login", memberId, password });
+      <!-- History Tabs -->
+      <div class="bg-white rounded-3xl shadow mb-10">
+        <div class="px-6 pt-6 flex border-b">
+          <button onclick="switchHistoryTab(0)" id="tabSavingsBtn" class="tab-active px-8 py-4 text-lg">Savings History</button>
+          <button onclick="switchHistoryTab(1)" id="tabLoansBtn" class="px-8 py-4 text-lg text-slate-500">Loan History</button>
+        </div>
 
-        console.log("Sending login request for:", memberId);
+        <div id="savingsHistory" class="p-6">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b text-left text-slate-500 text-sm">
+                  <th class="pb-3 font-medium">Date</th>
+                  <th class="pb-3 font-medium">Transaction ID</th>
+                  <th class="pb-3 font-medium">Type</th>
+                  <th class="pb-3 font-medium">Amount</th>
+                  <th class="pb-3 font-medium">Notes</th>
+                </tr>
+              </thead>
+              <tbody id="savingsTableBody" class="text-sm divide-y"></tbody>
+            </table>
+          </div>
+        </div>
 
-        const res = await fetch(WEB_APP_URL, {
-            method: "POST",
-            headers: { 
-                "Content-Type": "application/json"
-            },
-            body: payload
+        <div id="loansHistory" class="p-6 hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b text-left text-slate-500 text-sm">
+                  <th class="pb-3 font-medium">Date</th>
+                  <th class="pb-3 font-medium">Loan ID</th>
+                  <th class="pb-3 font-medium">Amount</th>
+                  <th class="pb-3 font-medium">Outstanding</th>
+                  <th class="pb-3 font-medium">Status</th>
+                  <th class="pb-3 font-medium text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="loansTableBody" class="text-sm divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statements Section -->
+      <div class="bg-white rounded-3xl shadow p-8">
+        <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
+          <i class="fa-solid fa-file-export"></i> Account Statements
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <button onclick="downloadStatement()" class="flex items-center justify-center gap-3 bg-teal-700 hover:bg-teal-800 text-white py-6 rounded-3xl font-semibold text-lg">
+            <i class="fa-solid fa-download text-2xl"></i> Download PDF Statement
+          </button>
+          <button onclick="emailStatement()" class="flex items-center justify-center gap-3 bg-white border-2 border-slate-300 hover:border-slate-400 py-6 rounded-3xl font-semibold text-lg text-slate-700">
+            <i class="fa-solid fa-envelope text-2xl"></i> Email Statement
+          </button>
+          <button onclick="whatsappStatement()" class="flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white py-6 rounded-3xl font-semibold text-lg">
+            <i class="fa-brands fa-whatsapp text-2xl"></i> Send via WhatsApp
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ADD SAVINGS MODAL -->
+  <div id="addSavingsModal" onclick="if(event.target===this)hideModal('addSavingsModal')" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 modal p-8">
+      <h3 class="text-2xl font-bold mb-6">Add Savings</h3>
+      <div class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium mb-1">Member ID (Target)</label>
+          <input id="savingsMemberId" class="w-full p-4 border rounded-2xl" placeholder="KU001">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Amount (KSh)</label>
+          <input id="savingsAmount" type="number" class="w-full p-4 border rounded-2xl" placeholder="5000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Notes</label>
+          <textarea id="savingsNotes" class="w-full p-4 border rounded-2xl h-24"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-4 mt-8">
+        <button onclick="hideModal('addSavingsModal')" class="flex-1 py-4 border rounded-2xl font-semibold">Cancel</button>
+        <button onclick="submitAddSavings()" class="flex-1 bg-teal-700 text-white py-4 rounded-2xl font-semibold">Add Savings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REQUEST LOAN MODAL -->
+  <div id="requestLoanModal" onclick="if(event.target===this)hideModal('requestLoanModal')" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 modal p-8">
+      <h3 class="text-2xl font-bold mb-6">Request Loan</h3>
+      <div class="space-y-5">
+        <div>
+          <label class="block text-sm font-medium mb-1">Amount (KSh)</label>
+          <input id="loanAmount" type="number" class="w-full p-4 border rounded-2xl" placeholder="10000">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Term (Months)</label>
+          <input id="loanTerm" type="number" value="12" class="w-full p-4 border rounded-2xl">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Notes</label>
+          <textarea id="loanNotes" class="w-full p-4 border rounded-2xl h-24"></textarea>
+        </div>
+      </div>
+      <div class="flex gap-4 mt-8">
+        <button onclick="hideModal('requestLoanModal')" class="flex-1 py-4 border rounded-2xl font-semibold">Cancel</button>
+        <button onclick="submitRequestLoan()" class="flex-1 bg-teal-700 text-white py-4 rounded-2xl font-semibold">Submit Request</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN DASHBOARD MODAL -->
+  <div id="adminModal" onclick="if(event.target===this)hideAdminDashboard()" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-6xl mx-4 max-h-[92vh] overflow-hidden modal">
+      <div class="px-8 py-6 border-b flex justify-between items-center bg-slate-50">
+        <h2 class="text-2xl font-bold text-slate-800">CBO Group Overview</h2>
+        <button onclick="hideAdminDashboard()" class="text-4xl text-slate-400 hover:text-slate-600 leading-none">×</button>
+      </div>
+      <div class="p-8 overflow-y-auto" style="max-height: calc(92vh - 85px);">
+        <div class="grid grid-cols-3 gap-6 mb-12">
+          <div class="bg-teal-50 rounded-3xl p-8">
+            <p class="text-teal-600 text-sm font-medium">Active Members</p>
+            <h3 id="adminActiveMembers" class="text-5xl font-bold text-teal-700 mt-3">0</h3>
+          </div>
+          <div class="bg-amber-50 rounded-3xl p-8">
+            <p class="text-amber-600 text-sm font-medium">Total Loans Outstanding</p>
+            <h3 id="adminTotalLoans" class="text-5xl font-bold text-amber-700 mt-3">KSh 0</h3>
+          </div>
+          <div class="bg-slate-50 rounded-3xl p-8">
+            <p class="text-slate-600 text-sm font-medium">Group Total Savings</p>
+            <h3 id="adminTotalSavings" class="text-5xl font-bold text-slate-700 mt-3">KSh 0</h3>
+          </div>
+        </div>
+
+        <div class="mb-12">
+          <div class="flex justify-between items-center mb-5">
+            <h3 class="font-semibold text-xl">Members Savings Ranking</h3>
+            <button onclick="downloadRankingCSV()" class="bg-teal-700 hover:bg-teal-800 text-white px-6 py-3 rounded-2xl text-sm font-semibold flex items-center gap-2">
+              <i class="fa-solid fa-download"></i> Download CSV
+            </button>
+          </div>
+          <div class="overflow-x-auto rounded-2xl border">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-100">
+                <tr>
+                  <th class="px-6 py-4 text-left font-medium">Rank</th>
+                  <th class="px-6 py-4 text-left font-medium">Member ID</th>
+                  <th class="px-6 py-4 text-left font-medium">Name</th>
+                  <th class="px-6 py-4 text-right font-medium">Savings (KSh)</th>
+                </tr>
+              </thead>
+              <tbody id="rankingBody" class="divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mb-12">
+          <h3 class="font-semibold text-xl mb-5">Group Monthly Savings Trend (Last 6 Months)</h3>
+          <div class="bg-white border border-slate-200 rounded-3xl p-8">
+            <div class="chart-container">
+              <canvas id="monthlyTrendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t pt-10">
+          <h3 class="font-semibold text-xl mb-5">Email Monthly Statement</h3>
+          <div class="flex gap-4 max-w-md">
+            <input id="emailMemberId" placeholder="Member ID (e.g. KU001)" class="flex-1 p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600">
+            <button onclick="sendMemberStatement()" class="bg-teal-700 hover:bg-teal-800 text-white px-10 rounded-2xl font-semibold">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
+
+    let currentToken = null;
+    let currentMember = null;
+    let allMembersData = null;
+    let monthlyTrendChart = null;
+
+    // Login with National ID
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const nationalId = document.getElementById("nationalId").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const loginBtn = document.getElementById("loginBtn");
+      const msgEl = document.getElementById("loginMsg");
+
+      msgEl.textContent = "Logging in...";
+      msgEl.className = "text-center text-sm mt-6 text-blue-600";
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging in...`;
+
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action: "login", nationalId, password })
         });
-
-        const text = await res.text();
-        console.log("Raw server response:", text);
-
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch (parseErr) {
-            console.error("Failed to parse JSON response:", parseErr);
-            showMessage("loginMessage", "Server returned invalid response. Check Web App deployment.", "text-red-600");
-            return;
-        }
-
-        console.log("Parsed response:", data);
-
-        if (data.success) {
-            currentData = data;
-            localStorage.setItem("memberData", JSON.stringify(data));
-            showMessage("loginMessage", "Login successful!", "text-green-600");
-            showDashboard(data);
-        } else {
-            showMessage("loginMessage", data.message || "Invalid Member ID or Password", "text-red-600");
-        }
-    } catch (err) {
-        console.error("Login fetch error:", err);
-        showMessage("loginMessage", "Connection failed. Please check your internet and Web App URL.", "text-red-600");
-    } finally {
-        btn.disabled = false;
-        loginText.classList.remove("hidden");
-        spinner.classList.add("hidden");
-    }
-});
-
-function showMessage(elementId, text, className = "") {
-    const el = document.getElementById(elementId);
-    el.textContent = text;
-    el.className = `mt-6 text-center text-sm ${className} ${text ? '' : 'hidden'}`;
-}
-
-function showDashboard(data) {
-    document.getElementById("login-screen").classList.add("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
-
-    const m = data.member || {};
-
-    document.getElementById("welcome").textContent = `Welcome back, ${m.fullName || 'Member'}!`;
-    document.getElementById("welcome-nav").textContent = m.fullName || '';
-
-    document.getElementById("name").textContent = m.fullName || '';
-    document.getElementById("role").textContent = m.role || 'Member';
-    document.getElementById("phone").textContent = m.phone || '—';
-    document.getElementById("email").textContent = m.email || '—';
-    document.getElementById("join").textContent = m.joinDate || '—';
-    document.getElementById("natid").textContent = m.nationalID || '—';
-    document.getElementById("status").textContent = m.status || 'Active';
-
-    const photoEl = document.getElementById("photo");
-    photoEl.src = m.photoUrl || "https://picsum.photos/id/64/160/160";
-    photoEl.onerror = () => photoEl.src = "https://picsum.photos/id/64/160/160";
-
-    document.getElementById("savings").textContent = `KSh ${Number(m.totalSavings || 0).toLocaleString()}`;
-    document.getElementById("fines").textContent = `KSh ${Number(m.totalFinesPaid || 0).toLocaleString()}`;
-    document.getElementById("regfees").textContent = `KSh ${Number(m.regFees || 0).toLocaleString()}`;
-
-    renderSavings(data.savingsHistory || []);
-    renderLoans(data.loans || []);
-}
-
-function renderSavings(list) {
-    const container = document.getElementById("savingsHistory");
-    if (list.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 italic py-8 text-center">No savings transactions yet.</p>`;
-        return;
-    }
-    container.innerHTML = list.map(s => `
-        <div class="flex justify-between items-center bg-slate-50 p-6 rounded-2xl border-l-4 border-teal-600">
-            <div>
-                <div class="font-medium">${s.transactionId || 'Transaction'}</div>
-                <div class="text-xs text-slate-500 mt-1">${s.date || ''} • ${s.type || 'Deposit'}</div>
-            </div>
-            <div class="text-right">
-                <div class="font-semibold text-teal-700 text-xl">+KSh ${Number(s.amount || 0).toLocaleString()}</div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function renderLoans(list) {
-    const container = document.getElementById("loanHistory");
-    if (list.length === 0) {
-        container.innerHTML = `<p class="text-slate-400 italic py-8 text-center">No loans yet.</p>`;
-        return;
-    }
-    container.innerHTML = list.map(l => `
-        <div class="bg-slate-50 p-6 rounded-2xl flex justify-between items-center">
-            <div>
-                <div class="font-medium">${l.loanId || 'Loan'}</div>
-                <div class="text-xs text-slate-500">${l.date || ''}</div>
-            </div>
-            <div>
-                <span class="px-4 py-1.5 rounded-full text-sm font-medium ${l.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-slate-200 text-slate-600'}">
-                    ${l.status || 'Unknown'}
-                </span>
-            </div>
-        </div>
-    `).join('');
-}
-
-async function downloadStatement() {
-    if (!currentData?.member?.memberId) return alert("Please login first");
-    
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=downloadStatement&memberId=${currentData.member.memberId}`);
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${currentData.member.fullName || 'Member'}_Statement.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-    } catch (err) {
-        alert("Could not download statement.");
-    }
-}
-
-async function emailStatement() {
-    if (!currentData?.member?.memberId) return alert("Please login first");
-    
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=emailStatement&memberId=${currentData.member.memberId}`);
         const data = await res.json();
-        alert(data.success ? "Statement sent to your email!" : (data.message || "Failed to send email"));
-    } catch (err) {
-        alert("Failed to send email.");
-    }
-}
 
-function logout() {
-    if (confirm("Are you sure you want to logout?")) {
-        localStorage.clear();
-        location.reload();
-    }
-}
-
-function forgotPassword() {
-    alert("Password reset feature coming soon.");
-}
-
-// Auto login from localStorage
-window.onload = () => {
-    const saved = localStorage.getItem("memberData");
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            currentData = data;
-            showDashboard(data);
-        } catch (e) {
-            localStorage.clear();
+        if (!data.success) {
+          msgEl.textContent = data.message || "Login failed";
+          msgEl.className = "text-center text-sm mt-6 text-red-600";
+          return;
         }
+
+        currentToken = data.token;
+        currentMember = data.member;
+
+        localStorage.setItem("token", currentToken);
+        localStorage.setItem("member", JSON.stringify(currentMember));
+
+        showDashboard();
+      } catch (err) {
+        msgEl.textContent = "Network error";
+        msgEl.className = "text-center text-sm mt-6 text-red-600";
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+      }
+    });
+
+    async function showDashboard() {
+      document.getElementById("loginScreen").classList.add("hidden");
+      document.getElementById("dashboardScreen").classList.remove("hidden");
+
+      const m = currentMember;
+      document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
+      document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
+
+      document.getElementById("fullName").textContent = m.fullName;
+      document.getElementById("phone").textContent = m.phone || "—";
+      document.getElementById("email").textContent = m.email || "—";
+      document.getElementById("status").innerHTML = `${m.status || "Active"} <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
+      document.getElementById("roleDisplay").textContent = m.role || "Member";
+
+      let photoUrl = m.photo || "";
+      if (photoUrl) {
+        const idMatch = photoUrl.match(/[-\w]{25,}/);
+        if (idMatch) photoUrl = `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w400`;
+        document.getElementById("profilePhoto").src = photoUrl;
+        document.getElementById("profilePhoto").classList.remove("hidden");
+        document.getElementById("photoPlaceholder").classList.add("hidden");
+      }
+
+      renderActionButtons();
+      await loadDashboardData();
     }
-};
-</script>
+
+    function renderActionButtons() {
+      const role = (currentMember.role || "").toUpperCase().trim();
+      let html = `<button onclick="showRequestLoanModal()" class="flex items-center gap-3 bg-white border border-slate-300 hover:border-teal-600 px-6 py-4 rounded-2xl font-semibold"><i class="fa-solid fa-hand-holding-dollar text-xl"></i> Request Loan</button>`;
+      if (role === "TREASURER") {
+        html += `<button onclick="showAddSavingsModal()" class="flex items-center gap-3 bg-teal-700 text-white px-6 py-4 rounded-2xl font-semibold"><i class="fa-solid fa-plus text-xl"></i> Add Savings</button>`;
+      }
+      document.getElementById("actionButtons").innerHTML = html;
+    }
+
+    async function loadDashboardData() {
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action: "dashboard", token: currentToken })
+        });
+        const data = await res.json();
+        if (!data.success) return alert(data.message);
+
+        document.getElementById("totalSavings").innerHTML = `KSh ${Number(data.summary.personalTotalSavings || 0).toLocaleString()}`;
+        document.getElementById("regFees").innerHTML = `KSh ${Number(currentMember.regFees || 0).toLocaleString()}`;
+
+        const totalLoans = data.loans.reduce((sum, l) => sum + Number(l.amount || 0), 0);
+        document.getElementById("totalLoans").innerHTML = `KSh ${totalLoans.toLocaleString()}`;
+
+        renderSavingsHistory(data.savings);
+        renderLoansHistory(data.loans);
+
+        const role = (currentMember.role || "").toUpperCase().trim();
+        if (["TREASURER", "CHAIRPERSON", "VICE CHAIRPERSON", "SECRETARY"].includes(role)) {
+          document.getElementById("adminBtn").classList.remove("hidden");
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderSavingsHistory(savings) {
+      const tbody = document.getElementById("savingsTableBody");
+      tbody.innerHTML = (savings && savings.length) ? savings.map(s => `
+        <tr class="hover:bg-slate-50">
+          <td class="py-4 px-4">${new Date(s.date).toLocaleDateString('en-GB')}</td>
+          <td class="py-4 px-4 font-mono text-xs">${s.id}</td>
+          <td class="py-4 px-4">${s.type}</td>
+          <td class="py-4 px-4 text-teal-700 font-semibold">+ KSh ${Number(s.amount).toLocaleString()}</td>
+          <td class="py-4 px-4 text-slate-600">${s.notes || '—'}</td>
+        </tr>`).join('') : `<tr><td colspan="5" class="text-center py-8 text-slate-400">No savings records yet</td></tr>`;
+    }
+
+    function renderLoansHistory(loans) {
+      const tbody = document.getElementById("loansTableBody");
+      const isTreasurer = (currentMember.role || "").toUpperCase().trim() === "TREASURER";
+
+      tbody.innerHTML = (loans && loans.length) ? loans.map(l => {
+        const isPending = (l.status === "Pending" || l.approval === "Pending");
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-4 px-4">${new Date(l.date || Date.now()).toLocaleDateString('en-GB')}</td>
+            <td class="py-4 px-4 font-mono text-xs">${l.id}</td>
+            <td class="py-4 px-4 font-semibold">KSh ${Number(l.amount).toLocaleString()}</td>
+            <td class="py-4 px-4 text-amber-600">KSh ${Number(l.outstanding || l.amount).toLocaleString()}</td>
+            <td class="py-4 px-4">
+              <span class="px-3 py-1 text-xs rounded-full ${l.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                ${l.status || l.approval || 'Pending'}
+              </span>
+            </td>
+            <td class="py-4 px-4 text-center">
+              ${isTreasurer && isPending ? `
+                <button onclick="approveLoan('${l.id}')" class="text-emerald-600 hover:text-emerald-700 mx-2 text-xl"><i class="fa-solid fa-check"></i></button>
+                <button onclick="rejectLoan('${l.id}')" class="text-red-600 hover:text-red-700 mx-2 text-xl"><i class="fa-solid fa-xmark"></i></button>` : '—'}
+            </td>
+          </tr>`;
+      }).join('') : `<tr><td colspan="6" class="text-center py-8 text-slate-400">No loan records yet</td></tr>`;
+    }
+
+    async function approveLoan(loanId) {
+      if (!confirm("Approve this loan?")) return;
+      await updateLoan(loanId, "approveLoan");
+    }
+
+    async function rejectLoan(loanId) {
+      if (!confirm("Reject this loan?")) return;
+      await updateLoan(loanId, "rejectLoan");
+    }
+
+    async function updateLoan(loanId, action) {
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action, token: currentToken, loanId })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(data.message || "Success");
+          loadDashboardData();
+        } else alert(data.message);
+      } catch (err) {
+        alert("Error");
+      }
+    }
+
+    function switchHistoryTab(n) {
+      document.getElementById("savingsHistory").classList.toggle("hidden", n !== 0);
+      document.getElementById("loansHistory").classList.toggle("hidden", n !== 1);
+      document.getElementById("tabSavingsBtn").classList.toggle("tab-active", n === 0);
+      document.getElementById("tabLoansBtn").classList.toggle("tab-active", n === 1);
+    }
+
+    function showAddSavingsModal() {
+      document.getElementById("addSavingsModal").classList.remove("hidden");
+      document.getElementById("savingsMemberId").value = currentMember.memberId;
+    }
+
+    function showRequestLoanModal() {
+      document.getElementById("requestLoanModal").classList.remove("hidden");
+    }
+
+    function hideModal(id) {
+      document.getElementById(id).classList.add("hidden");
+    }
+
+    async function submitAddSavings() {
+      const memberTarget = document.getElementById("savingsMemberId").value.trim().toUpperCase();
+      const amount = document.getElementById("savingsAmount").value;
+      const notes = document.getElementById("savingsNotes").value;
+      if (!amount) return alert("Please enter amount");
+
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action: "addSavings", token: currentToken, memberTarget, amount, notes })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Savings added successfully!");
+          hideModal("addSavingsModal");
+          loadDashboardData();
+        } else alert(data.message);
+      } catch (err) { alert("Error"); }
+    }
+
+    async function submitRequestLoan() {
+      const amount = document.getElementById("loanAmount").value;
+      const term = document.getElementById("loanTerm").value || 12;
+      const notes = document.getElementById("loanNotes").value;
+      if (!amount) return alert("Please enter amount");
+
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action: "addLoan", token: currentToken, memberTarget: currentMember.memberId, amount, term, notes })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert("Loan request submitted successfully!");
+          hideModal("requestLoanModal");
+          loadDashboardData();
+        } else alert(data.message);
+      } catch (err) { alert("Error"); }
+    }
+
+    async function downloadStatement() {
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action: "downloadMemberStatement", token: currentToken })
+        });
+        const data = await res.json();
+        if (data.success && data.downloadUrl) {
+          window.open(data.downloadUrl, "_blank");
+        } else {
+          alert(data.message || "Failed to generate PDF");
+        }
+      } catch (err) {
+        alert("Error generating PDF statement");
+      }
+    }
+
+    async function emailStatement() {
+      if (confirm(`Send statement to ${currentMember.email || 'your registered email'}?`)) {
+        try {
+          const res = await fetch(API, {
+            method: "POST",
+            body: JSON.stringify({ action: "emailMemberStatement", token: currentToken, targetMemberId: currentMember.memberId })
+          });
+          const data = await res.json();
+          alert(data.message || "Statement emailed successfully");
+        } catch (err) {
+          alert("Error sending email. Please try again.");
+        }
+      }
+    }
+
+    async function whatsappStatement() {
+      const phone = currentMember.phone || "";
+      if (!phone) return alert("No phone number found.");
+      const message = `Hello ${currentMember.fullName},%0A%0AHere is your latest statement from Kakelo Unity SACCO.%0A%0ADownload here: [Statement PDF Link]%0A%0AThank you!`;
+      const whatsappUrl = `https://wa.me/${phone.replace(/\D/g,'')}?text=${message}`;
+      window.open(whatsappUrl, "_blank");
+    }
+
+    function showAdminDashboard() {
+      document.getElementById("adminModal").classList.remove("hidden");
+      loadAdminData();
+    }
+
+    async function loadAdminData() {
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action: "allMembers", token: currentToken })
+        });
+        const data = await res.json();
+        if (!data.success) return;
+
+        allMembersData = data.members;
+
+        const activeCount = data.members.filter(m => String(m.status).toLowerCase() === "active" || !m.status).length;
+        document.getElementById("adminActiveMembers").textContent = activeCount;
+
+        const totalSavings = data.members.reduce((sum, m) => sum + Number(m.savings || 0), 0);
+        document.getElementById("adminTotalSavings").innerHTML = `KSh ${totalSavings.toLocaleString()}`;
+
+        const sorted = [...data.members].sort((a, b) => b.savings - a.savings);
+        const tbody = document.getElementById("rankingBody");
+        tbody.innerHTML = sorted.map((m, i) => `
+          <tr class="hover:bg-slate-50">
+            <td class="px-6 py-4 font-medium">${i+1}</td>
+            <td class="px-6 py-4 font-mono">${m.id}</td>
+            <td class="px-6 py-4">${m.name}</td>
+            <td class="px-6 py-4 text-right font-semibold">KSh ${Number(m.savings).toLocaleString()}</td>
+          </tr>`).join('');
+
+        await loadMonthlyTrendChart();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function loadMonthlyTrendChart() {
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action: "getMonthlyReport", token: currentToken })
+        });
+        const data = await res.json();
+
+        if (data.success && data.monthlyTrend) {
+          const ctx = document.getElementById('monthlyTrendChart');
+          if (monthlyTrendChart) monthlyTrendChart.destroy();
+
+          const labels = data.monthlyTrend.map(item => item.month);
+          const values = data.monthlyTrend.map(item => item.savings);
+
+          monthlyTrendChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: labels,
+              datasets: [{
+                label: 'Group Savings (KSh)',
+                data: values,
+                backgroundColor: '#14b8a6',
+                borderColor: '#0f766e',
+                borderWidth: 2,
+                borderRadius: 8
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true, ticks: { callback: (val) => 'KSh ' + val.toLocaleString() } }
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function downloadRankingCSV() {
+      if (!allMembersData) return alert("No data available");
+      let csv = "Rank,Member ID,Name,Savings\n";
+      const sorted = [...allMembersData].sort((a,b) => b.savings - a.savings);
+      sorted.forEach((m,i) => {
+        csv += `${i+1},"${m.id}","${m.name.replace(/"/g,'""')}",${m.savings}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `SACCO_Savings_Ranking_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    async function sendMemberStatement() {
+      const target = document.getElementById("emailMemberId").value.trim().toUpperCase();
+      if (!target) return alert("Enter Member ID");
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ action: "emailMemberStatement", token: currentToken, targetMemberId: target })
+        });
+        const data = await res.json();
+        alert(data.message || "Statement sent");
+      } catch (err) {
+        alert("Error sending statement");
+      }
+    }
+
+    function hideAdminDashboard() {
+      document.getElementById("adminModal").classList.add("hidden");
+      if (monthlyTrendChart) monthlyTrendChart.destroy();
+    }
+
+    function logout() {
+      localStorage.clear();
+      location.reload();
+    }
+
+    window.onload = () => {
+      const savedToken = localStorage.getItem("token");
+      const savedMember = localStorage.getItem("member");
+      if (savedToken && savedMember) {
+        currentToken = savedToken;
+        currentMember = JSON.parse(savedMember);
+        showDashboard();
+      }
+    };
+  </script>
 </body>
 </html>
