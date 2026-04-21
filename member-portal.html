@@ -197,26 +197,59 @@
         </div>
       </div>
 
-      <!-- Statements Section -->
-      <div class="bg-white rounded-3xl shadow p-8">
-        <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
-          <i class="fa-solid fa-file-export"></i> Account Statements
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <button onclick="downloadStatement()" class="flex items-center justify-center gap-3 bg-teal-700 hover:bg-teal-800 text-white py-6 rounded-3xl font-semibold text-lg">
-            <i class="fa-solid fa-download text-2xl"></i> Download PDF Statement
-          </button>
-          <button onclick="emailStatement()" class="flex items-center justify-center gap-3 bg-white border-2 border-slate-300 hover:border-slate-400 py-6 rounded-3xl font-semibold text-lg text-slate-700">
-            <i class="fa-solid fa-envelope text-2xl"></i> Email Statement
-          </button>
-          <button onclick="whatsappStatement()" class="flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white py-6 rounded-3xl font-semibold text-lg">
-            <i class="fa-brands fa-whatsapp text-2xl"></i> Send via WhatsApp
-          </button>
-        </div>
-      </div>
+    <!-- Statements Section -->
+<div class="bg-white rounded-3xl shadow p-8">
+  <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
+    <i class="fa-solid fa-file-export"></i> Account Statements
+  </h3>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Normal Member Buttons -->
+    <button onclick="downloadStatement()" 
+            class="flex items-center justify-center gap-3 bg-teal-700 hover:bg-teal-800 text-white py-6 rounded-3xl font-semibold text-lg transition-all">
+      <i class="fa-solid fa-download text-2xl"></i> 
+      Download My Statement
+    </button>
 
-    </div>
+    <button onclick="emailStatement()" 
+            class="flex items-center justify-center gap-3 bg-white border-2 border-slate-300 hover:border-slate-400 py-6 rounded-3xl font-semibold text-lg text-slate-700 transition-all">
+      <i class="fa-solid fa-envelope text-2xl"></i> 
+      Email My Statement
+    </button>
+
+    <button onclick="whatsappStatement()" 
+            class="flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white py-6 rounded-3xl font-semibold text-lg transition-all">
+      <i class="fa-brands fa-whatsapp text-2xl"></i> 
+      Send via WhatsApp
+    </button>
   </div>
+
+  <!-- Treasurer-Only Bulk Action -->
+  <div id="treasurerBulkSection" class="mt-10 pt-8 border-t border-slate-200 hidden">
+    <h4 class="text-lg font-semibold mb-4 text-rose-700 flex items-center gap-2">
+      <i class="fa-solid fa-user-tie"></i> Treasurer Bulk Actions
+    </h4>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <button onclick="emailAllMembers()" 
+              class="flex items-center justify-center gap-3 bg-rose-600 hover:bg-rose-700 text-white py-6 rounded-3xl font-semibold text-lg transition-all shadow-md">
+        <i class="fa-solid fa-envelope-open-text text-2xl"></i> 
+        📧 Email Statements to ALL Members
+      </button>
+
+      <button onclick="alert('Download all statements feature coming soon!')" 
+              class="flex items-center justify-center gap-3 bg-slate-700 hover:bg-slate-800 text-white py-6 rounded-3xl font-semibold text-lg transition-all">
+        <i class="fa-solid fa-file-zipper text-2xl"></i> 
+        Download All Statements
+      </button>
+    </div>
+    
+    <p class="text-xs text-slate-500 mt-4 text-center">
+      This will send a personalized PDF statement to every member who has an email address.<br>
+      <strong>Warning:</strong> This may take a few minutes depending on the number of members.
+    </p>
+  </div>
+</div>
 
   <!-- ADD SAVINGS MODAL -->
   <div id="addSavingsModal" onclick="if(event.target===this)hideModal('addSavingsModal')" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100]">
@@ -772,6 +805,71 @@ async function whatsappStatement() {
         showDashboard();
       }
     };
+     // ================= Existing Functions =================
+function downloadStatement() {
+  sendAction("downloadMemberStatement", {});
+}
+
+function emailStatement() {
+  sendAction("emailMemberStatement", {});
+}
+
+function whatsappStatement() {
+  // You can improve this later
+  alert("WhatsApp statement feature is coming soon!");
+}
+
+// ================= NEW: Email All Members =================
+function emailAllMembers() {
+  if (!confirm("⚠️ You are about to send account statements to ALL members.\n\nThis action cannot be undone and may take several minutes.\n\nDo you want to continue?")) {
+    return;
+  }
+
+  showToast("Sending statements to all members... Please wait.", "info");
+
+  sendAction("emailAllMembers", {})
+    .then(response => {
+      if (response.success) {
+        alert(`✅ Success!\n\n${response.message}`);
+      } else {
+        alert(`❌ Failed: ${response.message}`);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("An error occurred while sending statements.");
+    });
+}
+
+// ================= Helper Function =================
+function sendAction(action, extraData = {}) {
+  return fetch("YOUR_WEB_APP_URL_HERE", {   // ← Replace with your actual Web App URL
+    method: "POST",
+    body: JSON.stringify({
+      action: action,
+      token: currentToken,     // Make sure currentToken is defined globally
+      ...extraData
+    })
+  })
+  .then(res => res.json());
+}
+
+// ================= Show Treasurer Section =================
+function showTreasurerBulkSection() {
+  const role = currentMember?.role ? String(currentMember.role).toUpperCase().trim() : "";
+  const bulkSection = document.getElementById("treasurerBulkSection");
+
+  if (bulkSection && FULL_EDIT_ROLES.includes(role)) {
+    bulkSection.classList.remove("hidden");
+  }
+}
+
+// Call this function after login or when member data is loaded
+// Example:
+window.addEventListener('load', () => {
+  // ... your other initialization code
+  showTreasurerBulkSection();
+});
   </script>
 </body>
 </html>
