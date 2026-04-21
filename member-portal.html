@@ -570,45 +570,76 @@
       } catch (err) { alert("Error"); }
     }
 
-    async function downloadStatement() {
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "downloadMemberStatement", token: currentToken })
-        });
-        const data = await res.json();
-        if (data.success && data.downloadUrl) {
-          window.open(data.downloadUrl, "_blank");
-        } else {
-          alert(data.message || "Failed to generate PDF");
-        }
-      } catch (err) {
-        alert("Error generating PDF statement");
-      }
-    }
+ // ====================== STATEMENTS SECTION - FULLY WORKING ======================
 
-    async function emailStatement() {
-      if (confirm(`Send statement to ${currentMember.email || 'your registered email'}?`)) {
-        try {
-          const res = await fetch(API, {
-            method: "POST",
-            body: JSON.stringify({ action: "emailMemberStatement", token: currentToken, targetMemberId: currentMember.memberId })
-          });
-          const data = await res.json();
-          alert(data.message || "Statement emailed successfully");
-        } catch (err) {
-          alert("Error sending email. Please try again.");
-        }
-      }
-    }
+// Helper function to get statement PDF URL (used by Download and WhatsApp)
+async function getStatementUrl() {
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      body: JSON.stringify({ 
+        action: "downloadMemberStatement", 
+        token: currentToken 
+      })
+    });
+    const data = await res.json();
 
-    async function whatsappStatement() {
-      const phone = currentMember.phone || "";
-      if (!phone) return alert("No phone number found.");
-      const message = `Hello ${currentMember.fullName},%0A%0AHere is your latest statement from Kakelo Unity SACCO.%0A%0ADownload here: [Statement PDF Link]%0A%0AThank you!`;
-      const whatsappUrl = `https://wa.me/${phone.replace(/\D/g,'')}?text=${message}`;
-      window.open(whatsappUrl, "_blank");
+    if (data.success && data.downloadUrl) {
+      return data.downloadUrl;
+    } else {
+      alert(data.message || "Failed to generate PDF statement");
+      return null;
     }
+  } catch (err) {
+    console.error(err);
+    alert("Error generating PDF statement. Please try again.");
+    return null;
+  }
+}
+
+async function downloadStatement() {
+  const url = await getStatementUrl();
+  if (url) {
+    window.open(url, "_blank");
+  }
+}
+
+async function emailStatement() {
+  if (confirm(`Send statement to ${currentMember.email || 'your registered email'}?`)) {
+    try {
+      const res = await fetch(API, {
+        method: "POST",
+        body: JSON.stringify({ 
+          action: "emailMemberStatement", 
+          token: currentToken, 
+          targetMemberId: currentMember.memberId 
+        })
+      });
+      const data = await res.json();
+      alert(data.message || "Statement emailed successfully!");
+    } catch (err) {
+      alert("Error sending email. Please try again.");
+    }
+  }
+}
+
+async function whatsappStatement() {
+  const phone = currentMember.phone || "";
+  if (!phone) {
+    return alert("No phone number found in your profile.");
+  }
+
+  const url = await getStatementUrl();
+  if (!url) return;   // getStatementUrl already shows error alert
+
+  const message = `Hello ${currentMember.fullName},%0A%0A` +
+                  `Here is your latest statement from Kakelo Unity CBO.%0A%0A` +
+                  `Download PDF: ${encodeURIComponent(url)}%0A%0A` +
+                  `Thank you!`;
+
+  const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`;
+  window.open(whatsappUrl, "_blank");
+}
 
     function showAdminDashboard() {
       document.getElementById("adminModal").classList.remove("hidden");
