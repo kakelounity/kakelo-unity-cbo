@@ -197,14 +197,13 @@
         </div>
       </div>
 
-    <!-- Statements Section -->
+   <!-- Statements Section -->
 <div class="bg-white rounded-3xl shadow p-8">
   <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
     <i class="fa-solid fa-file-export"></i> Account Statements
   </h3>
   
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- Normal Member Buttons -->
     <button onclick="downloadStatement()" 
             class="flex items-center justify-center gap-3 bg-teal-700 hover:bg-teal-800 text-white py-6 rounded-3xl font-semibold text-lg transition-all">
       <i class="fa-solid fa-download text-2xl"></i> 
@@ -224,7 +223,7 @@
     </button>
   </div>
 
-  <!-- Treasurer-Only Bulk Action -->
+  <!-- Treasurer Bulk Action - This will show only for Treasurer -->
   <div id="treasurerBulkSection" class="mt-10 pt-8 border-t border-slate-200 hidden">
     <h4 class="text-lg font-semibold mb-4 text-rose-700 flex items-center gap-2">
       <i class="fa-solid fa-user-tie"></i> Treasurer Bulk Actions
@@ -245,8 +244,7 @@
     </div>
     
     <p class="text-xs text-slate-500 mt-4 text-center">
-      This will send a personalized PDF statement to every member who has an email address.<br>
-      <strong>Warning:</strong> This may take a few minutes depending on the number of members.
+      This will send a personalized PDF statement to every member with an email address.
     </p>
   </div>
 </div>
@@ -366,13 +364,15 @@
     </div>
   </div>
 
-  <script>
+ <script>
     const API = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
     let currentToken = null;
     let currentMember = null;
     let allMembersData = null;
     let monthlyTrendChart = null;
+
+    const FULL_EDIT_ROLES = ["TREASURER"];
 
     // Login with National ID
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
@@ -441,6 +441,9 @@
 
       renderActionButtons();
       await loadDashboardData();
+
+      // Show Treasurer bulk actions if applicable
+      showTreasurerBulkSection();
     }
 
     function renderActionButtons() {
@@ -603,77 +606,116 @@
       } catch (err) { alert("Error"); }
     }
 
- // ====================== STATEMENTS SECTION - FULLY WORKING ======================
+    // ====================== STATEMENTS SECTION ======================
 
-// Helper function to get statement PDF URL (used by Download and WhatsApp)
-async function getStatementUrl() {
-  try {
-    const res = await fetch(API, {
-      method: "POST",
-      body: JSON.stringify({ 
-        action: "downloadMemberStatement", 
-        token: currentToken 
-      })
-    });
-    const data = await res.json();
+    async function getStatementUrl() {
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ 
+            action: "downloadMemberStatement", 
+            token: currentToken 
+          })
+        });
+        const data = await res.json();
 
-    if (data.success && data.downloadUrl) {
-      return data.downloadUrl;
-    } else {
-      alert(data.message || "Failed to generate PDF statement");
-      return null;
+        if (data.success && data.downloadUrl) {
+          return data.downloadUrl;
+        } else {
+          alert(data.message || "Failed to generate PDF statement");
+          return null;
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error generating PDF statement. Please try again.");
+        return null;
+      }
     }
-  } catch (err) {
-    console.error(err);
-    alert("Error generating PDF statement. Please try again.");
-    return null;
-  }
-}
 
-async function downloadStatement() {
-  const url = await getStatementUrl();
-  if (url) {
-    window.open(url, "_blank");
-  }
-}
-
-async function emailStatement() {
-  if (confirm(`Send statement to ${currentMember.email || 'your registered email'}?`)) {
-    try {
-      const res = await fetch(API, {
-        method: "POST",
-        body: JSON.stringify({ 
-          action: "emailMemberStatement", 
-          token: currentToken, 
-          targetMemberId: currentMember.memberId 
-        })
-      });
-      const data = await res.json();
-      alert(data.message || "Statement emailed successfully!");
-    } catch (err) {
-      alert("Error sending email. Please try again.");
+    async function downloadStatement() {
+      const url = await getStatementUrl();
+      if (url) window.open(url, "_blank");
     }
-  }
-}
 
-async function whatsappStatement() {
-  const phone = currentMember.phone || "";
-  if (!phone) {
-    return alert("No phone number found in your profile.");
-  }
+    async function emailStatement() {
+      if (confirm(`Send statement to ${currentMember.email || 'your registered email'}?`)) {
+        try {
+          const res = await fetch(API, {
+            method: "POST",
+            body: JSON.stringify({ 
+              action: "emailMemberStatement", 
+              token: currentToken, 
+              targetMemberId: currentMember.memberId 
+            })
+          });
+          const data = await res.json();
+          alert(data.message || "Statement emailed successfully!");
+        } catch (err) {
+          alert("Error sending email. Please try again.");
+        }
+      }
+    }
 
-  const url = await getStatementUrl();
-  if (!url) return;   // getStatementUrl already shows error alert
+    async function whatsappStatement() {
+      const phone = currentMember.phone || "";
+      if (!phone) {
+        return alert("No phone number found in your profile.");
+      }
 
-  const message = `Hello ${currentMember.fullName},%0A%0A` +
-                  `Here is your latest statement from Kakelo Unity CBO.%0A%0A` +
-                  `Download PDF: ${encodeURIComponent(url)}%0A%0A` +
-                  `Thank you!`;
+      const url = await getStatementUrl();
+      if (!url) return;
 
-  const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`;
-  window.open(whatsappUrl, "_blank");
-}
+      const message = `Hello ${currentMember.fullName},%0A%0AHere is your latest statement from Kakelo Unity CBO.%0A%0ADownload PDF: ${encodeURIComponent(url)}%0A%0AThank you!`;
 
+      const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`;
+      window.open(whatsappUrl, "_blank");
+    }
+
+    // ================= NEW: Email All Members (Treasurer Only) =================
+    async function emailAllMembers() {
+      if (!confirm("⚠️ You are about to send statements to ALL members.\n\nThis may take several minutes.\n\nDo you want to continue?")) {
+        return;
+      }
+
+      showToast("Sending statements to all members... Please wait.", "info");
+
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          body: JSON.stringify({ 
+            action: "emailAllMembers", 
+            token: currentToken 
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          alert(`✅ Success!\n\n${data.message}`);
+        } else {
+          alert(`❌ Error: ${data.message}`);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to send statements. Please try again.");
+      }
+    }
+
+    // ================= Show Treasurer Bulk Section =================
+    function showTreasurerBulkSection() {
+      const role = (currentMember?.role || "").toUpperCase().trim();
+      const bulkSection = document.getElementById("treasurerBulkSection");
+
+      if (bulkSection && FULL_EDIT_ROLES.includes(role)) {
+        bulkSection.classList.remove("hidden");
+      }
+    }
+
+    // Toast helper (simple version - you can improve it)
+    function showToast(message, type = "info") {
+      alert(message);   // You can replace this with a nice toast later
+    }
+
+    // Admin functions (unchanged)
     function showAdminDashboard() {
       document.getElementById("adminModal").classList.remove("hidden");
       loadAdminData();
@@ -796,6 +838,7 @@ async function whatsappStatement() {
       location.reload();
     }
 
+    // Auto login from localStorage
     window.onload = () => {
       const savedToken = localStorage.getItem("token");
       const savedMember = localStorage.getItem("member");
@@ -805,71 +848,4 @@ async function whatsappStatement() {
         showDashboard();
       }
     };
-     // ================= Existing Functions =================
-function downloadStatement() {
-  sendAction("downloadMemberStatement", {});
-}
-
-function emailStatement() {
-  sendAction("emailMemberStatement", {});
-}
-
-function whatsappStatement() {
-  // You can improve this later
-  alert("WhatsApp statement feature is coming soon!");
-}
-
-// ================= NEW: Email All Members =================
-function emailAllMembers() {
-  if (!confirm("⚠️ You are about to send account statements to ALL members.\n\nThis action cannot be undone and may take several minutes.\n\nDo you want to continue?")) {
-    return;
-  }
-
-  showToast("Sending statements to all members... Please wait.", "info");
-
-  sendAction("emailAllMembers", {})
-    .then(response => {
-      if (response.success) {
-        alert(`✅ Success!\n\n${response.message}`);
-      } else {
-        alert(`❌ Failed: ${response.message}`);
-      }
-    })
-    .catch(err => {
-      console.error(err);
-      alert("An error occurred while sending statements.");
-    });
-}
-
-// ================= Helper Function =================
-function sendAction(action, extraData = {}) {
-  return fetch("YOUR_WEB_APP_URL_HERE", {   // ← Replace with your actual Web App URL
-    method: "POST",
-    body: JSON.stringify({
-      action: action,
-      token: currentToken,     // Make sure currentToken is defined globally
-      ...extraData
-    })
-  })
-  .then(res => res.json());
-}
-
-// ================= Show Treasurer Section =================
-function showTreasurerBulkSection() {
-  const role = currentMember?.role ? String(currentMember.role).toUpperCase().trim() : "";
-  const bulkSection = document.getElementById("treasurerBulkSection");
-
-  if (bulkSection && FULL_EDIT_ROLES.includes(role)) {
-    bulkSection.classList.remove("hidden");
-  }
-}
-
-// Call this function after login or when member data is loaded
-// Example:
-window.addEventListener('load', () => {
-  // ... your other initialization code
-  showTreasurerBulkSection();
-});
-  </script>
-</body>
-</html>
+</script>
