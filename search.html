@@ -42,7 +42,7 @@
     <section class="py-20 bg-gradient-to-b from-white to-slate-100 min-h-screen">
         <div class="max-w-4xl mx-auto px-6">
 
-            <!-- Search Input Card -->
+            <!-- Search Bar -->
             <div class="bg-white rounded-3xl shadow-xl p-8 mb-12">
                 <div class="flex gap-3">
                     <input 
@@ -52,8 +52,8 @@
                         class="flex-1 border border-slate-300 rounded-2xl px-6 py-5 text-lg focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
                         autocomplete="off">
                     
-                    <button onclick="performSearch()"
-                            class="bg-teal-700 hover:bg-teal-800 text-white px-10 py-5 rounded-2xl font-semibold transition-all flex items-center gap-3 whitespace-nowrap">
+                    <button onclick="performSearch()" 
+                            class="bg-teal-700 hover:bg-teal-800 text-white px-10 py-5 rounded-2xl font-semibold transition-all flex items-center gap-3">
                         <i class="fa-solid fa-magnifying-glass"></i>
                         Search
                     </button>
@@ -88,17 +88,17 @@
     <!-- SEARCH SCRIPT -->
     <script>
         const pages = [
-            { title: "Home", url: "index.html", description: "Welcome to Kakelo Unity CBO. Learn about our mission and community work." },
-            { title: "Our Programs", url: "programs.html", description: "Youth empowerment, education support, economic empowerment, community outreach, agriculture, and health awareness." },
-            { title: "Our Leadership", url: "leadership.html", description: "Meet Isack Ouma, Leah Okeyo, Phanice Asher, Amos Owuor and the rest of our team." },
-            { title: "Our Impact", url: "impact.html", description: "Success stories, youth empowered, students supported, and families helped." },
-            { title: "Gallery", url: "gallery.html", description: "Photos from our events, programs, and community activities." },
-            { title: "Events", url: "events.html", description: "Upcoming and past community events and activities." },
-            { title: "Donate", url: "donate.html", description: "Support our mission through donations." },
-            { title: "Contact Us", url: "contact.html", description: "Get in touch with Kakelo Unity CBO." },
-            { title: "Become a Member", url: "become-a-member.html", description: "Join Kakelo Unity CBO as a member." },
-            { title: "Member Portal", url: "member-portal.html", description: "Login to your member dashboard and savings account." },
-            { title: "Volunteer With Us", url: "volunteer.html", description: "Join our team and volunteer your time and skills." }
+            { title: "Home", url: "index.html", description: "Welcome to Kakelo Unity CBO" },
+            { title: "Our Programs", url: "programs.html", description: "Youth empowerment, education, agriculture, health" },
+            { title: "Our Leadership", url: "leadership.html", description: "Meet our team members" },
+            { title: "Our Impact", url: "impact.html", description: "Success stories and community impact" },
+            { title: "Gallery", url: "gallery.html", description: "Photos from our events" },
+            { title: "Events", url: "events.html", description: "Upcoming and past events" },
+            { title: "Donate", url: "donate.html", description: "Support our work" },
+            { title: "Contact Us", url: "contact.html", description: "Get in touch with us" },
+            { title: "Become a Member", url: "become-a-member.html", description: "Join as a member" },
+            { title: "Member Portal", url: "member-portal.html", description: "Login to member dashboard" },
+            { title: "Volunteer", url: "volunteer.html", description: "Volunteer with us" }
         ];
 
         function performSearch() {
@@ -109,40 +109,31 @@
             initialState.style.display = "none";
 
             if (!query) {
-                resultsContainer.innerHTML = `
-                    <div class="bg-amber-50 border border-amber-200 text-amber-700 p-8 rounded-3xl text-center">
-                        Please type something to search...
-                    </div>
-                `;
+                resultsContainer.innerHTML = `<div class="bg-amber-50 p-8 rounded-3xl text-center text-amber-700">Please type something to search...</div>`;
                 return;
             }
 
-            const filtered = pages.filter(page =>
-                page.title.toLowerCase().includes(query) ||
+            const filtered = pages.filter(page => 
+                page.title.toLowerCase().includes(query) || 
                 page.description.toLowerCase().includes(query)
             );
 
             if (filtered.length === 0) {
                 resultsContainer.innerHTML = `
-                    <div class="bg-red-50 border border-red-200 text-red-600 p-8 rounded-3xl text-center">
+                    <div class="bg-red-50 p-8 rounded-3xl text-center text-red-600">
                         No results found for "<strong>${query}</strong>".<br>
-                        Try different keywords like "programs", "leadership", "donate", or "events".
-                    </div>
-                `;
+                        Try words like "programs", "leadership", or "donate".
+                    </div>`;
                 return;
             }
 
             resultsContainer.innerHTML = filtered.map(page => `
-                <a href="${page.url}" 
-                   class="block bg-white shadow hover:shadow-2xl transition-all rounded-3xl p-8 border border-slate-100 hover:border-teal-300 group">
-                    <h3 class="text-2xl font-bold text-teal-800 mb-3 group-hover:text-teal-700">${page.title}</h3>
-                    <p class="text-slate-600 leading-relaxed">${page.description}</p>
-                    <div class="mt-4 text-teal-700 text-sm font-medium flex items-center gap-2">
-                        Visit Page 
-                        <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
-                    </div>
+                <a href="${page.url}" class="block bg-white p-8 rounded-3xl shadow hover:shadow-xl transition-all border border-transparent hover:border-teal-300">
+                    <h3 class="text-2xl font-bold text-teal-800 mb-2">${page.title}</h3>
+                    <p class="text-slate-600">${page.description}</p>
+                    <div class="mt-4 text-teal-700 text-sm font-medium">→ Visit Page</div>
                 </a>
-            `).join("");
+            `).join('');
         }
 
         // Enter key support
@@ -152,7 +143,7 @@
             }
         });
 
-        // Clear results when input is empty
+        // Show initial state when input is cleared
         document.getElementById("searchInput").addEventListener("input", function() {
             if (this.value.trim() === "") {
                 document.getElementById("searchResults").innerHTML = "";
