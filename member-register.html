@@ -155,18 +155,14 @@
         form.addEventListener("submit", async function(e) {
             e.preventDefault();
 
-            // Show loading state
             submitBtn.innerHTML = `
                 <span class="inline-block animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-3"></span>
                 Submitting...
             `;
             submitBtn.disabled = true;
 
-            // Collect form data
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
-            
-            // Add action required by Apps Script
             data.action = "registerMember";
 
             try {
@@ -174,24 +170,30 @@
                     method: "POST",
                     body: JSON.stringify(data),
                     headers: {
-                        "Content-Type": "application/json"
-                    }
+                        "Content-Type": "text/plain;charset=utf-8"
+                    },
+                    redirect: "follow"
                 });
 
-                const result = await response.json();
+                const text = await response.text();
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    result = { success: false, message: "Invalid response from server" };
+                }
 
                 if (result.success) {
-                    alert("✅ Registration submitted successfully!\n\nThank you for applying to join Kakelo Unity CBO.\n\nOur team will review your application and contact you within 48 hours.");
+                    alert("✅ Registration submitted successfully!\n\nOur team will review your application and contact you within 48 hours.");
                     form.reset();
                 } else {
                     alert("❌ " + (result.message || "Submission failed. Please try again."));
                 }
             } catch (error) {
-                console.error("Error:", error);
-                alert("❌ Connection error. Please check your internet connection and try again.");
+                console.error("Submission error:", error);
+                alert("❌ Failed to submit. Please check your internet connection and try again.\n\nIf the problem continues, contact us on WhatsApp: +254 707 118 312");
             }
 
-            // Reset button
             submitBtn.innerHTML = originalBtnText;
             submitBtn.disabled = false;
         });
