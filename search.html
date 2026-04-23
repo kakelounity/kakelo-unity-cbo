@@ -50,7 +50,7 @@
                         id="searchInput"
                         placeholder="Search for programs, leadership, events, donations..."
                         class="w-full border border-slate-300 rounded-2xl px-6 py-5 text-lg focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
-                        onkeyup="if(event.key === 'Enter') performSearch()">
+                        autocomplete="off">
                     
                     <button onclick="performSearch()"
                             class="absolute right-3 top-1/2 -translate-y-1/2 bg-teal-700 hover:bg-teal-800 text-white px-8 py-3 rounded-2xl font-semibold transition-all flex items-center gap-2">
@@ -136,6 +136,11 @@
                 description: "Get in touch with Kakelo Unity CBO."
             },
             {
+                title: "Become a Member",
+                url: "become-a-member.html",
+                description: "Join Kakelo Unity CBO as a member."
+            },
+            {
                 title: "Member Portal",
                 url: "member-portal.html",
                 description: "Login to your member dashboard and savings account."
@@ -172,7 +177,7 @@
                 resultsContainer.innerHTML = `
                     <div class="bg-red-50 border border-red-200 text-red-600 p-8 rounded-3xl text-center">
                         No results found for "<strong>${query}</strong>".<br>
-                        Try different keywords like "youth", "donate", or "leadership".
+                        Try different keywords like "programs", "leadership", "donate", or "events".
                     </div>
                 `;
                 return;
@@ -191,10 +196,25 @@
             `).join("");
         }
 
-        // Allow pressing Enter in the search box
-        document.getElementById("searchInput").addEventListener("keypress", function(e) {
+        // Improved: Clear previous listeners and add clean Enter key support
+        const searchInput = document.getElementById("searchInput");
+
+        // Remove any existing listeners to avoid conflicts
+        searchInput.removeEventListener("keypress", performSearch);
+
+        // Add Enter key support
+        searchInput.addEventListener("keypress", function(e) {
             if (e.key === "Enter") {
+                e.preventDefault();   // Prevent form submission if inside a form
                 performSearch();
+            }
+        });
+
+        // Optional: Clear results when input is cleared
+        searchInput.addEventListener("input", function() {
+            if (this.value.trim() === "") {
+                document.getElementById("searchResults").innerHTML = "";
+                document.getElementById("initialState").style.display = "block";
             }
         });
     </script>
