@@ -127,7 +127,7 @@
                 </form>
 
                 <p class="text-center text-sm text-slate-500 mt-10">
-                    After submission, our team will review your application and contact you within 48 hours for verification.
+                    After submission, our team will review your application and contact you within 48 hours.
                 </p>
             </div>
         </div>
@@ -180,7 +180,7 @@
                 try {
                     result = JSON.parse(text);
                 } catch (e) {
-                    result = { success: false, message: "Invalid response from server" };
+                    result = { success: false, message: "Server error - please try again" };
                 }
 
                 if (result.success) {
@@ -190,8 +190,8 @@
                     alert("❌ " + (result.message || "Submission failed. Please try again."));
                 }
             } catch (error) {
-                console.error("Submission error:", error);
-                alert("❌ Failed to submit. Please check your internet connection and try again.\n\nIf the problem continues, contact us on WhatsApp: +254 707 118 312");
+                console.error("Error:", error);
+                alert("❌ Failed to connect to server.\n\nPlease make sure the Google Apps Script is correctly deployed as 'Anyone'.\n\nIf still failing, contact us on WhatsApp: +254 707 118 312");
             }
 
             submitBtn.innerHTML = originalBtnText;
