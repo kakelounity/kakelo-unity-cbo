@@ -122,7 +122,7 @@
                 resultsContainer.innerHTML = `
                     <div class="bg-red-50 p-8 rounded-3xl text-center text-red-600">
                         No results found for "<strong>${query}</strong>".<br>
-                        Try words like "programs", "leadership", or "donate".
+                        Try words like "programs", "leadership", "donate", or "events".
                     </div>`;
                 return;
             }
@@ -138,12 +138,10 @@
 
         // Enter key support
         document.getElementById("searchInput").addEventListener("keypress", function(e) {
-            if (e.key === "Enter") {
-                performSearch();
-            }
+            if (e.key === "Enter") performSearch();
         });
 
-        // Show initial state when input is cleared
+        // Restore initial state when input is cleared
         document.getElementById("searchInput").addEventListener("input", function() {
             if (this.value.trim() === "") {
                 document.getElementById("searchResults").innerHTML = "";
