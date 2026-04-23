@@ -86,69 +86,76 @@
     <script src="footer.js"></script>
 
     <!-- SEARCH SCRIPT -->
-    <script>
-        const pages = [
-            { title: "Home", url: "index.html", description: "Welcome to Kakelo Unity CBO" },
-            { title: "Our Programs", url: "programs.html", description: "Youth empowerment, education, agriculture, health" },
-            { title: "Our Leadership", url: "leadership.html", description: "Meet our team members" },
-            { title: "Our Impact", url: "impact.html", description: "Success stories and community impact" },
-            { title: "Gallery", url: "gallery.html", description: "Photos from our events" },
-            { title: "Events", url: "events.html", description: "Upcoming and past events" },
-            { title: "Donate", url: "donate.html", description: "Support our work" },
-            { title: "Contact Us", url: "contact.html", description: "Get in touch with us" },
-            { title: "Become a Member", url: "become-a-member.html", description: "Join as a member" },
-            { title: "Member Portal", url: "member-portal.html", description: "Login to member dashboard" },
-            { title: "Volunteer", url: "volunteer.html", description: "Volunteer with us" }
-        ];
+  <script>
+const pages = [
+    { title: "Home", url: "index.html", description: "Welcome to Kakelo Unity CBO" },
+    { title: "Our Programs", url: "programs.html", description: "Youth empowerment, education, agriculture, health" },
+    { title: "Our Leadership", url: "leadership.html", description: "Meet our team members" },
+    { title: "Our Impact", url: "impact.html", description: "Success stories and community impact" },
+    { title: "Gallery", url: "gallery.html", description: "Photos from our events" },
+    { title: "Events", url: "events.html", description: "Upcoming and past events" },
+    { title: "Donate", url: "donate.html", description: "Support our work" },
+    { title: "Contact Us", url: "contact.html", description: "Get in touch with us" },
+    { title: "Become a Member", url: "member-register.html", description: "Join as a member" },
+    { title: "Member Portal", url: "member-portal.html", description: "Login to member dashboard" },
+    { title: "Volunteer", url: "volunteer.html", description: "Volunteer with us" }
+];
 
-        function performSearch() {
-            const query = document.getElementById("searchInput").value.toLowerCase().trim();
-            const resultsContainer = document.getElementById("searchResults");
-            const initialState = document.getElementById("initialState");
+function performSearch() {
+    const query = document.getElementById("searchInput").value.toLowerCase().trim();
+    const resultsContainer = document.getElementById("searchResults");
+    const initialState = document.getElementById("initialState");
 
-            initialState.style.display = "none";
+    initialState.style.display = "none";
 
-            if (!query) {
-                resultsContainer.innerHTML = `<div class="bg-amber-50 p-8 rounded-3xl text-center text-amber-700">Please type something to search...</div>`;
-                return;
-            }
+    if (!query) {
+        resultsContainer.innerHTML = `<div class="bg-amber-50 p-8 rounded-3xl text-center text-amber-700">Please type something to search...</div>`;
+        return;
+    }
 
-            const filtered = pages.filter(page => 
-                page.title.toLowerCase().includes(query) || 
-                page.description.toLowerCase().includes(query)
-            );
+    const filtered = pages.filter(page =>
+        page.title.toLowerCase().includes(query) ||
+        page.description.toLowerCase().includes(query)
+    );
 
-            if (filtered.length === 0) {
-                resultsContainer.innerHTML = `
-                    <div class="bg-red-50 p-8 rounded-3xl text-center text-red-600">
-                        No results found for "<strong>${query}</strong>".<br>
-                        Try words like "programs", "leadership", "donate", or "events".
-                    </div>`;
-                return;
-            }
+    if (filtered.length === 0) {
+        resultsContainer.innerHTML = `
+            <div class="bg-red-50 p-8 rounded-3xl text-center text-red-600">
+                No results found for "<strong>${query}</strong>"
+            </div>`;
+        return;
+    }
 
-            resultsContainer.innerHTML = filtered.map(page => `
-                <a href="${page.url}" class="block bg-white p-8 rounded-3xl shadow hover:shadow-xl transition-all border border-transparent hover:border-teal-300">
-                    <h3 class="text-2xl font-bold text-teal-800 mb-2">${page.title}</h3>
-                    <p class="text-slate-600">${page.description}</p>
-                    <div class="mt-4 text-teal-700 text-sm font-medium">→ Visit Page</div>
-                </a>
-            `).join('');
-        }
+    resultsContainer.innerHTML = filtered.map(page => `
+        <a href="${page.url}" class="block bg-white p-8 rounded-3xl shadow hover:shadow-xl transition">
+            <h3 class="text-2xl font-bold text-teal-800 mb-2">${page.title}</h3>
+            <p class="text-slate-600">${page.description}</p>
+        </a>
+    `).join('');
+}
 
-        // Enter key support
-        document.getElementById("searchInput").addEventListener("keypress", function(e) {
-            if (e.key === "Enter") performSearch();
-        });
+// ENTER KEY
+document.getElementById("searchInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") performSearch();
+});
 
-        // Restore initial state when input is cleared
-        document.getElementById("searchInput").addEventListener("input", function() {
-            if (this.value.trim() === "") {
-                document.getElementById("searchResults").innerHTML = "";
-                document.getElementById("initialState").style.display = "block";
-            }
-        });
-    </script>
+// CLEAR INPUT
+document.getElementById("searchInput").addEventListener("input", function() {
+    if (this.value.trim() === "") {
+        document.getElementById("searchResults").innerHTML = "";
+        document.getElementById("initialState").style.display = "block";
+    }
+});
 
-</body>
-</html>
+// ✅ AUTO SEARCH FROM NAVBAR
+window.addEventListener("load", () => {
+    const params = new URLSearchParams(window.location.search);
+    const query = params.get("q");
+
+    if (query) {
+        const input = document.getElementById("searchInput");
+        input.value = query;
+        performSearch();
+    }
+});
+</script>
