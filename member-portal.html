@@ -494,8 +494,7 @@
         loginBtn.textContent = "Login";
       }
     });
-
-  // ================= 2. UPDATED showDashboard() =================
+// ================= UPDATED showDashboard() - FIXED =================
 async function showDashboard() {
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboardScreen").classList.remove("hidden");
@@ -524,7 +523,7 @@ async function showDashboard() {
     document.getElementById("photoPlaceholder").classList.add("hidden");
   }
 
-  // Load dashboard content
+  // Load rest of dashboard
   renderActionButtons();
   await loadDashboardData();
   showTreasurerBulkSection();
@@ -538,12 +537,11 @@ async function showDashboard() {
     }, 800);
   }
 
-  // Start inactivity timer
+  // Start 5-minute inactivity timer
   setupActivityListeners();
   resetInactivityTimer();
 }
-      renderActionButtons();
-      await loadDashboardData();
+
 
       // Show Treasurer bulk actions if applicable
       showTreasurerBulkSection();
