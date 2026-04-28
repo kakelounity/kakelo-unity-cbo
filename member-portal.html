@@ -496,16 +496,17 @@
     });
 // ================= UPDATED showDashboard() - FIXED =================
 async function showDashboard() {
+  // Switch from login to dashboard
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboardScreen").classList.remove("hidden");
 
   const m = currentMember;
 
-  // Welcome and Navbar
+  // Welcome message
   document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
   document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
 
-  // Profile Details
+  // Fill Profile Information
   document.getElementById("fullName").textContent = m.fullName;
   document.getElementById("phone").textContent = m.phone || "—";
   document.getElementById("email").textContent = m.email || "—";
@@ -523,13 +524,15 @@ async function showDashboard() {
     document.getElementById("photoPlaceholder").classList.add("hidden");
   }
 
-  // Load rest of dashboard
+  // Load dashboard data (this has await)
   renderActionButtons();
   await loadDashboardData();
   showTreasurerBulkSection();
 
-  // Force password change on first login
-  isFirstLogin = (m.initialPassword === true || m.passwordChanged === false || !m.passwordChanged);
+  // === FORCE PASSWORD CHANGE ON FIRST LOGIN ===
+  isFirstLogin = (m.initialPassword === true || 
+                 m.passwordChanged === false || 
+                 !m.passwordChanged);
 
   if (isFirstLogin) {
     setTimeout(() => {
@@ -537,12 +540,10 @@ async function showDashboard() {
     }, 800);
   }
 
-  // Start 5-minute inactivity timer
+  // === START 5-MINUTE INACTIVITY TIMER ===
   setupActivityListeners();
   resetInactivityTimer();
 }
-
-
       // Show Treasurer bulk actions if applicable
       showTreasurerBulkSection();
     }
@@ -1177,6 +1178,28 @@ function setupActivityListeners() {
   });
 }
   // ================= 3. LOGOUT FUNCTION =================
+function logout() {
+  clearTimeout(inactivityTimer);
+  localStorage.clear();
+  location.reload();
+}
+ function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(autoLogout, INACTIVITY_LIMIT);
+}
+
+function autoLogout() {
+  alert("Your session has timed out due to inactivity.\n\nYou have been logged out for security.");
+  logout();
+}
+
+function setupActivityListeners() {
+  const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'];
+  events.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, { passive: true });
+  });
+}
+
 function logout() {
   clearTimeout(inactivityTimer);
   localStorage.clear();
