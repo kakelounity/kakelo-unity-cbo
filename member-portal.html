@@ -22,38 +22,114 @@
 </head>
 <body class="bg-slate-100 font-sans">
 
-  <!-- LOGIN SCREEN -->
-  <div id="loginScreen" class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-teal-700 to-teal-900">
-    <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
-      <div class="text-center mb-8">
-        <div class="mx-auto mb-6">
-          <img src="https://drive.google.com/thumbnail?id=1zn4KqLto2mUNxjcnA8VYY48K06S5UK8T&sz=w300" 
-               alt="Kakelo Unity SACCO Logo" 
-               class="mx-auto h-24 w-auto object-contain">
-        </div>
-        <h1 class="text-3xl font-bold text-teal-800">Kakelo Unity CBO</h1>
-        <p class="text-slate-500 mt-1">Member Portal</p>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-teal-700 to-teal-900">
+  <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-md">
+    <div class="text-center mb-8">
+      <div class="mx-auto mb-6">
+        <img src="https://drive.google.com/thumbnail?id=1zn4KqLto2mUNxjcnA8VYY48K06S5UK8T&sz=w300" 
+             alt="Kakelo Unity CBO Logo" 
+             class="mx-auto h-24 w-auto object-contain">
+      </div>
+      <h1 class="text-3xl font-bold text-teal-800">Kakelo Unity CBO</h1>
+      <p class="text-slate-500 mt-1">Member Portal</p>
+    </div>
+
+    <form id="loginForm" class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">National ID</label>
+        <input id="nationalId" type="text" class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600 text-lg" placeholder="Enter National ID" required />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+        <input id="password" type="password" class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600 text-lg" placeholder="••••••••" required />
       </div>
 
-      <form id="loginForm" class="space-y-5">
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">National ID</label>
-          <input id="nationalId" type="text" class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600 text-lg" placeholder="Enter National ID" required />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-          <input id="password" type="password" class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600 text-lg" placeholder="••••••••" required />
-        </div>
+      <button type="submit" id="loginBtn" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-4 rounded-2xl text-lg transition">
+        Login
+      </button>
+    </form>
 
-        <button type="submit" id="loginBtn" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-4 rounded-2xl text-lg transition">
-          Login
-        </button>
-      </form>
-
-      <p id="loginMsg" class="text-center text-sm mt-6 min-h-[24px]"></p>
+    <!-- Forgot Password Link -->
+    <div class="text-right mt-4">
+      <button onclick="showForgotPassword()" 
+              class="text-teal-600 hover:text-teal-700 text-sm font-medium">
+        Forgot Password?
+      </button>
     </div>
-  </div>
 
+    <p id="loginMsg" class="text-center text-sm mt-6 min-h-[24px]"></p>
+  </div>
+</div>
+
+<!-- ====================== CHANGE PASSWORD MODAL ====================== -->
+<div id="changePasswordModal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[200]">
+  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 p-8">
+    
+    <div class="text-center mb-8">
+      <div class="mx-auto w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-4">
+        <i class="fa-solid fa-key text-3xl"></i>
+      </div>
+      <h2 id="modalTitle" class="text-2xl font-bold text-slate-800">Set New Password</h2>
+      <p id="modalSubtitle" class="text-slate-600 mt-2 text-sm">
+        For your security, please change your initial password.
+      </p>
+    </div>
+
+    <div class="space-y-6">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Current Password</label>
+        <div class="relative">
+          <input id="currentPassword" type="password" 
+                 class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600" 
+                 placeholder="Enter current password">
+          <button type="button" onclick="togglePassword('currentPassword')" 
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-eye" id="currentPasswordIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">New Password</label>
+        <div class="relative">
+          <input id="newPassword" type="password" 
+                 class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600"
+                 placeholder="Enter new password" onkeyup="checkPasswordStrength()">
+          <button type="button" onclick="togglePassword('newPassword')" 
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-eye" id="newPasswordIcon"></i>
+          </button>
+        </div>
+        <div id="passwordStrength" class="h-2 bg-slate-200 rounded-full mt-3"></div>
+        <p id="strengthText" class="text-xs mt-1 text-slate-500"></p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Confirm New Password</label>
+        <div class="relative">
+          <input id="confirmPassword" type="password" 
+                 class="w-full p-4 border border-slate-300 rounded-2xl focus:outline-none focus:border-teal-600"
+                 placeholder="Confirm new password" onkeyup="checkPasswordMatch()">
+          <button type="button" onclick="togglePassword('confirmPassword')" 
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-eye" id="confirmPasswordIcon"></i>
+          </button>
+        </div>
+        <p id="matchMessage" class="text-xs mt-1 min-h-[20px]"></p>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <button onclick="submitChangePassword()" id="changePasswordBtn"
+              class="w-full bg-teal-700 hover:bg-teal-800 text-white font-semibold py-4 rounded-2xl text-lg transition">
+        Update Password
+      </button>
+    </div>
+
+    <p id="changePasswordMsg" class="text-center text-sm mt-6 min-h-[24px]"></p>
+  </div>
+</div>
   <!-- DASHBOARD SCREEN -->
   <div id="dashboardScreen" class="hidden min-h-screen bg-slate-100">
 
@@ -369,8 +445,11 @@
 
     let currentToken = null;
     let currentMember = null;
+    let isFirstLogin = false;
+    let inactivityTimer = null;
+    const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes
     let allMembersData = null;
-    let monthlyTrendChart = null;
+    let monthlyTrendChart = null; 
 
     const FULL_EDIT_ROLES = ["TREASURER"];
 
@@ -416,29 +495,53 @@
       }
     });
 
-    async function showDashboard() {
-      document.getElementById("loginScreen").classList.add("hidden");
-      document.getElementById("dashboardScreen").classList.remove("hidden");
+  // ================= 2. UPDATED showDashboard() =================
+async function showDashboard() {
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("dashboardScreen").classList.remove("hidden");
 
-      const m = currentMember;
-      document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
-      document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
+  const m = currentMember;
 
-      document.getElementById("fullName").textContent = m.fullName;
-      document.getElementById("phone").textContent = m.phone || "—";
-      document.getElementById("email").textContent = m.email || "—";
-      document.getElementById("status").innerHTML = `${m.status || "Active"} <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
-      document.getElementById("roleDisplay").textContent = m.role || "Member";
+  // Welcome and Navbar
+  document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
+  document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
 
-      let photoUrl = m.photo || "";
-      if (photoUrl) {
-        const idMatch = photoUrl.match(/[-\w]{25,}/);
-        if (idMatch) photoUrl = `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w400`;
-        document.getElementById("profilePhoto").src = photoUrl;
-        document.getElementById("profilePhoto").classList.remove("hidden");
-        document.getElementById("photoPlaceholder").classList.add("hidden");
-      }
+  // Profile Details
+  document.getElementById("fullName").textContent = m.fullName;
+  document.getElementById("phone").textContent = m.phone || "—";
+  document.getElementById("email").textContent = m.email || "—";
+  document.getElementById("status").innerHTML = `${m.status || "Active"} 
+    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
+  document.getElementById("roleDisplay").textContent = m.role || "Member";
 
+  // Profile Photo
+  let photoUrl = m.photo || "";
+  if (photoUrl) {
+    const idMatch = photoUrl.match(/[-\w]{25,}/);
+    if (idMatch) photoUrl = `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w400`;
+    document.getElementById("profilePhoto").src = photoUrl;
+    document.getElementById("profilePhoto").classList.remove("hidden");
+    document.getElementById("photoPlaceholder").classList.add("hidden");
+  }
+
+  // Load dashboard content
+  renderActionButtons();
+  await loadDashboardData();
+  showTreasurerBulkSection();
+
+  // Force password change on first login
+  isFirstLogin = (m.initialPassword === true || m.passwordChanged === false || !m.passwordChanged);
+
+  if (isFirstLogin) {
+    setTimeout(() => {
+      showChangePasswordModal(true);
+    }, 800);
+  }
+
+  // Start inactivity timer
+  setupActivityListeners();
+  resetInactivityTimer();
+}
       renderActionButtons();
       await loadDashboardData();
 
@@ -894,4 +997,191 @@ async function loadDashboardData() {
         showDashboard();
       }
     };
+  // ================= 1. FORGOT PASSWORD FUNCTION =================
+function showForgotPassword() {
+  const nationalId = prompt("Enter your National ID to receive a password reset link:");
+  if (!nationalId || nationalId.trim() === "") return;
+
+  const msgEl = document.getElementById("loginMsg");
+  msgEl.textContent = "Sending reset link...";
+  msgEl.className = "text-center text-sm mt-6 text-blue-600";
+
+  fetch(API, {
+    method: "POST",
+    body: JSON.stringify({ 
+      action: "requestPasswordReset", 
+      nationalId: nationalId.trim() 
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    msgEl.textContent = data.message;
+    msgEl.className = data.success ? "text-emerald-600" : "text-red-600";
+  })
+  .catch(() => {
+    msgEl.textContent = "Failed to send reset link. Please try again.";
+    msgEl.className = "text-red-600";
+  });
+}
+  // ================= 2. CHANGE PASSWORD MODAL FUNCTIONS =================
+
+function showChangePasswordModal(isForced = false) {
+  const modal = document.getElementById("changePasswordModal");
+  modal.classList.remove("hidden");
+
+  // Reset form fields
+  document.getElementById("currentPassword").value = "";
+  document.getElementById("newPassword").value = "";
+  document.getElementById("confirmPassword").value = "";
+  document.getElementById("changePasswordMsg").textContent = "";
+
+  if (isForced) {
+    document.getElementById("modalTitle").textContent = "Set New Password";
+    document.getElementById("modalSubtitle").textContent = "This is your first login. Please create a new secure password to continue.";
+  } else {
+    document.getElementById("modalTitle").textContent = "Change Password";
+    document.getElementById("modalSubtitle").textContent = "Update your account password";
+  }
+}
+
+function togglePassword(fieldId) {
+  const input = document.getElementById(fieldId);
+  const icon = document.getElementById(fieldId + "Icon");
+  
+  if (input.type === "password") {
+    input.type = "text";
+    icon.classList.replace("fa-eye", "fa-eye-slash");
+  } else {
+    input.type = "password";
+    icon.classList.replace("fa-eye-slash", "fa-eye");
+  }
+}
+
+function checkPasswordStrength() {
+  const pass = document.getElementById("newPassword").value;
+  const bar = document.getElementById("passwordStrength");
+  const text = document.getElementById("strengthText");
+
+  if (!pass) {
+    bar.className = "h-2 bg-slate-200 rounded-full";
+    text.textContent = "";
+    return;
+  }
+
+  let score = 0;
+  if (pass.length >= 8) score++;
+  if (/[A-Z]/.test(pass)) score++;
+  if (/[0-9]/.test(pass)) score++;
+  if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+  if (score <= 1) {
+    bar.className = "h-2 bg-red-500 rounded-full";
+    text.textContent = "Weak";
+  } else if (score === 2) {
+    bar.className = "h-2 bg-amber-500 rounded-full";
+    text.textContent = "Medium";
+  } else {
+    bar.className = "h-2 bg-emerald-500 rounded-full";
+    text.textContent = "Strong";
+  }
+}
+
+function checkPasswordMatch() {
+  const newPass = document.getElementById("newPassword").value;
+  const confirmPass = document.getElementById("confirmPassword").value;
+  const msg = document.getElementById("matchMessage");
+
+  if (!confirmPass) {
+    msg.textContent = "";
+    return;
+  }
+
+  msg.innerHTML = newPass === confirmPass 
+    ? `<span class="text-emerald-600">✓ Passwords match</span>` 
+    : `<span class="text-red-600">✗ Passwords do not match</span>`;
+}
+  // ================= 3. SUBMIT CHANGE PASSWORD =================
+async function submitChangePassword() {
+  const current = document.getElementById("currentPassword").value.trim();
+  const newPass = document.getElementById("newPassword").value.trim();
+  const confirm = document.getElementById("confirmPassword").value.trim();
+  const msgEl = document.getElementById("changePasswordMsg");
+  const btn = document.getElementById("changePasswordBtn");
+
+  if (!current || !newPass || !confirm) {
+    msgEl.textContent = "All fields are required";
+    return;
+  }
+  if (newPass !== confirm) {
+    msgEl.textContent = "New passwords do not match";
+    return;
+  }
+  if (newPass.length < 6) {
+    msgEl.textContent = "New password must be at least 6 characters";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Updating...`;
+
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "changePassword",
+        token: currentToken,
+        currentPassword: current,
+        newPassword: newPass
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      msgEl.innerHTML = `<span class="text-emerald-600">✅ Password updated successfully!</span>`;
+      
+      // Update local state
+      if (currentMember) currentMember.passwordChanged = true;
+
+      setTimeout(() => {
+        document.getElementById("changePasswordModal").classList.add("hidden");
+        alert("Your password has been changed successfully.");
+      }, 1500);
+    } else {
+      msgEl.textContent = data.message || "Failed to change password";
+    }
+  } catch (err) {
+    msgEl.textContent = "Network error. Please try again.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Update Password";
+  }
+}
+  // ================= 1. INACTIVITY LOGOUT FUNCTIONS =================
+let inactivityTimer = null;
+const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(autoLogout, INACTIVITY_LIMIT);
+}
+
+function autoLogout() {
+  alert("Your session has timed out due to inactivity.\n\nYou have been logged out for security reasons.");
+  logout();
+}
+
+function setupActivityListeners() {
+  const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'];
+  
+  events.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, { passive: true });
+  });
+}
+  // ================= 3. LOGOUT FUNCTION =================
+function logout() {
+  clearTimeout(inactivityTimer);
+  localStorage.clear();
+  location.reload();
+}
 </script>
