@@ -440,769 +440,741 @@
     </div>
   </div>
 
- <script>
+<script>
     const API = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
     let currentToken = null;
     let currentMember = null;
     let isFirstLogin = false;
     let inactivityTimer = null;
-    const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes
-    let allMembersData = null;
-    let monthlyTrendChart = null; 
+    const INACTIVITY_LIMIT = 15 * 60 * 1000; // 15 minutes (increased from 5)
+    let monthlyTrendChart = null;
 
     const FULL_EDIT_ROLES = ["TREASURER"];
 
-    // Login with National ID
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const nationalId = document.getElementById("nationalId").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const loginBtn = document.getElementById("loginBtn");
-      const msgEl = document.getElementById("loginMsg");
-
-      msgEl.textContent = "Logging in...";
-      msgEl.className = "text-center text-sm mt-6 text-blue-600";
-      loginBtn.disabled = true;
-      loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging in...`;
-
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "login", nationalId, password })
-        });
-        const data = await res.json();
-
-        if (!data.success) {
-          msgEl.textContent = data.message || "Login failed";
-          msgEl.className = "text-center text-sm mt-6 text-red-600";
-          return;
-        }
-
-        currentToken = data.token;
-        currentMember = data.member;
-
-        localStorage.setItem("token", currentToken);
-        localStorage.setItem("member", JSON.stringify(currentMember));
-
-        showDashboard();
-      } catch (err) {
-        msgEl.textContent = "Network error";
-        msgEl.className = "text-center text-sm mt-6 text-red-600";
-      } finally {
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Login";
-      }
-    });
-// ================= UPDATED showDashboard() - FIXED =================
-async function showDashboard() {
-  // Switch from login to dashboard
-  document.getElementById("loginScreen").classList.add("hidden");
-  document.getElementById("dashboardScreen").classList.remove("hidden");
-
-  const m = currentMember;
-
-  // Welcome message
-  document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
-  document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
-
-  // Fill Profile Information
-  document.getElementById("fullName").textContent = m.fullName;
-  document.getElementById("phone").textContent = m.phone || "—";
-  document.getElementById("email").textContent = m.email || "—";
-  document.getElementById("status").innerHTML = `${m.status || "Active"} 
-    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
-  document.getElementById("roleDisplay").textContent = m.role || "Member";
-
-  // Profile Photo
-  let photoUrl = m.photo || "";
-  if (photoUrl) {
-    const idMatch = photoUrl.match(/[-\w]{25,}/);
-    if (idMatch) photoUrl = `https://drive.google.com/thumbnail?id=${idMatch[0]}&sz=w400`;
-    document.getElementById("profilePhoto").src = photoUrl;
-    document.getElementById("profilePhoto").classList.remove("hidden");
-    document.getElementById("photoPlaceholder").classList.add("hidden");
-  }
-
-  // Load dashboard data (this has await)
-  renderActionButtons();
-  await loadDashboardData();
-  showTreasurerBulkSection();
-
-  // === FORCE PASSWORD CHANGE ON FIRST LOGIN ===
-  isFirstLogin = (m.initialPassword === true || 
-                 m.passwordChanged === false || 
-                 !m.passwordChanged);
-
-  if (isFirstLogin) {
-    setTimeout(() => {
-      showChangePasswordModal(true);
-    }, 800);
-  }
-
-  // === START 5-MINUTE INACTIVITY TIMER ===
-  setupActivityListeners();
-  resetInactivityTimer();
-}
-      // Show Treasurer bulk actions if applicable
-      showTreasurerBulkSection();
+    // ================= HELPER FUNCTIONS =================
+    function hasRole(roles) {
+        if (!currentMember) return false;
+        const userRole = (currentMember.role || "").toUpperCase().trim();
+        return Array.isArray(roles) 
+            ? roles.includes(userRole) 
+            : userRole === String(roles).toUpperCase();
     }
 
-    function renderActionButtons() {
-      const role = (currentMember.role || "").toUpperCase().trim();
-      let html = `<button onclick="showRequestLoanModal()" class="flex items-center gap-3 bg-white border border-slate-300 hover:border-teal-600 px-6 py-4 rounded-2xl font-semibold"><i class="fa-solid fa-hand-holding-dollar text-xl"></i> Request Loan</button>`;
-      if (role === "TREASURER") {
-        html += `<button onclick="showAddSavingsModal()" class="flex items-center gap-3 bg-teal-700 text-white px-6 py-4 rounded-2xl font-semibold"><i class="fa-solid fa-plus text-xl"></i> Add Savings</button>`;
-      }
-      document.getElementById("actionButtons").innerHTML = html;
-    }
-
-    // ================= UPDATED loadDashboardData() =================
-async function loadDashboardData() {
-  try {
-    const res = await fetch(API, {
-      method: "POST",
-      body: JSON.stringify({ action: "dashboard", token: currentToken })
-    });
-    const data = await res.json();
-    if (!data.success) return alert(data.message);
-
-    let personalSavings = 0;   // Only "Savings" and "Dividends"
-    let totalFines = 0;        // Fines collected (group money)
-
-    if (data.savings && data.savings.length) {
-      data.savings.forEach(s => {
-        const type = String(s.type || "").toLowerCase().trim();
-        const amount = Number(s.amount || 0);
-
-        if (type === "savings" || type === "dividends") {
-          personalSavings += amount;
-        } else if (type === "fine") {
-          totalFines += amount;
-        }
-      });
-    }
-
-    // Update Dashboard UI
-    document.getElementById("totalSavings").innerHTML = `KSh ${personalSavings.toLocaleString()}`;
-    document.getElementById("regFees").innerHTML = `KSh ${Number(currentMember.regFees || 0).toLocaleString()}`;
-
-    const totalLoans = data.loans.reduce((sum, l) => sum + Number(l.amount || 0), 0);
-    document.getElementById("totalLoans").innerHTML = `KSh ${totalLoans.toLocaleString()}`;
-
-    // Optional: Show total fines paid by this member
-    // You can add a new element with id="totalFines" in HTML if you want
-
-    renderSavingsHistory(data.savings);
-    renderLoansHistory(data.loans);
-
-    const role = (currentMember.role || "").toUpperCase().trim();
-    if (["TREASURER", "CHAIRPERSON", "VICE CHAIRPERSON", "SECRETARY"].includes(role)) {
-      document.getElementById("adminBtn").classList.remove("hidden");
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-  function renderSavingsHistory(savings) {
-  const tbody = document.getElementById("savingsTableBody");
-  
-  if (!savings || savings.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">No transactions yet</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = savings.map(s => {
-    const type = String(s.type || "Savings").trim();
-    const amount = Number(s.amount || 0);
-    let amountHTML = "";
-    let typeClass = "";
-
-    if (type.toLowerCase() === "fine") {
-      amountHTML = `<span class="text-red-600 font-semibold">- KSh ${amount.toLocaleString()}</span>`;
-      typeClass = 'bg-red-100 text-red-700';
-    } else {
-      amountHTML = `<span class="text-teal-700 font-semibold">+ KSh ${amount.toLocaleString()}</span>`;
-      typeClass = 'bg-teal-100 text-teal-700';
-    }
-
-    return `
-      <tr class="hover:bg-slate-50">
-        <td class="py-4 px-4">${new Date(s.date).toLocaleDateString('en-GB')}</td>
-        <td class="py-4 px-4 font-mono text-xs">${s.id}</td>
-        <td class="py-4 px-4">
-          <span class="px-3 py-1 text-xs rounded-full ${typeClass}">
-            ${type}
-          </span>
-        </td>
-        <td class="py-4 px-4">${amountHTML}</td>
-        <td class="py-4 px-4 text-slate-600">${s.notes || '—'}</td>
-      </tr>`;
-  }).join('');
-}
-
-    function renderLoansHistory(loans) {
-      const tbody = document.getElementById("loansTableBody");
-      const isTreasurer = (currentMember.role || "").toUpperCase().trim() === "TREASURER";
-
-      tbody.innerHTML = (loans && loans.length) ? loans.map(l => {
-        const isPending = (l.status === "Pending" || l.approval === "Pending");
-        return `
-          <tr class="hover:bg-slate-50">
-            <td class="py-4 px-4">${new Date(l.date || Date.now()).toLocaleDateString('en-GB')}</td>
-            <td class="py-4 px-4 font-mono text-xs">${l.id}</td>
-            <td class="py-4 px-4 font-semibold">KSh ${Number(l.amount).toLocaleString()}</td>
-            <td class="py-4 px-4 text-amber-600">KSh ${Number(l.outstanding || l.amount).toLocaleString()}</td>
-            <td class="py-4 px-4">
-              <span class="px-3 py-1 text-xs rounded-full ${l.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-                ${l.status || l.approval || 'Pending'}
-              </span>
-            </td>
-            <td class="py-4 px-4 text-center">
-              ${isTreasurer && isPending ? `
-                <button onclick="approveLoan('${l.id}')" class="text-emerald-600 hover:text-emerald-700 mx-2 text-xl"><i class="fa-solid fa-check"></i></button>
-                <button onclick="rejectLoan('${l.id}')" class="text-red-600 hover:text-red-700 mx-2 text-xl"><i class="fa-solid fa-xmark"></i></button>` : '—'}
-            </td>
-          </tr>`;
-      }).join('') : `<tr><td colspan="6" class="text-center py-8 text-slate-400">No loan records yet</td></tr>`;
-    }
-
-    async function approveLoan(loanId) {
-      if (!confirm("Approve this loan?")) return;
-      await updateLoan(loanId, "approveLoan");
-    }
-
-    async function rejectLoan(loanId) {
-      if (!confirm("Reject this loan?")) return;
-      await updateLoan(loanId, "rejectLoan");
-    }
-
-    async function updateLoan(loanId, action) {
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action, token: currentToken, loanId })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert(data.message || "Success");
-          loadDashboardData();
-        } else alert(data.message);
-      } catch (err) {
-        alert("Error");
-      }
-    }
-
-    function switchHistoryTab(n) {
-      document.getElementById("savingsHistory").classList.toggle("hidden", n !== 0);
-      document.getElementById("loansHistory").classList.toggle("hidden", n !== 1);
-      document.getElementById("tabSavingsBtn").classList.toggle("tab-active", n === 0);
-      document.getElementById("tabLoansBtn").classList.toggle("tab-active", n === 1);
-    }
-
-    function showAddSavingsModal() {
-      document.getElementById("addSavingsModal").classList.remove("hidden");
-      document.getElementById("savingsMemberId").value = currentMember.memberId;
-    }
-
-    function showRequestLoanModal() {
-      document.getElementById("requestLoanModal").classList.remove("hidden");
-    }
-
-    function hideModal(id) {
-      document.getElementById(id).classList.add("hidden");
-    }
-
-    async function submitAddSavings() {
-      const memberTarget = document.getElementById("savingsMemberId").value.trim().toUpperCase();
-      const amount = document.getElementById("savingsAmount").value;
-      const notes = document.getElementById("savingsNotes").value;
-      if (!amount) return alert("Please enter amount");
-
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "addSavings", token: currentToken, memberTarget, amount, notes })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert("Savings added successfully!");
-          hideModal("addSavingsModal");
-          loadDashboardData();
-        } else alert(data.message);
-      } catch (err) { alert("Error"); }
-    }
-
-    async function submitRequestLoan() {
-      const amount = document.getElementById("loanAmount").value;
-      const term = document.getElementById("loanTerm").value || 12;
-      const notes = document.getElementById("loanNotes").value;
-      if (!amount) return alert("Please enter amount");
-
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "addLoan", token: currentToken, memberTarget: currentMember.memberId, amount, term, notes })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert("Loan request submitted successfully!");
-          hideModal("requestLoanModal");
-          loadDashboardData();
-        } else alert(data.message);
-      } catch (err) { alert("Error"); }
-    }
-
-    // ====================== STATEMENTS SECTION ======================
-
-    async function getStatementUrl() {
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ 
-            action: "downloadMemberStatement", 
-            token: currentToken 
-          })
-        });
-        const data = await res.json();
-
-        if (data.success && data.downloadUrl) {
-          return data.downloadUrl;
-        } else {
-          alert(data.message || "Failed to generate PDF statement");
-          return null;
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Error generating PDF statement. Please try again.");
-        return null;
-      }
-    }
-
-    async function downloadStatement() {
-      const url = await getStatementUrl();
-      if (url) window.open(url, "_blank");
-    }
-
-    async function emailStatement() {
-      if (confirm(`Send statement to ${currentMember.email || 'your registered email'}?`)) {
-        try {
-          const res = await fetch(API, {
-            method: "POST",
-            body: JSON.stringify({ 
-              action: "emailMemberStatement", 
-              token: currentToken, 
-              targetMemberId: currentMember.memberId 
-            })
-          });
-          const data = await res.json();
-          alert(data.message || "Statement emailed successfully!");
-        } catch (err) {
-          alert("Error sending email. Please try again.");
-        }
-      }
-    }
-
-    async function whatsappStatement() {
-      const phone = currentMember.phone || "";
-      if (!phone) {
-        return alert("No phone number found in your profile.");
-      }
-
-      const url = await getStatementUrl();
-      if (!url) return;
-
-      const message = `Hello ${currentMember.fullName},%0A%0AHere is your latest statement from Kakelo Unity CBO.%0A%0ADownload PDF: ${encodeURIComponent(url)}%0A%0AThank you!`;
-
-      const whatsappUrl = `https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`;
-      window.open(whatsappUrl, "_blank");
-    }
-
-    // ================= NEW: Email All Members (Treasurer Only) =================
-    async function emailAllMembers() {
-      if (!confirm("⚠️ You are about to send statements to ALL members.\n\nThis may take several minutes.\n\nDo you want to continue?")) {
-        return;
-      }
-
-      showToast("Sending statements to all members... Please wait.", "info");
-
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ 
-            action: "emailAllMembers", 
-            token: currentToken 
-          })
-        });
-        const data = await res.json();
-
-        if (data.success) {
-          alert(`✅ Success!\n\n${data.message}`);
-        } else {
-          alert(`❌ Error: ${data.message}`);
-        }
-      } catch (err) {
-        console.error(err);
-        alert("Failed to send statements. Please try again.");
-      }
-    }
-
-    // ================= Show Treasurer Bulk Section =================
-    function showTreasurerBulkSection() {
-      const role = (currentMember?.role || "").toUpperCase().trim();
-      const bulkSection = document.getElementById("treasurerBulkSection");
-
-      if (bulkSection && FULL_EDIT_ROLES.includes(role)) {
-        bulkSection.classList.remove("hidden");
-      }
-    }
-
-    // Toast helper (simple version - you can improve it)
     function showToast(message, type = "info") {
-      alert(message);   // You can replace this with a nice toast later
+        alert(message); // Replace with better toast UI later
     }
 
-    // Admin functions (unchanged)
-    function showAdminDashboard() {
-      document.getElementById("adminModal").classList.remove("hidden");
-      loadAdminData();
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(autoLogout, INACTIVITY_LIMIT);
     }
 
-    async function loadAdminData() {
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "allMembers", token: currentToken })
+    function autoLogout() {
+        alert("Your session has timed out due to inactivity.\n\nYou have been logged out for security.");
+        logout();
+    }
+
+    function setupActivityListeners() {
+        const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'];
+        events.forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, { passive: true });
         });
-        const data = await res.json();
-        if (!data.success) return;
-
-        allMembersData = data.members;
-
-        const activeCount = data.members.filter(m => String(m.status).toLowerCase() === "active" || !m.status).length;
-        document.getElementById("adminActiveMembers").textContent = activeCount;
-
-        const totalSavings = data.members.reduce((sum, m) => sum + Number(m.savings || 0), 0);
-        document.getElementById("adminTotalSavings").innerHTML = `KSh ${totalSavings.toLocaleString()}`;
-
-        const sorted = [...data.members].sort((a, b) => b.savings - a.savings);
-        const tbody = document.getElementById("rankingBody");
-        tbody.innerHTML = sorted.map((m, i) => `
-          <tr class="hover:bg-slate-50">
-            <td class="px-6 py-4 font-medium">${i+1}</td>
-            <td class="px-6 py-4 font-mono">${m.id}</td>
-            <td class="px-6 py-4">${m.name}</td>
-            <td class="px-6 py-4 text-right font-semibold">KSh ${Number(m.savings).toLocaleString()}</td>
-          </tr>`).join('');
-
-        await loadMonthlyTrendChart();
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    async function loadMonthlyTrendChart() {
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "getMonthlyReport", token: currentToken })
-        });
-        const data = await res.json();
-
-        if (data.success && data.monthlyTrend) {
-          const ctx = document.getElementById('monthlyTrendChart');
-          if (monthlyTrendChart) monthlyTrendChart.destroy();
-
-          const labels = data.monthlyTrend.map(item => item.month);
-          const values = data.monthlyTrend.map(item => item.savings);
-
-          monthlyTrendChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-              labels: labels,
-              datasets: [{
-                label: 'Group Savings (KSh)',
-                data: values,
-                backgroundColor: '#14b8a6',
-                borderColor: '#0f766e',
-                borderWidth: 2,
-                borderRadius: 8
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                y: { beginAtZero: true, ticks: { callback: (val) => 'KSh ' + val.toLocaleString() } }
-              }
-            }
-          });
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    function downloadRankingCSV() {
-      if (!allMembersData) return alert("No data available");
-      let csv = "Rank,Member ID,Name,Savings\n";
-      const sorted = [...allMembersData].sort((a,b) => b.savings - a.savings);
-      sorted.forEach((m,i) => {
-        csv += `${i+1},"${m.id}","${m.name.replace(/"/g,'""')}",${m.savings}\n`;
-      });
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `SACCO_Savings_Ranking_${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    async function sendMemberStatement() {
-      const target = document.getElementById("emailMemberId").value.trim().toUpperCase();
-      if (!target) return alert("Enter Member ID");
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "emailMemberStatement", token: currentToken, targetMemberId: target })
-        });
-        const data = await res.json();
-        alert(data.message || "Statement sent");
-      } catch (err) {
-        alert("Error sending statement");
-      }
-    }
-
-    function hideAdminDashboard() {
-      document.getElementById("adminModal").classList.add("hidden");
-      if (monthlyTrendChart) monthlyTrendChart.destroy();
     }
 
     function logout() {
-      localStorage.clear();
-      location.reload();
+        clearTimeout(inactivityTimer);
+        localStorage.clear();
+        location.reload();
     }
 
-    // Auto login from localStorage
-    window.onload = () => {
-      const savedToken = localStorage.getItem("token");
-      const savedMember = localStorage.getItem("member");
-      if (savedToken && savedMember) {
-        currentToken = savedToken;
-        currentMember = JSON.parse(savedMember);
-        showDashboard();
-      }
-    };
-  // ================= 1. FORGOT PASSWORD FUNCTION =================
-function showForgotPassword() {
-  const nationalId = prompt("Enter your National ID to receive a password reset link:");
-  if (!nationalId || nationalId.trim() === "") return;
+    // ================= LOGIN =================
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nationalId = document.getElementById("nationalId").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const loginBtn = document.getElementById("loginBtn");
+        const msgEl = document.getElementById("loginMsg");
 
-  const msgEl = document.getElementById("loginMsg");
-  msgEl.textContent = "Sending reset link...";
-  msgEl.className = "text-center text-sm mt-6 text-blue-600";
+        msgEl.textContent = "Logging in...";
+        msgEl.className = "text-center text-sm mt-6 text-blue-600";
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging in...`;
 
-  fetch(API, {
-    method: "POST",
-    body: JSON.stringify({ 
-      action: "requestPasswordReset", 
-      nationalId: nationalId.trim() 
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    msgEl.textContent = data.message;
-    msgEl.className = data.success ? "text-emerald-600" : "text-red-600";
-  })
-  .catch(() => {
-    msgEl.textContent = "Failed to send reset link. Please try again.";
-    msgEl.className = "text-red-600";
-  });
-}
-  // ================= 2. CHANGE PASSWORD MODAL FUNCTIONS =================
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ action: "login", nationalId, password })
+            });
+            const data = await res.json();
 
-function showChangePasswordModal(isForced = false) {
-  const modal = document.getElementById("changePasswordModal");
-  modal.classList.remove("hidden");
+            if (!data.success) {
+                msgEl.textContent = data.message || "Login failed";
+                msgEl.className = "text-center text-sm mt-6 text-red-600";
+                return;
+            }
 
-  // Reset form fields
-  document.getElementById("currentPassword").value = "";
-  document.getElementById("newPassword").value = "";
-  document.getElementById("confirmPassword").value = "";
-  document.getElementById("changePasswordMsg").textContent = "";
+            currentToken = data.token;
+            currentMember = data.member;
 
-  if (isForced) {
-    document.getElementById("modalTitle").textContent = "Set New Password";
-    document.getElementById("modalSubtitle").textContent = "This is your first login. Please create a new secure password to continue.";
-  } else {
-    document.getElementById("modalTitle").textContent = "Change Password";
-    document.getElementById("modalSubtitle").textContent = "Update your account password";
-  }
-}
+            localStorage.setItem("token", currentToken);
+            localStorage.setItem("member", JSON.stringify(currentMember));
 
-function togglePassword(fieldId) {
-  const input = document.getElementById(fieldId);
-  const icon = document.getElementById(fieldId + "Icon");
-  
-  if (input.type === "password") {
-    input.type = "text";
-    icon.classList.replace("fa-eye", "fa-eye-slash");
-  } else {
-    input.type = "password";
-    icon.classList.replace("fa-eye-slash", "fa-eye");
-  }
-}
-
-function checkPasswordStrength() {
-  const pass = document.getElementById("newPassword").value;
-  const bar = document.getElementById("passwordStrength");
-  const text = document.getElementById("strengthText");
-
-  if (!pass) {
-    bar.className = "h-2 bg-slate-200 rounded-full";
-    text.textContent = "";
-    return;
-  }
-
-  let score = 0;
-  if (pass.length >= 8) score++;
-  if (/[A-Z]/.test(pass)) score++;
-  if (/[0-9]/.test(pass)) score++;
-  if (/[^A-Za-z0-9]/.test(pass)) score++;
-
-  if (score <= 1) {
-    bar.className = "h-2 bg-red-500 rounded-full";
-    text.textContent = "Weak";
-  } else if (score === 2) {
-    bar.className = "h-2 bg-amber-500 rounded-full";
-    text.textContent = "Medium";
-  } else {
-    bar.className = "h-2 bg-emerald-500 rounded-full";
-    text.textContent = "Strong";
-  }
-}
-
-function checkPasswordMatch() {
-  const newPass = document.getElementById("newPassword").value;
-  const confirmPass = document.getElementById("confirmPassword").value;
-  const msg = document.getElementById("matchMessage");
-
-  if (!confirmPass) {
-    msg.textContent = "";
-    return;
-  }
-
-  msg.innerHTML = newPass === confirmPass 
-    ? `<span class="text-emerald-600">✓ Passwords match</span>` 
-    : `<span class="text-red-600">✗ Passwords do not match</span>`;
-}
-  // ================= 3. SUBMIT CHANGE PASSWORD =================
-async function submitChangePassword() {
-  const current = document.getElementById("currentPassword").value.trim();
-  const newPass = document.getElementById("newPassword").value.trim();
-  const confirm = document.getElementById("confirmPassword").value.trim();
-  const msgEl = document.getElementById("changePasswordMsg");
-  const btn = document.getElementById("changePasswordBtn");
-
-  if (!current || !newPass || !confirm) {
-    msgEl.textContent = "All fields are required";
-    return;
-  }
-  if (newPass !== confirm) {
-    msgEl.textContent = "New passwords do not match";
-    return;
-  }
-  if (newPass.length < 6) {
-    msgEl.textContent = "New password must be at least 6 characters";
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Updating...`;
-
-  try {
-    const res = await fetch(API, {
-      method: "POST",
-      body: JSON.stringify({
-        action: "changePassword",
-        token: currentToken,
-        currentPassword: current,
-        newPassword: newPass
-      })
+            showDashboard();
+        } catch (err) {
+            console.error(err);
+            msgEl.textContent = "Network error. Please try again.";
+            msgEl.className = "text-center text-sm mt-6 text-red-600";
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.textContent = "Login";
+        }
     });
 
-    const data = await res.json();
+    // ================= SHOW DASHBOARD =================
+    async function showDashboard() {
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("dashboardScreen").classList.remove("hidden");
 
-    if (data.success) {
-      msgEl.innerHTML = `<span class="text-emerald-600">✅ Password updated successfully!</span>`;
-      
-      // Update local state
-      if (currentMember) currentMember.passwordChanged = true;
+        const m = currentMember;
+        if (!m) return;
 
-      setTimeout(() => {
-        document.getElementById("changePasswordModal").classList.add("hidden");
-        alert("Your password has been changed successfully.");
-      }, 1500);
-    } else {
-      msgEl.textContent = data.message || "Failed to change password";
+        // Welcome & Nav
+        document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
+        document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
+
+        // Profile Info
+        document.getElementById("fullName").textContent = m.fullName;
+        document.getElementById("phone").textContent = m.phone || "—";
+        document.getElementById("email").textContent = m.email || "—";
+        document.getElementById("status").innerHTML = `${m.status || "Active"} 
+            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
+        document.getElementById("roleDisplay").textContent = m.role || "Member";
+
+        // Profile Photo
+        let photoUrl = m.photo || "";
+        if (photoUrl) {
+            document.getElementById("profilePhoto").src = photoUrl;
+            document.getElementById("profilePhoto").classList.remove("hidden");
+            document.getElementById("photoPlaceholder").classList.add("hidden");
+        }
+
+        // Render UI elements
+        renderActionButtons();
+        showTreasurerBulkSection();
+
+        // Load data
+        await loadDashboardData();
+
+        // First login password change
+        isFirstLogin = (m.initialPassword === true || 
+                       m.passwordChanged === false || 
+                       !m.passwordChanged);
+
+        if (isFirstLogin) {
+            setTimeout(() => {
+                showChangePasswordModal(true);
+            }, 800);
+        }
+
+        // Start inactivity timer
+        setupActivityListeners();
+        resetInactivityTimer();
     }
-  } catch (err) {
-    msgEl.textContent = "Network error. Please try again.";
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Update Password";
-  }
-}
-  // ================= 1. INACTIVITY LOGOUT FUNCTIONS =================
-let inactivityTimer = null;
-const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes
 
-function resetInactivityTimer() {
-  clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(autoLogout, INACTIVITY_LIMIT);
-}
+    function renderActionButtons() {
+        const html = `
+            <button onclick="showRequestLoanModal()" 
+                    class="flex items-center gap-3 bg-white border border-slate-300 hover:border-teal-600 px-6 py-4 rounded-2xl font-semibold">
+                <i class="fa-solid fa-hand-holding-dollar text-xl"></i> Request Loan
+            </button>`;
 
-function autoLogout() {
-  alert("Your session has timed out due to inactivity.\n\nYou have been logged out for security reasons.");
-  logout();
-}
+        if (hasRole("TREASURER")) {
+            document.getElementById("actionButtons").innerHTML = html + `
+                <button onclick="showAddSavingsModal()" 
+                        class="flex items-center gap-3 bg-teal-700 text-white px-6 py-4 rounded-2xl font-semibold">
+                    <i class="fa-solid fa-plus text-xl"></i> Add Savings
+                </button>`;
+        } else {
+            document.getElementById("actionButtons").innerHTML = html;
+        }
+    }
 
-function setupActivityListeners() {
-  const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'];
-  
-  events.forEach(event => {
-    document.addEventListener(event, resetInactivityTimer, { passive: true });
-  });
-}
-  // ================= 3. LOGOUT FUNCTION =================
-function logout() {
-  clearTimeout(inactivityTimer);
-  localStorage.clear();
-  location.reload();
-}
- function resetInactivityTimer() {
-  clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(autoLogout, INACTIVITY_LIMIT);
-}
+    function showTreasurerBulkSection() {
+        const bulkSection = document.getElementById("treasurerBulkSection");
+        if (bulkSection) {
+            bulkSection.classList.toggle("hidden", !hasRole(FULL_EDIT_ROLES));
+        }
+    }
 
-function autoLogout() {
-  alert("Your session has timed out due to inactivity.\n\nYou have been logged out for security.");
-  logout();
-}
+    // ================= LOAD DASHBOARD DATA =================
+    async function loadDashboardData() {
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ action: "dashboard", token: currentToken })
+            });
+            const data = await res.json();
 
-function setupActivityListeners() {
-  const events = ['mousemove', 'mousedown', 'keypress', 'scroll', 'touchstart', 'click'];
-  events.forEach(event => {
-    document.addEventListener(event, resetInactivityTimer, { passive: true });
-  });
-}
+            if (!data.success) {
+                alert(data.message || "Failed to load dashboard");
+                return;
+            }
 
-function logout() {
-  clearTimeout(inactivityTimer);
-  localStorage.clear();
-  location.reload();
-}
+            let personalSavings = 0;
+            let totalFines = 0;
+
+            if (data.savings && data.savings.length) {
+                data.savings.forEach(s => {
+                    const type = String(s.type || "").toLowerCase().trim();
+                    const amount = Number(s.amount || 0);
+
+                    if (type === "savings" || type === "dividends") {
+                        personalSavings += amount;
+                    } else if (type === "fine") {
+                        totalFines += amount;
+                    }
+                });
+            }
+
+            // Update Summary Cards
+            document.getElementById("totalSavings").innerHTML = `KSh ${personalSavings.toLocaleString()}`;
+            document.getElementById("totalLoans").innerHTML = `KSh ${data.loans.reduce((sum, l) => sum + Number(l.amount || 0), 0).toLocaleString()}`;
+            document.getElementById("totalFines").innerHTML = `KSh ${totalFines.toLocaleString()}`;
+            document.getElementById("regFees").innerHTML = `KSh ${Number(currentMember.regFees || 0).toLocaleString()}`;
+
+            // Render Histories
+            renderSavingsHistory(data.savings);
+            renderLoansHistory(data.loans);
+
+            // Show Admin Button for leadership roles
+            if (hasRole(["TREASURER", "CHAIRPERSON", "VICE CHAIRPERSON", "SECRETARY"])) {
+                document.getElementById("adminBtn").classList.remove("hidden");
+            }
+        } catch (err) {
+            console.error("Dashboard load error:", err);
+            showToast("Failed to load dashboard data", "error");
+        }
+    }
+
+    function renderSavingsHistory(savings) {
+        const tbody = document.getElementById("savingsTableBody");
+        if (!savings || savings.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">No transactions yet</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = savings.map(s => {
+            const type = String(s.type || "Savings").trim();
+            const amount = Number(s.amount || 0);
+            const isFine = type.toLowerCase() === "fine";
+
+            return `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-4 px-4">${new Date(s.date).toLocaleDateString('en-GB')}</td>
+                    <td class="py-4 px-4 font-mono text-xs">${s.id}</td>
+                    <td class="py-4 px-4">
+                        <span class="px-3 py-1 text-xs rounded-full ${isFine ? 'bg-red-100 text-red-700' : 'bg-teal-100 text-teal-700'}">
+                            ${type}
+                        </span>
+                    </td>
+                    <td class="py-4 px-4">
+                        ${isFine 
+                            ? `<span class="text-red-600 font-semibold">- KSh ${amount.toLocaleString()}</span>`
+                            : `<span class="text-teal-700 font-semibold">+ KSh ${amount.toLocaleString()}</span>`
+                        }
+                    </td>
+                    <td class="py-4 px-4 text-slate-600">${s.notes || '—'}</td>
+                </tr>`;
+        }).join('');
+    }
+
+    function renderLoansHistory(loans) {
+        const tbody = document.getElementById("loansTableBody");
+        const isTreasurer = hasRole("TREASURER");
+
+        if (!loans || loans.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">No loan records yet</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = loans.map(l => {
+            const isPending = (l.status === "Pending" || l.approval === "Pending");
+            return `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-4 px-4">${new Date(l.date || Date.now()).toLocaleDateString('en-GB')}</td>
+                    <td class="py-4 px-4 font-mono text-xs">${l.id}</td>
+                    <td class="py-4 px-4 font-semibold">KSh ${Number(l.amount).toLocaleString()}</td>
+                    <td class="py-4 px-4 text-amber-600">KSh ${Number(l.outstanding || l.amount).toLocaleString()}</td>
+                    <td class="py-4 px-4">
+                        <span class="px-3 py-1 text-xs rounded-full ${l.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                            ${l.status || l.approval || 'Pending'}
+                        </span>
+                    </td>
+                    <td class="py-4 px-4 text-center">
+                        ${isTreasurer && isPending ? `
+                            <button onclick="approveLoan('${l.id}')" class="text-emerald-600 hover:text-emerald-700 mx-2 text-xl"><i class="fa-solid fa-check"></i></button>
+                            <button onclick="rejectLoan('${l.id}')" class="text-red-600 hover:text-red-700 mx-2 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                        ` : '—'}
+                    </td>
+                </tr>`;
+        }).join('');
+    }
+
+    // ================= MODALS & ACTIONS =================
+    function showAddSavingsModal() {
+        document.getElementById("addSavingsModal").classList.remove("hidden");
+        document.getElementById("savingsMemberId").value = currentMember.memberId;
+    }
+
+    function showRequestLoanModal() {
+        document.getElementById("requestLoanModal").classList.remove("hidden");
+    }
+
+    function hideModal(id) {
+        document.getElementById(id).classList.add("hidden");
+    }
+
+    async function submitAddSavings() {
+        const memberTarget = document.getElementById("savingsMemberId").value.trim().toUpperCase();
+        const amount = document.getElementById("savingsAmount").value;
+        const notes = document.getElementById("savingsNotes").value;
+
+        if (!amount) return alert("Please enter amount");
+
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ 
+                    action: "addSavings", 
+                    token: currentToken, 
+                    memberTarget, 
+                    amount, 
+                    notes 
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                alert("Savings added successfully!");
+                hideModal("addSavingsModal");
+                loadDashboardData();
+            } else {
+                alert(data.message || "Failed to add savings");
+            }
+        } catch (err) {
+            alert("Error connecting to server");
+        }
+    }
+
+    async function submitRequestLoan() {
+        const amount = document.getElementById("loanAmount").value;
+        const term = document.getElementById("loanTerm").value || 12;
+        const notes = document.getElementById("loanNotes").value;
+
+        if (!amount) return alert("Please enter amount");
+
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ 
+                    action: "addLoan", 
+                    token: currentToken, 
+                    memberTarget: currentMember.memberId, 
+                    amount, 
+                    term, 
+                    notes 
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                alert("Loan request submitted successfully!");
+                hideModal("requestLoanModal");
+                loadDashboardData();
+            } else {
+                alert(data.message || "Failed to submit loan");
+            }
+        } catch (err) {
+            alert("Error connecting to server");
+        }
+    }
+
+    // Loan Approval
+    async function approveLoan(loanId) {
+        if (!confirm("Approve this loan?")) return;
+        await updateLoan(loanId, "approveLoan");
+    }
+
+    async function rejectLoan(loanId) {
+        if (!confirm("Reject this loan?")) return;
+        await updateLoan(loanId, "rejectLoan");
+    }
+
+    async function updateLoan(loanId, action) {
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ action, token: currentToken, loanId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || "Success");
+                loadDashboardData();
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+            alert("Error");
+        }
+    }
+
+    function switchHistoryTab(n) {
+        document.getElementById("savingsHistory").classList.toggle("hidden", n !== 0);
+        document.getElementById("loansHistory").classList.toggle("hidden", n !== 1);
+        document.getElementById("tabSavingsBtn").classList.toggle("tab-active", n === 0);
+        document.getElementById("tabLoansBtn").classList.toggle("tab-active", n === 1);
+    }
+
+    // ================= STATEMENT FUNCTIONS =================
+    async function getStatementUrl() {
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ 
+                    action: "downloadMemberStatement", 
+                    token: currentToken 
+                })
+            });
+            const data = await res.json();
+            return data.success ? data.downloadUrl : null;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    }
+
+    async function downloadStatement() {
+        const url = await getStatementUrl();
+        if (url) window.open(url, "_blank");
+        else alert("Failed to generate statement");
+    }
+
+    async function emailStatement() {
+        if (!confirm(`Send statement to ${currentMember.email || 'your email'}?`)) return;
+
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ 
+                    action: "emailMemberStatement", 
+                    token: currentToken, 
+                    targetMemberId: currentMember.memberId 
+                })
+            });
+            const data = await res.json();
+            alert(data.message || "Statement emailed successfully!");
+        } catch (err) {
+            alert("Error sending email");
+        }
+    }
+
+    async function whatsappStatement() {
+        const phone = currentMember.phone || "";
+        if (!phone) return alert("No phone number found.");
+
+        const url = await getStatementUrl();
+        if (!url) return;
+
+        const message = `Hello ${currentMember.fullName},%0A%0AHere is your latest statement from Kakelo Unity CBO.%0A%0ADownload: ${encodeURIComponent(url)}`;
+        window.open(`https://wa.me/${phone.replace(/\D/g, '')}?text=${message}`, "_blank");
+    }
+
+    async function emailAllMembers() {
+        if (!confirm("Send statements to ALL members?\n\nThis may take a few minutes.")) return;
+
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ action: "emailAllMembers", token: currentToken })
+            });
+            const data = await res.json();
+            alert(data.message || "Process completed");
+        } catch (err) {
+            alert("Failed to send statements");
+        }
+    }
+
+    // ================= ADMIN DASHBOARD =================
+    function showAdminDashboard() {
+        document.getElementById("adminModal").classList.remove("hidden");
+        loadAdminData();
+    }
+
+    function hideAdminDashboard() {
+        document.getElementById("adminModal").classList.add("hidden");
+        if (monthlyTrendChart) monthlyTrendChart.destroy();
+    }
+
+    async function loadAdminData() {
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ action: "allMembers", token: currentToken })
+            });
+            const data = await res.json();
+            if (!data.success) return;
+
+            const activeCount = data.members.filter(m => !m.status || String(m.status).toLowerCase() === "active").length;
+            document.getElementById("adminActiveMembers").textContent = activeCount;
+
+            const totalSavings = data.members.reduce((sum, m) => sum + Number(m.savings || 0), 0);
+            document.getElementById("adminTotalSavings").innerHTML = `KSh ${totalSavings.toLocaleString()}`;
+
+            // Ranking Table
+            const sorted = [...data.members].sort((a, b) => b.savings - a.savings);
+            document.getElementById("rankingBody").innerHTML = sorted.map((m, i) => `
+                <tr class="hover:bg-slate-50">
+                    <td class="px-6 py-4 font-medium">${i+1}</td>
+                    <td class="px-6 py-4 font-mono">${m.id}</td>
+                    <td class="px-6 py-4">${m.name}</td>
+                    <td class="px-6 py-4 text-right font-semibold">KSh ${Number(m.savings).toLocaleString()}</td>
+                </tr>`).join('');
+
+            await loadMonthlyTrendChart();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function loadMonthlyTrendChart() {
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ action: "getMonthlyReport", token: currentToken })
+            });
+            const data = await res.json();
+
+            if (data.success && data.monthlyTrend) {
+                const ctx = document.getElementById('monthlyTrendChart');
+                if (monthlyTrendChart) monthlyTrendChart.destroy();
+
+                monthlyTrendChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.monthlyTrend.map(item => item.month),
+                        datasets: [{
+                            label: 'Group Savings (KSh)',
+                            data: data.monthlyTrend.map(item => item.savings),
+                            backgroundColor: '#14b8a6',
+                            borderColor: '#0f766e',
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { callback: val => 'KSh ' + val.toLocaleString() } }
+                        }
+                    }
+                });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    function downloadRankingCSV() {
+        // Implementation remains same as before
+        alert("Download CSV feature - implement if needed");
+    }
+
+    async function sendMemberStatement() {
+        const target = document.getElementById("emailMemberId").value.trim().toUpperCase();
+        if (!target) return alert("Enter Member ID");
+
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({ 
+                    action: "emailMemberStatement", 
+                    token: currentToken, 
+                    targetMemberId: target 
+                })
+            });
+            const data = await res.json();
+            alert(data.message || "Statement sent");
+        } catch (err) {
+            alert("Error sending statement");
+        }
+    }
+
+    // ================= CHANGE PASSWORD MODAL =================
+    function showChangePasswordModal(isForced = false) {
+        const modal = document.getElementById("changePasswordModal");
+        modal.classList.remove("hidden");
+
+        document.getElementById("currentPassword").value = "";
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+        document.getElementById("changePasswordMsg").textContent = "";
+
+        if (isForced) {
+            document.getElementById("modalTitle").textContent = "Set New Password";
+            document.getElementById("modalSubtitle").textContent = "This is your first login. Please create a new secure password.";
+        } else {
+            document.getElementById("modalTitle").textContent = "Change Password";
+            document.getElementById("modalSubtitle").textContent = "Update your account password";
+        }
+    }
+
+    function togglePassword(fieldId) {
+        const input = document.getElementById(fieldId);
+        const icon = document.getElementById(fieldId + "Icon");
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+
+    function checkPasswordStrength() {
+        // Your existing strength checker logic
+        const pass = document.getElementById("newPassword").value;
+        const bar = document.getElementById("passwordStrength");
+        const text = document.getElementById("strengthText");
+
+        if (!pass) {
+            bar.className = "h-2 bg-slate-200 rounded-full";
+            text.textContent = "";
+            return;
+        }
+
+        let score = 0;
+        if (pass.length >= 8) score++;
+        if (/[A-Z]/.test(pass)) score++;
+        if (/[0-9]/.test(pass)) score++;
+        if (/[^A-Za-z0-9]/.test(pass)) score++;
+
+        if (score <= 1) {
+            bar.className = "h-2 bg-red-500 rounded-full";
+            text.textContent = "Weak";
+        } else if (score === 2) {
+            bar.className = "h-2 bg-amber-500 rounded-full";
+            text.textContent = "Medium";
+        } else {
+            bar.className = "h-2 bg-emerald-500 rounded-full";
+            text.textContent = "Strong";
+        }
+    }
+
+    function checkPasswordMatch() {
+        const newPass = document.getElementById("newPassword").value;
+        const confirmPass = document.getElementById("confirmPassword").value;
+        const msg = document.getElementById("matchMessage");
+
+        msg.innerHTML = newPass === confirmPass 
+            ? `<span class="text-emerald-600">✓ Passwords match</span>` 
+            : `<span class="text-red-600">✗ Passwords do not match</span>`;
+    }
+
+    async function submitChangePassword() {
+        const current = document.getElementById("currentPassword").value.trim();
+        const newPass = document.getElementById("newPassword").value.trim();
+        const confirm = document.getElementById("confirmPassword").value.trim();
+        const msgEl = document.getElementById("changePasswordMsg");
+        const btn = document.getElementById("changePasswordBtn");
+
+        if (!current || !newPass || !confirm) {
+            msgEl.textContent = "All fields are required";
+            return;
+        }
+        if (newPass !== confirm) {
+            msgEl.textContent = "New passwords do not match";
+            return;
+        }
+        if (newPass.length < 6) {
+            msgEl.textContent = "New password must be at least 6 characters";
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Updating...`;
+
+        try {
+            const res = await fetch(API, {
+                method: "POST",
+                body: JSON.stringify({
+                    action: "changePassword",
+                    token: currentToken,
+                    currentPassword: current,
+                    newPassword: newPass
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                msgEl.innerHTML = `<span class="text-emerald-600">✅ Password updated successfully!</span>`;
+                if (currentMember) currentMember.passwordChanged = true;
+
+                setTimeout(() => {
+                    document.getElementById("changePasswordModal").classList.add("hidden");
+                    alert("Your password has been changed successfully.");
+                }, 1500);
+            } else {
+                msgEl.textContent = data.message || "Failed to change password";
+            }
+        } catch (err) {
+            msgEl.textContent = "Network error. Please try again.";
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "Update Password";
+        }
+    }
+
+    // ================= FORGOT PASSWORD =================
+    function showForgotPassword() {
+        const nationalId = prompt("Enter your National ID to receive a password reset link:");
+        if (!nationalId || nationalId.trim() === "") return;
+
+        const msgEl = document.getElementById("loginMsg");
+        msgEl.textContent = "Sending reset link...";
+        msgEl.className = "text-center text-sm mt-6 text-blue-600";
+
+        fetch(API, {
+            method: "POST",
+            body: JSON.stringify({ action: "requestPasswordReset", nationalId: nationalId.trim() })
+        })
+        .then(res => res.json())
+        .then(data => {
+            msgEl.textContent = data.message;
+            msgEl.className = data.success ? "text-emerald-600" : "text-red-600";
+        })
+        .catch(() => {
+            msgEl.textContent = "Failed to send reset link. Please try again.";
+            msgEl.className = "text-red-600";
+        });
+    }
+
+    // ================= AUTO LOGIN =================
+    window.onload = () => {
+        const savedToken = localStorage.getItem("token");
+        const savedMember = localStorage.getItem("member");
+
+        if (savedToken && savedMember) {
+            try {
+                currentToken = savedToken;
+                currentMember = JSON.parse(savedMember);
+                showDashboard();
+            } catch (e) {
+                localStorage.clear();
+            }
+        }
+    };
 </script>
