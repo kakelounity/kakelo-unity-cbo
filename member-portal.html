@@ -511,18 +511,17 @@
         loginBtn.disabled = true;
         loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging in...`;
 
-        try {
-            const res = await fetch(API, {
-                method: "POST",
-                body: JSON.stringify({ action: "login", nationalId, password })
-            });
-            const data = await res.json();
-
-            if (!data.success) {
-                msgEl.textContent = data.message || "Login failed";
-                msgEl.className = "text-center text-sm mt-6 text-red-600";
-                return;
-            }
+       await fetch("YOUR_SCRIPT_URL", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    action: "login",
+    nationalId,
+    password
+  })
+});
 
             currentToken = data.token;
             currentMember = data.member;
