@@ -1187,4 +1187,48 @@
             }
         }
     };
+  document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const loginBtn = document.getElementById('loginBtn');
+    const loginMsg = document.getElementById('loginMsg');
+    
+    loginBtn.disabled = true;
+    loginMsg.innerText = "Authenticating...";
+    loginMsg.className = "text-center text-sm mt-6 text-teal-600";
+
+    const payload = {
+      action: "login",
+      nationalId: document.getElementById('nationalId').value,
+      password: document.getElementById('password').value
+    };
+
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "cors", // Ensure cors mode is explicitly set
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // Use text/plain to avoid preflight
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Success: Transition to dashboard
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboardScreen').classList.remove('hidden');
+        document.getElementById('navName').innerText = result.member.name;
+        localStorage.setItem('userToken', result.token);
+      } else {
+        loginMsg.innerText = result.message;
+        loginMsg.className = "text-center text-sm mt-6 text-red-600";
+      }
+    } catch (error) {
+      loginMsg.innerText = "Connection failed. Please check your internet.";
+      loginMsg.className = "text-center text-sm mt-6 text-red-600";
+    } finally {
+      loginBtn.disabled = false;
+    }
+  });
+</script>
+
 </script>
