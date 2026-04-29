@@ -499,30 +499,36 @@
     }
 
     // ================= LOGIN =================
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const nationalId = document.getElementById("nationalId").value.trim();
-        const password = document.getElementById("password").value.trim();
-        const loginBtn = document.getElementById("loginBtn");
-        const msgEl = document.getElementById("loginMsg");
+   document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-        msgEl.textContent = "Logging in...";
-        msgEl.className = "text-center text-sm mt-6 text-blue-600";
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging in...`;
+    const nationalId = document.getElementById("nationalId").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const loginBtn = document.getElementById("loginBtn");
+    const msgEl = document.getElementById("loginMsg");
 
-       await fetch("YOUR_SCRIPT_URL", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    action: "login",
-    nationalId,
-    password
-  })
-});
+    loginBtn.disabled = true;
+    msgEl.textContent = "Logging in...";
+    msgEl.className = "text-center text-sm mt-6 text-blue-600";
 
+    try {
+        const res = await fetch(API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+                action: "login",
+                nationalId,
+                password
+            })
+        });
+
+        const data = await res.json();
+
+        console.log("LOGIN RESPONSE:", data); // 🔥 DEBUG
+
+        if (data.success) {
             currentToken = data.token;
             currentMember = data.member;
 
@@ -530,16 +536,20 @@
             localStorage.setItem("member", JSON.stringify(currentMember));
 
             showDashboard();
-        } catch (err) {
-            console.error(err);
-            msgEl.textContent = "Network error. Please try again.";
+        } else {
+            msgEl.textContent = data.message || "Login failed";
             msgEl.className = "text-center text-sm mt-6 text-red-600";
-        } finally {
-            loginBtn.disabled = false;
-            loginBtn.textContent = "Login";
         }
-    });
 
+    } catch (err) {
+        console.error("LOGIN ERROR:", err);
+        msgEl.textContent = "Network error. Please try again.";
+        msgEl.className = "text-center text-sm mt-6 text-red-600";
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Login";
+    }
+});
     // ================= SHOW DASHBOARD =================
     async function showDashboard() {
         document.getElementById("loginScreen").classList.add("hidden");
