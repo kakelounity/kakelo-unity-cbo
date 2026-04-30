@@ -472,49 +472,61 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     const nationalId = document.getElementById("nationalId").value.trim();
     const password = document.getElementById("password").value.trim();
-    const loginBtn = document.getElementById("loginBtn");
     const msgEl = document.getElementById("loginMsg");
+    const loginBtn = document.getElementById("loginBtn");
 
     loginBtn.disabled = true;
-    msgEl.textContent = "Logging in...";
+    msgEl.textContent = "Sending test request...";
     msgEl.className = "text-center text-sm mt-6 text-blue-600";
 
     try {
+        const payload = {
+            action: "login",
+            nationalId: nationalId || "test",
+            password: password || "test"
+        };
+
         const res = await fetch(API, {
             method: "POST",
             headers: {
-                "Content-Type": "text/plain;charset=utf-8"   // ← Critical for CORS
+                "Content-Type": "text/plain;charset=utf-8"
             },
-            body: JSON.stringify({
-                action: "login",
-                nationalId: nationalId,
-                password: password
-            })
+            body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
+        // Read as text first to see exactly what Google returns
+        const rawText = await res.text();
+        console.log("Raw response from Google:", rawText);
+
+        let data;
+        try {
+            data = JSON.parse(rawText);
+        } catch (e) {
+            console.log("Response is NOT JSON. Google probably returned an error page.");
+            msgEl.innerHTML = `Google returned HTML error.<br>Check console for details.`;
+            return;
+        }
+
+        console.log("Parsed JSON:", data);
 
         if (data.success) {
+            msgEl.textContent = "Login successful!";
             currentToken = data.token;
             currentMember = data.member;
-
             localStorage.setItem("token", currentToken);
             localStorage.setItem("member", JSON.stringify(currentMember));
-
             showDashboard();
         } else {
             msgEl.textContent = data.message || "Login failed";
             msgEl.className = "text-center text-sm mt-6 text-red-600";
         }
     } catch (err) {
-        console.error("LOGIN ERROR:", err);
-        msgEl.textContent = "Connection failed. Please check your internet and try again.";
-        msgEl.className = "text-center text-sm mt-6 text-red-600";
+        console.error("Fetch failed:", err);
+        msgEl.innerHTML = `Failed to reach server.<br>Error: ${err.message}<br><br>Check if deployment is set to "Anyone"`;
     } finally {
         loginBtn.disabled = false;
     }
 });
-
 // ================= SHOW DASHBOARD =================
 async function showDashboard() {
     document.getElementById("loginScreen").classList.add("hidden");
