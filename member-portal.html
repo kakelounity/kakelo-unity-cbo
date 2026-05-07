@@ -704,7 +704,7 @@ function switchAdminTab(tab) {
       <span>Back to Member Portal</span>
     </button>`;
 
- } else if (tab === 0) {
+  if (tab === 0) {
   content.innerHTML = `
     ${backButton}
     <div class="p-8">
