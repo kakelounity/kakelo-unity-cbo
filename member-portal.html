@@ -360,7 +360,7 @@ async function showDashboard() {
   const m = currentMember;
   const role = (m.role || "").toUpperCase().trim();
 
-  // Welcome Message
+  // Welcome & Nav
   document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
   document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
 
@@ -384,10 +384,8 @@ async function showDashboard() {
     document.getElementById("photoPlaceholder").classList.remove("hidden");
   }
 
-  // Render Action Buttons & Load Data
   renderActionButtons();
-  
-  await loadDashboardData();
+  await loadDashboardData();     // Important: await
   loadSavingsTrend();
 }
 
@@ -415,18 +413,20 @@ function renderActionButtons() {
 // ====================== LOAD DASHBOARD DATA ======================
 async function loadDashboardData() {
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "dashboard");
+    formData.append("token", currentToken);
+
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        action: "dashboard", 
-        token: currentToken 
-      })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
 
     const data = await res.json();
+
     if (!data.success) {
-      console.error(data.message);
+      console.error("Dashboard Error:", data.message);
       return;
     }
 
@@ -438,7 +438,6 @@ async function loadDashboardData() {
     document.getElementById("totalLoans").innerHTML = `KSh ${totalLoans.toLocaleString()}`;
     document.getElementById("totalFines").innerHTML = `KSh ${Number(data.summary?.totalFines || 0).toLocaleString()}`;
 
-    // Render History Tables
     renderSavingsHistory(data.savings || []);
     renderLoansHistory(data.loans || []);
 
@@ -519,23 +518,25 @@ async function submitAddSavings() {
   if (!amount) return alert("Please enter amount");
 
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "addSavings");
+    formData.append("token", currentToken);
+    formData.append("memberTarget", memberTarget);
+    formData.append("amount", amount);
+    formData.append("notes", notes);
+
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        action: "addSavings", 
-        token: currentToken, 
-        memberTarget, 
-        amount, 
-        notes 
-      })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
+
     const data = await res.json();
 
     if (data.success) {
       alert("✅ Savings added successfully!");
       hideModal("addSavingsModal");
-      loadDashboardData();   // Refresh dashboard
+      loadDashboardData();
     } else {
       alert(data.message || "Failed to add savings");
     }
@@ -552,17 +553,18 @@ async function submitRequestLoan() {
   if (!amount) return alert("Please enter loan amount");
 
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "addLoan");
+    formData.append("token", currentToken);
+    formData.append("memberId", currentMember.memberId);
+    formData.append("amount", amount);
+    formData.append("term", term);
+    formData.append("notes", notes);
+
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        action: "addLoan", 
-        token: currentToken, 
-        memberId: currentMember.memberId, 
-        amount, 
-        term, 
-        notes 
-      })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
 
     const data = await res.json();
@@ -572,71 +574,79 @@ async function submitRequestLoan() {
       hideModal("requestLoanModal");
       loadDashboardData();
     } else {
-      alert(data.message || "Failed to submit loan request");
+      alert(data.message || "Failed to submit loan");
     }
   } catch (err) {
     alert("Error submitting loan request");
   }
 }
-    // ====================== SAVINGS TREND CHART ======================
-    async function loadSavingsTrend() {
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "getSavingsTrend", token: currentToken })
-        });
-        const data = await res.json();
 
-        const ctx = document.getElementById('savingsTrendChart');
-        if (savingsTrendChart) savingsTrendChart.destroy();
+// ====================== SAVINGS TREND CHART ======================
+async function loadSavingsTrend() {
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getSavingsTrend");
+    formData.append("token", currentToken);
 
-        if (!data.success || !data.trend || data.trend.length === 0) {
-          ctx.style.display = 'none';
-          const container = ctx.parentElement;
-          if (!document.getElementById('noTrendMsg')) {
-            const msg = document.createElement('div');
-            msg.id = 'noTrendMsg';
-            msg.className = "flex items-center justify-center h-full text-slate-400 text-lg";
-            msg.innerHTML = `<i class="fa-solid fa-chart-line mr-3"></i> No savings data yet`;
-            container.appendChild(msg);
-          }
-          return;
-        }
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
+    });
 
-        const labels = data.trend.map(item => item.month);
-        const values = data.trend.map(item => item.amount);
+    const data = await res.json();
 
-        savingsTrendChart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Savings (KSh)',
-              data: values,
-              borderColor: '#14b8a6',
-              backgroundColor: 'rgba(20, 184, 166, 0.1)',
-              borderWidth: 3,
-              tension: 0.4,
-              fill: true,
-              pointRadius: 5,
-              pointBackgroundColor: '#14b8a6'
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { beginAtZero: true, ticks: { callback: val => 'KSh ' + val.toLocaleString() } },
-              x: { grid: { color: '#e2e8f0' } }
-            }
-          }
-        });
-      } catch (err) {
-        console.error("Chart error:", err);
+    const ctx = document.getElementById('savingsTrendChart');
+    if (savingsTrendChart) savingsTrendChart.destroy();
+
+    if (!data.success || !data.trend || data.trend.length === 0) {
+      ctx.style.display = 'none';
+      const container = ctx.parentElement;
+      if (!document.getElementById('noTrendMsg')) {
+        const msg = document.createElement('div');
+        msg.id = 'noTrendMsg';
+        msg.className = "flex items-center justify-center h-full text-slate-400 text-lg";
+        msg.innerHTML = `<i class="fa-solid fa-chart-line mr-3"></i> No savings data yet`;
+        container.appendChild(msg);
       }
+      return;
     }
 
+    ctx.style.display = 'block';
+
+    const labels = data.trend.map(item => item.month);
+    const values = data.trend.map(item => item.amount);
+
+    savingsTrendChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Savings (KSh)',
+          data: values,
+          borderColor: '#14b8a6',
+          backgroundColor: 'rgba(20, 184, 166, 0.1)',
+          borderWidth: 3,
+          tension: 0.4,
+          fill: true,
+          pointRadius: 5,
+          pointBackgroundColor: '#14b8a6'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { callback: val => 'KSh ' + val.toLocaleString() } },
+          x: { grid: { color: '#e2e8f0' } }
+        }
+      }
+    });
+  } catch (err) {
+    console.error("Chart error:", err);
+  }
+}
 // ====================== PROFESSIONAL ADMIN DASHBOARD ======================
 function showAdminDashboard() {
   document.getElementById("adminModal").classList.remove("hidden");
