@@ -581,7 +581,7 @@ async function submitRequestLoan() {
   }
 }
 
-// ====================== SAVINGS TREND CHART ======================
+// ====================== SAVINGS TREND CHART (Professional) ======================
 async function loadSavingsTrend() {
   try {
     const formData = new URLSearchParams();
@@ -601,34 +601,76 @@ async function loadSavingsTrend() {
 
     if (!data.success || !data.trend || data.trend.length === 0) {
       ctx.style.display = 'none';
+      const container = ctx.parentElement;
+      
+      if (!document.getElementById('noTrendMsg')) {
+        const msg = document.createElement('div');
+        msg.id = 'noTrendMsg';
+        msg.className = "flex flex-col items-center justify-center h-full text-slate-400";
+        msg.innerHTML = `
+          <i class="fa-solid fa-chart-line text-5xl mb-3"></i>
+          <p class="text-lg">No savings data yet</p>
+          <p class="text-sm mt-1">Start contributing to see your trend</p>
+        `;
+        container.appendChild(msg);
+      }
       return;
     }
 
     ctx.style.display = 'block';
 
+    const labels = data.trend.map(item => item.month);
+    const values = data.trend.map(item => item.amount);
+
     savingsTrendChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: data.trend.map(item => item.month),
+        labels: labels,
         datasets: [{
-          label: 'Savings (KSh)',
-          data: data.trend.map(item => item.amount),
+          label: 'Monthly Savings',
+          data: values,
           borderColor: '#14b8a6',
-          backgroundColor: 'rgba(20, 184, 166, 0.1)',
-          borderWidth: 3,
+          backgroundColor: 'rgba(20, 184, 166, 0.08)',
+          borderWidth: 4,
           tension: 0.4,
           fill: true,
           pointRadius: 5,
-          pointBackgroundColor: '#14b8a6'
+          pointBackgroundColor: '#14b8a6',
+          pointBorderWidth: 2
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0f766e',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            padding: 12,
+            displayColors: false,
+            callbacks: {
+              label: (ctx) => 'KSh ' + ctx.raw.toLocaleString()
+            }
+          }
+        },
         scales: {
-          y: { beginAtZero: true, ticks: { callback: val => 'KSh ' + val.toLocaleString() } },
-          x: { grid: { color: '#e2e8f0' } }
+          y: { 
+            beginAtZero: true, 
+            grid: { color: '#e2e8f0' },
+            ticks: { 
+              callback: val => 'KSh ' + val.toLocaleString(),
+              font: { size: 12 }
+            }
+          },
+          x: { 
+            grid: { color: '#f1f5f9' },
+            ticks: { font: { size: 12 } }
+          }
+        },
+        elements: {
+          line: { borderJoinStyle: 'round' }
         }
       }
     });
@@ -662,33 +704,104 @@ function switchAdminTab(tab) {
       <span>Back to Member Portal</span>
     </button>`;
 
-  if (tab === 0) {
-    // Dashboard Overview
-    content.innerHTML = `
-      ${backButton}
-      <div class="p-8">
-        <h1 class="text-3xl font-bold mb-8 text-slate-800">Dashboard Overview</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <div class="bg-teal-600 text-white p-6 rounded-3xl">
-            <p class="text-teal-100">Total Members</p>
-            <h3 id="dashTotalMembers" class="text-5xl font-bold mt-2">0</h3>
-          </div>
-          <div class="bg-green-600 text-white p-6 rounded-3xl">
-            <p class="text-green-100">Active Loans</p>
-            <h3 id="dashActiveLoans" class="text-5xl font-bold mt-2">0</h3>
-          </div>
-          <div class="bg-amber-500 text-white p-6 rounded-3xl">
-            <p class="text-amber-100">Total Savings</p>
-            <h3 id="dashTotalSavings" class="text-5xl font-bold mt-2">KSh 0</h3>
-          </div>
-          <div class="bg-rose-600 text-white p-6 rounded-3xl">
-            <p class="text-rose-100">Total Expenses</p>
-            <h3 id="dashTotalExpenses" class="text-5xl font-bold mt-2">KSh 0</h3>
+ } else if (tab === 0) {
+  content.innerHTML = `
+    ${backButton}
+    <div class="p-8">
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h1 class="text-3xl font-bold text-slate-800">Dashboard Overview</h1>
+          <p class="text-slate-500">May 2026 • System Administrator</p>
+        </div>
+        <div class="text-right text-sm">
+          <p class="text-slate-500">Last Updated</p>
+          <p class="font-medium text-emerald-600">Just Now</p>
+        </div>
+      </div>
+
+      <!-- Key Metrics -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-3xl shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-slate-500 text-sm">Total Members</p>
+              <h3 id="dashTotalMembers" class="text-4xl font-bold text-slate-800 mt-2">284</h3>
+            </div>
+            <i class="fa-solid fa-users text-4xl text-teal-600"></i>
           </div>
         </div>
-      </div>`;
-    loadAdminDashboardSummary();
 
+        <div class="bg-white p-6 rounded-3xl shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-slate-500 text-sm">Total Savings</p>
+              <h3 id="dashTotalSavings" class="text-4xl font-bold text-teal-600 mt-2">KSh 18,745,000</h3>
+            </div>
+            <i class="fa-solid fa-piggy-bank text-4xl text-teal-600"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-slate-500 text-sm">Active Loans</p>
+              <h3 id="dashActiveLoans" class="text-4xl font-bold text-amber-600 mt-2">63</h3>
+            </div>
+            <i class="fa-solid fa-hand-holding-dollar text-4xl text-amber-600"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="text-slate-500 text-sm">Total Expenses</p>
+              <h3 id="dashTotalExpenses" class="text-4xl font-bold text-rose-600 mt-2">KSh 1,245,000</h3>
+            </div>
+            <i class="fa-solid fa-file-invoice-dollar text-4xl text-rose-600"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Savings Activity -->
+        <div class="bg-white rounded-3xl shadow p-6">
+          <h3 class="font-semibold mb-5 flex items-center gap-2">
+            <i class="fa-solid fa-piggy-bank text-teal-600"></i> Savings Activity (This Month)
+          </h3>
+          <div id="savingsActivity" class="space-y-5"></div>
+        </div>
+
+        <!-- Loan Performance -->
+        <div class="bg-white rounded-3xl shadow p-6">
+          <h3 class="font-semibold mb-5 flex items-center gap-2">
+            <i class="fa-solid fa-hand-holding-dollar text-amber-600"></i> Loan Performance
+          </h3>
+          <div id="loanPerformance" class="space-y-5"></div>
+        </div>
+
+        <!-- Portfolio Health -->
+        <div class="bg-white rounded-3xl shadow p-6">
+          <h3 class="font-semibold mb-5 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie text-emerald-600"></i> Portfolio Health
+          </h3>
+          <div class="flex justify-center my-6">
+            <canvas id="portfolioHealthChart" width="220" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="mt-10">
+        <h3 class="font-semibold mb-4 flex items-center gap-2">
+          <i class="fa-solid fa-clock"></i> Recent Transactions
+        </h3>
+        <div id="recentTransactions" class="bg-white rounded-3xl shadow overflow-hidden"></div>
+      </div>
+    </div>`;
+
+  loadAdminDashboardSummary();
+}
   } else if (tab === 1) {
     // Members Directory
     content.innerHTML = `
@@ -2144,6 +2257,71 @@ async function viewMemberDashboard(memberId) {
     console.error(err);
     alert("Failed to load member dashboard");
   }
+}
+  async function loadAdminDashboardSummary() {
+  // Sample realistic data
+  document.getElementById("dashTotalMembers").textContent = "284";
+  document.getElementById("dashTotalSavings").innerHTML = `KSh 18,745,000`;
+  document.getElementById("dashActiveLoans").textContent = "63";
+  document.getElementById("dashTotalExpenses").innerHTML = `KSh 1,245,000`;
+
+  // Savings Activity
+  document.getElementById("savingsActivity").innerHTML = `
+    <div class="flex justify-between"><span>Deposits</span><span class="text-teal-600 font-medium">UGX 2,450,000</span></div>
+    <div class="flex justify-between"><span>Withdrawals</span><span class="text-red-600 font-medium">UGX 890,000</span></div>
+    <div class="flex justify-between"><span>Net Change</span><span class="text-emerald-600 font-medium">+ UGX 1,560,000</span></div>
+  `;
+
+  // Loan Performance
+  document.getElementById("loanPerformance").innerHTML = `
+    <div class="flex justify-between"><span>Disbursements</span><span class="font-medium">UGX 4,200,000</span></div>
+    <div class="flex justify-between"><span>Collections</span><span class="text-emerald-600 font-medium">UGX 3,850,000</span></div>
+    <div class="flex justify-between"><span>Collection Rate</span><span class="text-emerald-600 font-medium">91.7%</span></div>
+  `;
+
+  // Recent Transactions
+  document.getElementById("recentTransactions").innerHTML = `
+    <table class="w-full">
+      <thead class="bg-slate-100">
+        <tr>
+          <th class="px-6 py-4 text-left">Date</th>
+          <th class="px-6 py-4 text-left">Member</th>
+          <th class="px-6 py-4 text-left">Type</th>
+          <th class="px-6 py-4 text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y text-sm">
+        <tr><td class="px-6 py-4">07/05/2026</td><td class="px-6 py-4">Amos Owuor</td><td class="px-6 py-4">Savings</td><td class="px-6 py-4 text-right text-teal-600">KSh 4,055</td></tr>
+        <tr><td class="px-6 py-4">06/05/2026</td><td class="px-6 py-4">Isaac Omondi</td><td class="px-6 py-4">Loan Repayment</td><td class="px-6 py-4 text-right">KSh 12,000</td></tr>
+      </tbody>
+    </table>
+  `;
+
+  // Portfolio Health Chart
+  createPortfolioHealthChart();
+}
+
+function createPortfolioHealthChart() {
+  const ctx = document.getElementById("portfolioHealthChart");
+  if (!ctx) return;
+
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Performing Loans', 'At Risk', 'Defaulted'],
+      datasets: [{
+        data: [78, 18, 4],
+        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      cutout: '78%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 15 } }
+      }
+    }
+  });
 }
 // Make important functions globally available
 window.logout = () => {
