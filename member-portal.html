@@ -601,29 +601,18 @@ async function loadSavingsTrend() {
 
     if (!data.success || !data.trend || data.trend.length === 0) {
       ctx.style.display = 'none';
-      const container = ctx.parentElement;
-      if (!document.getElementById('noTrendMsg')) {
-        const msg = document.createElement('div');
-        msg.id = 'noTrendMsg';
-        msg.className = "flex items-center justify-center h-full text-slate-400 text-lg";
-        msg.innerHTML = `<i class="fa-solid fa-chart-line mr-3"></i> No savings data yet`;
-        container.appendChild(msg);
-      }
       return;
     }
 
     ctx.style.display = 'block';
 
-    const labels = data.trend.map(item => item.month);
-    const values = data.trend.map(item => item.amount);
-
     savingsTrendChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: labels,
+        labels: data.trend.map(item => item.month),
         datasets: [{
           label: 'Savings (KSh)',
-          data: values,
+          data: data.trend.map(item => item.amount),
           borderColor: '#14b8a6',
           backgroundColor: 'rgba(20, 184, 166, 0.1)',
           borderWidth: 3,
@@ -937,22 +926,27 @@ async function deleteSavings(transId) {
 
 
     // ====================== SAVINGS DIRECTORY FUNCTIONS ======================
-    async function loadAllSavings() {
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "getAllSavings" })
-        });
-        const result = await res.json();
+   async function loadAllSavings() {
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getAllSavings");
 
-        if (result.success) {
-          allSavingsData = result.savings || [];
-          renderAllSavings(allSavingsData);
-        }
-      } catch (err) {
-        console.error(err);
-      }
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
+    });
+
+    const result = await res.json();
+    if (result.success) {
+      allSavingsData = result.savings || [];
+      renderAllSavings(allSavingsData);
     }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 
     function renderAllSavings(savings) {
   const tbody = document.getElementById("allSavingsBody");
@@ -1263,30 +1257,22 @@ let allExpensesData = [];
 
 async function loadAllExpenses() {
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getAllExpenses");
+
     const res = await fetch(API, {
       method: "POST",
-      body: JSON.stringify({ action: "getAllExpenses" })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
+
     const result = await res.json();
-
-    console.log("Expenses API Response:", result);   // For debugging
-
     if (result.success) {
       allExpensesData = result.expenses || [];
       renderAllExpenses(allExpensesData);
-    } else {
-      console.error("Error:", result.message);
-      document.getElementById("allExpensesBody").innerHTML = `
-        <tr><td colspan="7" class="text-center py-8 text-red-500">
-          ${result.message || "Failed to load expenses"}
-        </td></tr>`;
     }
   } catch (err) {
-    console.error("Load Expenses Error:", err);
-    document.getElementById("allExpensesBody").innerHTML = `
-      <tr><td colspan="7" class="text-center py-8 text-red-500">
-        Network error loading expenses
-      </td></tr>`;
+    console.error(err);
   }
 }
 
@@ -1519,12 +1505,16 @@ let allLoansData = [];
 
 async function loadAllLoans() {
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getAllLoans");
+
     const res = await fetch(API, {
       method: "POST",
-      body: JSON.stringify({ action: "getAllLoans" })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
-    const result = await res.json();
 
+    const result = await res.json();
     if (result.success) {
       allLoansData = result.loans || [];
       renderAllLoans(allLoansData);
@@ -1737,12 +1727,16 @@ let allMembersData = [];
 
 async function loadAllMembers() {
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getAllMembers");
+
     const res = await fetch(API, {
       method: "POST",
-      body: JSON.stringify({ action: "getAllMembers" })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
-    const result = await res.json();
 
+    const result = await res.json();
     if (result.success) {
       allMembersData = result.members || [];
       renderAllMembers(allMembersData);
