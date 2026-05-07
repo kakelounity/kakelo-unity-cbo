@@ -1001,58 +1001,62 @@ async function deleteSavings(transId) {
 
       renderAllSavings(filtered);
     }
-
-    // ====================== ADD SAVINGS FORM ======================
-    function showAddSavingsForm() {
-      const formHTML = `
-        <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-[110]">
-          <div class="bg-white rounded-3xl p-8 w-full max-w-lg">
-            <h3 class="text-2xl font-bold mb-6">Add New Transaction</h3>
-            <div class="space-y-5">
-              <div>
-                <label class="block text-sm mb-1">Transaction ID</label>
-                <input id="newTransId" class="w-full p-4 border rounded-2xl bg-gray-100" value="SV${Date.now().toString().slice(-8)}" readonly>
-              </div>
-              <div>
-                <label class="block text-sm mb-1">Date</label>
-                <input id="newDate" type="date" class="w-full p-4 border rounded-2xl">
-              </div>
-              <div>
-                <label class="block text-sm mb-1">Member ID</label>
-                <input id="newMemberId" class="w-full p-4 border rounded-2xl" placeholder="KU001">
-              </div>
-              <div>
-                <label class="block text-sm mb-1">Type</label>
-                <select id="newType" class="w-full p-4 border rounded-2xl">
-                  <option value="savings">Savings</option>
-                  <option value="fine">Fine</option>
-                  <option value="withdrawal">Withdrawal</option>
-                  <option value="dividend">Dividend</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm mb-1">Amount (KSh)</label>
-                <input id="newAmount" type="number" class="w-full p-4 border rounded-2xl" placeholder="5000">
-              </div>
-              <div>
-                <label class="block text-sm mb-1">Notes</label>
-                <textarea id="newNotes" class="w-full p-4 border rounded-2xl h-20"></textarea>
-              </div>
-              <div>
-                <label class="block text-sm mb-1">Reference (Optional)</label>
-                <input id="newReference" class="w-full p-4 border rounded-2xl" placeholder="Receipt / Cheque No">
-              </div>
-            </div>
-            <div class="flex gap-4 mt-8">
-              <button onclick="this.closest('.fixed').remove()" class="flex-1 py-4 border rounded-2xl font-semibold">Cancel</button>
-              <button onclick="submitNewSavings()" class="flex-1 bg-teal-700 text-white py-4 rounded-2xl font-semibold">Save Transaction</button>
-            </div>
+function showAddSavingsForm() {
+  const formHTML = `
+    <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-[110]">
+      <div class="bg-white rounded-3xl p-8 w-full max-w-lg">
+        <h3 class="text-2xl font-bold mb-6">Add New Transaction</h3>
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm mb-1">Transaction ID</label>
+            <input id="newTransId" class="w-full p-4 border rounded-2xl bg-gray-100" value="SV${Date.now().toString().slice(-8)}" readonly>
           </div>
-        </div>`;
+          <div>
+            <label class="block text-sm mb-1">Date</label>
+            <input id="newDate" type="date" class="w-full p-4 border rounded-2xl">
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Member ID</label>
+            <input id="newMemberId" class="w-full p-4 border rounded-2xl" placeholder="KU001">
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Type</label>
+            <select id="newType" class="w-full p-4 border rounded-2xl">
+              <option value="savings">Savings</option>
+              <option value="fine">Fine</option>
+              <option value="withdrawal">Withdrawal</option>
+              <option value="dividend">Dividend</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Amount (KSh)</label>
+            <input id="newAmount" type="number" class="w-full p-4 border rounded-2xl" placeholder="5000">
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Notes</label>
+            <textarea id="newNotes" class="w-full p-4 border rounded-2xl h-20"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm mb-1">Reference (Optional)</label>
+            <input id="newReference" class="w-full p-4 border rounded-2xl" placeholder="Receipt / Cheque No">
+          </div>
+        </div>
+        <div class="flex gap-4 mt-8">
+          <button onclick="this.closest('.fixed').remove()" 
+                  class="flex-1 py-4 border border-slate-300 rounded-2xl font-semibold hover:bg-slate-50">
+            Cancel
+          </button>
+          <button onclick="submitNewSavings()" 
+                  class="flex-1 bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold">
+            Save Transaction
+          </button>
+        </div>
+      </div>
+    </div>`;
 
-      document.body.insertAdjacentHTML('beforeend', formHTML);
-      document.getElementById("newDate").valueAsDate = new Date();
-    }
+  document.body.insertAdjacentHTML('beforeend', formHTML);
+  document.getElementById("newDate").valueAsDate = new Date();
+}
 
     async function submitNewSavings() {
   const payload = {
@@ -1098,97 +1102,90 @@ window.onload = () => {
     showDashboard();
   }
 };
-// ====================== FULL EDIT SAVINGS FUNCTION ======================
+// ====================== EDIT SAVINGS ======================
 async function editSavings(transId) {
-    if (!transId) return alert("Transaction ID is missing!");
+  if (!transId) return alert("Transaction ID is missing!");
 
-    try {
-        // Fetch latest savings data
-        const res = await fetch(API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "getAllSavings" })
-        });
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ action: "getAllSavings" })
+    });
 
-        const result = await res.json();
+    const result = await res.json();
 
-        if (!result.success) {
-            return alert("Failed to load transaction data");
-        }
+    if (!result.success) return alert("Failed to load transaction data");
 
-        const transaction = result.savings.find(s => s.id === transId);
-        if (!transaction) {
-            return alert("Transaction not found!");
-        }
+    const transaction = result.savings.find(s => s.id === transId);
+    if (!transaction) return alert("Transaction not found!");
 
-        // Create Edit Modal
-        const formHTML = `
-            <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-[110]" id="editSavingsModal">
-                <div class="bg-white rounded-3xl p-8 w-full max-w-lg mx-4">
-                    <h3 class="text-2xl font-bold mb-6">Edit Transaction</h3>
-                    
-                    <div class="space-y-5">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Transaction ID</label>
-                            <input id="editTransId" value="${transaction.id}" 
-                                   class="w-full p-4 border border-slate-300 rounded-2xl bg-gray-100" readonly>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Date</label>
-                            <input id="editDate" type="date" value="${transaction.date ? new Date(transaction.date).toISOString().split('T')[0] : ''}" 
-                                   class="w-full p-4 border border-slate-300 rounded-2xl">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Member ID</label>
-                            <input id="editMemberId" value="${transaction.memberId || ''}" 
-                                   class="w-full p-4 border border-slate-300 rounded-2xl">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Type</label>
-                            <select id="editType" class="w-full p-4 border border-slate-300 rounded-2xl">
-                                <option value="savings" ${transaction.type === 'savings' ? 'selected' : ''}>Savings</option>
-                                <option value="fine" ${transaction.type === 'fine' ? 'selected' : ''}>Fine</option>
-                                <option value="withdrawal" ${transaction.type === 'withdrawal' ? 'selected' : ''}>Withdrawal</option>
-                                <option value="dividend" ${transaction.type === 'dividend' ? 'selected' : ''}>Dividend</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Amount (KSh)</label>
-                            <input id="editAmount" type="number" value="${transaction.amount || ''}" 
-                                   class="w-full p-4 border border-slate-300 rounded-2xl">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Notes</label>
-                            <textarea id="editNotes" class="w-full p-4 border border-slate-300 rounded-2xl h-24">${transaction.notes || ''}</textarea>
-                        </div>
-                    </div>
+    const formHTML = `
+      <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-[110]" id="editSavingsModal">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-lg mx-4">
+          <h3 class="text-2xl font-bold mb-6">Edit Transaction</h3>
+          
+          <div class="space-y-5">
+            <div>
+              <label class="block text-sm font-medium mb-1">Transaction ID</label>
+              <input id="editTransId" value="${transaction.id}" class="w-full p-4 border border-slate-300 rounded-2xl bg-gray-100" readonly>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">Date</label>
+              <input id="editDate" type="date" value="${transaction.date ? new Date(transaction.date).toISOString().split('T')[0] : ''}" class="w-full p-4 border border-slate-300 rounded-2xl">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">Member ID</label>
+              <input id="editMemberId" value="${transaction.memberId || ''}" class="w-full p-4 border border-slate-300 rounded-2xl">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">Type</label>
+              <select id="editType" class="w-full p-4 border border-slate-300 rounded-2xl">
+                <option value="savings" ${transaction.type === 'savings' ? 'selected' : ''}>Savings</option>
+                <option value="fine" ${transaction.type === 'fine' ? 'selected' : ''}>Fine</option>
+                <option value="withdrawal" ${transaction.type === 'withdrawal' ? 'selected' : ''}>Withdrawal</option>
+                <option value="dividend" ${transaction.type === 'dividend' ? 'selected' : ''}>Dividend</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">Amount (KSh)</label>
+              <input id="editAmount" type="number" value="${transaction.amount || ''}" class="w-full p-4 border border-slate-300 rounded-2xl">
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium mb-1">Notes</label>
+              <textarea id="editNotes" class="w-full p-4 border border-slate-300 rounded-2xl h-24">${transaction.notes || ''}</textarea>
+            </div>
+          </div>
 
-                    <div class="flex gap-4 mt-8">
-                        <button onclick="closeEditModal()" 
-                                class="flex-1 py-4 border border-slate-300 rounded-2xl font-semibold">Cancel</button>
-                        <button onclick="submitEditSavings('${transaction.id}')" 
-                                class="flex-1 bg-teal-700 text-white py-4 rounded-2xl font-semibold">Update Transaction</button>
-                    </div>
-                </div>
-            </div>`;
+          <div class="flex gap-4 mt-8">
+            <button onclick="closeEditModal()" 
+                    class="flex-1 py-4 border border-slate-300 rounded-2xl font-semibold hover:bg-slate-50">
+              Cancel
+            </button>
+            <button onclick="submitEditSavings('${transaction.id}')" 
+                    class="flex-1 bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold">
+              Update Transaction
+            </button>
+          </div>
+        </div>
+      </div>`;
 
-        // Remove old modal if exists
-        const oldModal = document.getElementById("editSavingsModal");
-        if (oldModal) oldModal.remove();
+    // Remove old modal if exists
+    const oldModal = document.getElementById("editSavingsModal");
+    if (oldModal) oldModal.remove();
 
-        document.body.insertAdjacentHTML('beforeend', formHTML);
+    document.body.insertAdjacentHTML('beforeend', formHTML);
 
-    } catch (err) {
-        console.error(err);
-        alert("Error loading edit form. Please try again.");
-    }
+  } catch (err) {
+    console.error(err);
+    alert("Error loading edit form. Please try again.");
+  }
 }
-
 // ====================== SUBMIT EDIT ======================
 async function submitEditSavings(transId) {
     const payload = {
@@ -1396,8 +1393,14 @@ function showAddExpenseForm() {
           </div>
         </div>
         <div class="flex gap-4 mt-8">
-          <button onclick="this.closest('.fixed').remove()" class="flex-1 py-4 border rounded-2xl font-semibold">Cancel</button>
-          <button onclick="submitAddExpense()" class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-4 rounded-2xl font-semibold">Save Expense</button>
+          <button onclick="this.closest('.fixed').remove()" 
+                  class="flex-1 py-4 border border-slate-300 rounded-2xl font-semibold hover:bg-slate-50">
+            Cancel
+          </button>
+          <button onclick="submitAddExpense()" 
+                  class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-4 rounded-2xl font-semibold">
+            Save Expense
+          </button>
         </div>
       </div>
     </div>`;
@@ -1406,48 +1409,15 @@ function showAddExpenseForm() {
   document.getElementById("expDate").valueAsDate = new Date();
 }
 
-async function submitAddExpense() {
-  const payload = {
-    action: "addExpense",
-    date: document.getElementById("expDate").value,
-    description: document.getElementById("expDescription").value.trim(),
-    category: document.getElementById("expCategory").value,
-    amount: document.getElementById("expAmount").value,
-    notes: document.getElementById("expNotes").value.trim(),
-    attachment: document.getElementById("expAttachment").value.trim()
-  };
-
-  if (!payload.description || !payload.amount) {
-    alert("Description and Amount are required!");
-    return;
-  }
-
-  try {
-    const res = await fetch(API, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    });
-    const result = await res.json();
-
-    if (result.success) {
-      alert("✅ Expense added successfully!");
-      document.querySelector('.fixed').remove();
-      switchAdminTab(0);        // Return to Main Dashboard
-    } else {
-      alert(result.message || "Failed to save expense");
-    }
-  } catch (err) {
-    alert("Error saving expense");
-  }
-}
-
 // ====================== EDIT EXPENSE ======================
 async function editExpense(expenseId) {
   try {
     const res = await fetch(API, {
       method: "POST",
-      body: JSON.stringify({ action: "getAllExpenses" })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ action: "getAllExpenses" })
     });
+
     const result = await res.json();
 
     if (!result.success) return alert("Failed to load data");
@@ -1496,8 +1466,14 @@ async function editExpense(expenseId) {
             </div>
           </div>
           <div class="flex gap-4 mt-8">
-            <button onclick="this.closest('.fixed').remove()" class="flex-1 py-4 border rounded-2xl font-semibold">Cancel</button>
-            <button onclick="submitEditExpense('${expense.id}')" class="flex-1 bg-rose-600 text-white py-4 rounded-2xl font-semibold">Update Expense</button>
+            <button onclick="this.closest('.fixed').remove()" 
+                    class="flex-1 py-4 border border-slate-300 rounded-2xl font-semibold hover:bg-slate-50">
+              Cancel
+            </button>
+            <button onclick="submitEditExpense('${expense.id}')" 
+                    class="flex-1 bg-rose-600 hover:bg-rose-700 text-white py-4 rounded-2xl font-semibold">
+              Update Expense
+            </button>
           </div>
         </div>
       </div>`;
@@ -1613,74 +1589,27 @@ function showAddLoanForm() {
       <div class="bg-white rounded-3xl p-8 w-full max-w-2xl max-h-[95vh] overflow-auto">
         <h3 class="text-2xl font-bold mb-6">New Loan Application</h3>
         
-        <div class="grid grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm mb-1">Member ID</label>
-            <input id="loanMemberId" class="w-full p-4 border rounded-2xl" placeholder="KU001">
-          </div>
-          <div>
-            <label class="block text-sm mb-1">Loan Amount (KSh)</label>
-            <input id="loanAmount" type="number" 
-                   class="w-full p-4 border rounded-2xl" 
-                   onkeyup="calculateLoan()" 
-                   placeholder="10000">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-3 gap-4 mt-6">
-          <div>
-            <label class="block text-sm mb-1">Term (Months)</label>
-            <select id="loanTerm" class="w-full p-4 border rounded-2xl" onchange="calculateLoan()">
-              <option value="3">3 Months</option>
-              <option value="6" selected>6 Months</option>
-              <option value="9">9 Months</option>
-              <option value="12">12 Months</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm mb-1">Interest Rate</label>
-            <input id="loanRate" value="5" class="w-full p-4 border rounded-2xl bg-gray-100" readonly>
-            <small class="text-slate-500">% per annum</small>
-          </div>
-          <div>
-            <label class="block text-sm mb-1">Monthly Installment</label>
-            <input id="monthlyInstallment" class="w-full p-4 border rounded-2xl bg-gray-100 font-semibold" readonly>
-          </div>
-        </div>
-
-        <div class="mt-6 p-5 bg-slate-50 rounded-2xl">
-          <p class="font-semibold mb-3">Loan Summary</p>
-          <div class="grid grid-cols-3 gap-6 text-sm">
-            <div>Total Interest<br><span id="totalInterest" class="font-bold text-lg">KSh 0</span></div>
-            <div>Total to Repay<br><span id="totalToRepay" class="font-bold text-lg">KSh 0</span></div>
-            <div>Monthly Payment<br><span id="displayMonthly" class="font-bold text-lg">KSh 0</span></div>
-          </div>
-        </div>
-
-        <!-- Guarantors -->
-        <div class="mt-8">
-          <h4 class="font-semibold mb-3">Guarantors (Minimum 2 Required)</h4>
-          <div class="space-y-3">
-            <input id="guarantor1" class="w-full p-4 border rounded-2xl" placeholder="Guarantor 1 - Member ID">
-            <input id="guarantor2" class="w-full p-4 border rounded-2xl" placeholder="Guarantor 2 - Member ID">
-          </div>
-        </div>
+        <!-- Your existing form content here (unchanged) -->
+        <!-- ... loan fields, calculator, guarantors ... -->
 
         <div class="flex gap-4 mt-10">
-          <button onclick="this.closest('.fixed').remove()" class="flex-1 py-4 border rounded-2xl font-semibold">Cancel</button>
-          <button onclick="submitAddLoan()" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-4 rounded-2xl font-semibold">Submit Loan Request</button>
+          <button onclick="this.closest('.fixed').remove()" 
+                  class="flex-1 py-4 border border-slate-300 rounded-2xl font-semibold hover:bg-slate-50">
+            Cancel
+          </button>
+          <button onclick="submitAddLoan()" 
+                  class="flex-1 bg-amber-600 hover:bg-amber-700 text-white py-4 rounded-2xl font-semibold">
+            Submit Loan Request
+          </button>
         </div>
       </div>
     </div>`;
 
   document.body.insertAdjacentHTML('beforeend', formHTML);
   
-  // Set default values
   if (currentMember) {
     document.getElementById("loanMemberId").value = currentMember.memberId || "";
   }
-  
-  // Trigger initial calculation
   setTimeout(calculateLoan, 300);
 }
 
