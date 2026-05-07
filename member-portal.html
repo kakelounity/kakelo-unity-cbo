@@ -665,9 +665,18 @@ function switchAdminTab(tab) {
   tabs.forEach(t => t.classList.remove('bg-teal-800', 'text-white'));
   if (tabs[tab]) tabs[tab].classList.add('bg-teal-800', 'text-white');
 
+  // Common Back Button
+  const backButton = `
+    <button onclick="hideAdminDashboard()" 
+            class="flex items-center gap-2 mb-6 text-slate-600 hover:text-slate-800 font-medium hover:bg-slate-100 px-5 py-2.5 rounded-2xl transition-all">
+      <i class="fa-solid fa-arrow-left"></i> 
+      <span>Back to Member Portal</span>
+    </button>`;
+
   if (tab === 0) {
-    // ====================== DASHBOARD OVERVIEW ======================
+    // Dashboard Overview
     content.innerHTML = `
+      ${backButton}
       <div class="p-8">
         <h1 class="text-3xl font-bold mb-8 text-slate-800">Dashboard Overview</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -692,8 +701,9 @@ function switchAdminTab(tab) {
     loadAdminDashboardSummary();
 
   } else if (tab === 1) {
-    // ====================== MEMBERS DIRECTORY ======================
+    // Members Directory
     content.innerHTML = `
+      ${backButton}
       <div class="p-8">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-slate-800">Members Directory</h1>
@@ -722,8 +732,9 @@ function switchAdminTab(tab) {
     loadAllMembers();
 
   } else if (tab === 2) {
-    // ====================== SAVINGS DIRECTORY ======================
+    // Savings Directory
     content.innerHTML = `
+      ${backButton}
       <div class="p-8">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-slate-800">Savings Directory</h1>
@@ -762,8 +773,9 @@ function switchAdminTab(tab) {
     loadAllSavings();
 
   } else if (tab === 3) {
-    // ====================== LOANS DIRECTORY ======================
+    // Loans Directory
     content.innerHTML = `
+      ${backButton}
       <div class="p-8">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-slate-800">Loans Directory</h1>
@@ -797,8 +809,9 @@ function switchAdminTab(tab) {
     loadAllLoans();
 
   } else if (tab === 4) {
-    // ====================== EXPENSES DIRECTORY ======================
+    // Expenses Directory
     content.innerHTML = `
+      ${backButton}
       <div class="p-8">
         <div class="flex justify-between items-center mb-6">
           <h1 class="text-3xl font-bold text-slate-800">Expenses Directory</h1>
@@ -838,50 +851,51 @@ function switchAdminTab(tab) {
     loadAllExpenses();
 
   } else if (tab === 5) {
-  // ====================== REPORTS DIRECTORY ======================
-  content.innerHTML = `
-    <div class="p-8">
-      <h1 class="text-3xl font-bold text-slate-800 mb-8">Reports & Statements</h1>
+    // Reports
+    content.innerHTML = `
+      ${backButton}
+      <div class="p-8">
+        <h1 class="text-3xl font-bold text-slate-800 mb-8">Reports & Statements</h1>
 
-      <div class="flex gap-4 mb-8 border-b pb-4">
-        <button onclick="switchReportPeriod(0)" id="periodBtn0" class="report-tab px-6 py-3 rounded-2xl font-medium active">Monthly</button>
-        <button onclick="switchReportPeriod(1)" id="periodBtn1" class="report-tab px-6 py-3 rounded-2xl font-medium">Quarterly</button>
-        <button onclick="switchReportPeriod(2)" id="periodBtn2" class="report-tab px-6 py-3 rounded-2xl font-medium">Annual</button>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div onclick="generateGroupReport('savings')" class="bg-white rounded-3xl shadow p-8 hover:shadow-2xl cursor-pointer transition">
-          <h3 class="text-xl font-semibold">Savings Report</h3>
-          <p class="text-slate-500 mt-2">Monthly/Quarterly savings performance</p>
-          <button class="mt-6 text-teal-600 hover:text-teal-700">Generate & Download →</button>
+        <div class="flex gap-4 mb-8 border-b pb-4">
+          <button onclick="switchReportPeriod(0)" id="periodBtn0" class="report-tab px-6 py-3 rounded-2xl font-medium active">Monthly</button>
+          <button onclick="switchReportPeriod(1)" id="periodBtn1" class="report-tab px-6 py-3 rounded-2xl font-medium">Quarterly</button>
+          <button onclick="switchReportPeriod(2)" id="periodBtn2" class="report-tab px-6 py-3 rounded-2xl font-medium">Annual</button>
         </div>
 
-        <div onclick="generateGroupReport('loans')" class="bg-white rounded-3xl shadow p-8 hover:shadow-2xl cursor-pointer transition">
-          <h3 class="text-xl font-semibold">Loans Report</h3>
-          <p class="text-slate-500 mt-2">Portfolio, outstanding & repayment</p>
-          <button class="mt-6 text-teal-600 hover:text-teal-700">Generate & Download →</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div onclick="generateGroupReport('savings')" class="bg-white rounded-3xl shadow p-8 hover:shadow-2xl cursor-pointer transition">
+            <h3 class="text-xl font-semibold">Savings Report</h3>
+            <p class="text-slate-500 mt-2">Monthly/Quarterly savings performance</p>
+            <button class="mt-6 text-teal-600 hover:text-teal-700">Generate & Download →</button>
+          </div>
+
+          <div onclick="generateGroupReport('loans')" class="bg-white rounded-3xl shadow p-8 hover:shadow-2xl cursor-pointer transition">
+            <h3 class="text-xl font-semibold">Loans Report</h3>
+            <p class="text-slate-500 mt-2">Portfolio, outstanding & repayment</p>
+            <button class="mt-6 text-teal-600 hover:text-teal-700">Generate & Download →</button>
+          </div>
+
+          <div onclick="generateGroupReport('overall')" class="bg-white rounded-3xl shadow p-8 hover:shadow-2xl cursor-pointer transition">
+            <h3 class="text-xl font-semibold">Overall Financial Report</h3>
+            <p class="text-slate-500 mt-2">Income, Expenses & Net Position</p>
+            <button class="mt-6 text-teal-600 hover:text-teal-700">Generate & Download →</button>
+          </div>
         </div>
 
-        <div onclick="generateGroupReport('overall')" class="bg-white rounded-3xl shadow p-8 hover:shadow-2xl cursor-pointer transition">
-          <h3 class="text-xl font-semibold">Overall Financial Report</h3>
-          <p class="text-slate-500 mt-2">Income, Expenses & Net Position</p>
-          <button class="mt-6 text-teal-600 hover:text-teal-700">Generate & Download →</button>
+        <div class="mt-12">
+          <h3 class="text-xl font-semibold mb-6">Individual Member Statements</h3>
+          <button onclick="emailAllStatements()" 
+                  class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl flex items-center gap-3">
+            <i class="fa-solid fa-envelope"></i> Email Statements to All Members
+          </button>
         </div>
-      </div>
 
-      <div class="mt-12">
-        <h3 class="text-xl font-semibold mb-6">Individual Member Statements</h3>
-        <button onclick="emailAllStatements()" 
-                class="bg-green-600 hover:bg-green-700 text-white px-8 py-4 rounded-2xl flex items-center gap-3">
-          <i class="fa-solid fa-envelope"></i> Email Statements to All Members
-        </button>
-      </div>
-
-      <div id="reportPreview" class="mt-10 bg-white rounded-3xl shadow p-8 min-h-[400px]">
-        <div class="text-center text-slate-400 py-20">Select a report to preview</div>
-      </div>
-    </div>`;
-}
+        <div id="reportPreview" class="mt-10 bg-white rounded-3xl shadow p-8 min-h-[400px]">
+          <div class="text-center text-slate-400 py-20">Select a report to preview</div>
+        </div>
+      </div>`;
+  }
 }
 // Updated Render with Edit & Delete buttons
 function renderAllSavings(savings) {
