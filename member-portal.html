@@ -2258,49 +2258,57 @@ async function viewMemberDashboard(memberId) {
     alert("Failed to load member dashboard");
   }
 }
-  async function loadAdminDashboardSummary() {
-  // Sample realistic data
-  document.getElementById("dashTotalMembers").textContent = "284";
-  document.getElementById("dashTotalSavings").innerHTML = `KSh 18,745,000`;
-  document.getElementById("dashActiveLoans").textContent = "63";
-  document.getElementById("dashTotalExpenses").innerHTML = `KSh 1,245,000`;
+  // ====================== LOAD ADMIN DASHBOARD SUMMARY (Live Data) ======================
+async function loadAdminDashboardSummary() {
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "adminDashboard");
+    formData.append("token", currentToken);
 
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // Live synchronized data from Google Sheet
+      document.getElementById("dashTotalMembers").textContent = data.totalMembers || "0";
+      document.getElementById("dashTotalSavings").innerHTML = `KSh ${Number(data.totalSavings || 0).toLocaleString()}`;
+      document.getElementById("dashActiveLoans").textContent = data.activeLoans || "0";
+      document.getElementById("dashTotalExpenses").innerHTML = `KSh ${Number(data.totalExpenses || 0).toLocaleString()}`;
+
+      // Update last refreshed time
+      document.getElementById("lastUpdated").textContent = "Just Now";
+
+      // Optional: Update activity sections
+      updateDashboardActivities(data);
+    } else {
+      console.error("Admin Dashboard Error:", data.message);
+    }
+  } catch (err) {
+    console.error("Failed to load admin dashboard:", err);
+  }
+}
+
+// Helper to update activity sections
+function updateDashboardActivities(data) {
   // Savings Activity
   document.getElementById("savingsActivity").innerHTML = `
-    <div class="flex justify-between"><span>Deposits</span><span class="text-teal-600 font-medium">UGX 2,450,000</span></div>
-    <div class="flex justify-between"><span>Withdrawals</span><span class="text-red-600 font-medium">UGX 890,000</span></div>
-    <div class="flex justify-between"><span>Net Change</span><span class="text-emerald-600 font-medium">+ UGX 1,560,000</span></div>
+    <div class="flex justify-between"><span>Deposits</span><span class="text-teal-600 font-medium">KSh ${Number(data.monthlyDeposits || 0).toLocaleString()}</span></div>
+    <div class="flex justify-between"><span>Withdrawals</span><span class="text-red-600 font-medium">KSh ${Number(data.monthlyWithdrawals || 0).toLocaleString()}</span></div>
+    <div class="flex justify-between pt-2 border-t"><span class="font-medium">Net Growth</span><span class="text-emerald-600 font-medium">+ KSh ${Number(data.netGrowth || 0).toLocaleString()}</span></div>
   `;
 
   // Loan Performance
   document.getElementById("loanPerformance").innerHTML = `
-    <div class="flex justify-between"><span>Disbursements</span><span class="font-medium">UGX 4,200,000</span></div>
-    <div class="flex justify-between"><span>Collections</span><span class="text-emerald-600 font-medium">UGX 3,850,000</span></div>
-    <div class="flex justify-between"><span>Collection Rate</span><span class="text-emerald-600 font-medium">91.7%</span></div>
+    <div class="flex justify-between"><span>Disbursed</span><span class="font-medium">KSh ${Number(data.loansDisbursed || 0).toLocaleString()}</span></div>
+    <div class="flex justify-between"><span>Collected</span><span class="text-emerald-600 font-medium">KSh ${Number(data.loansCollected || 0).toLocaleString()}</span></div>
+    <div class="flex justify-between pt-2 border-t"><span class="font-medium">Collection Rate</span><span class="text-emerald-600 font-medium">${data.collectionRate || "0"}%</span></div>
   `;
-
-  // Recent Transactions
-  document.getElementById("recentTransactions").innerHTML = `
-    <table class="w-full">
-      <thead class="bg-slate-100">
-        <tr>
-          <th class="px-6 py-4 text-left">Date</th>
-          <th class="px-6 py-4 text-left">Member</th>
-          <th class="px-6 py-4 text-left">Type</th>
-          <th class="px-6 py-4 text-right">Amount</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y text-sm">
-        <tr><td class="px-6 py-4">07/05/2026</td><td class="px-6 py-4">Amos Owuor</td><td class="px-6 py-4">Savings</td><td class="px-6 py-4 text-right text-teal-600">KSh 4,055</td></tr>
-        <tr><td class="px-6 py-4">06/05/2026</td><td class="px-6 py-4">Isaac Omondi</td><td class="px-6 py-4">Loan Repayment</td><td class="px-6 py-4 text-right">KSh 12,000</td></tr>
-      </tbody>
-    </table>
-  `;
-
-  // Portfolio Health Chart
-  createPortfolioHealthChart();
 }
-
 function createPortfolioHealthChart() {
   const ctx = document.getElementById("portfolioHealthChart");
   if (!ctx) return;
