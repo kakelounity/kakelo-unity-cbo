@@ -208,13 +208,12 @@
   </div>
 
 <script>
-const API ="https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec"
+const API = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
 let currentToken = null;
 let currentMember = null;
-let savingsTrendChart = null;
 
-// ====================== LOGIN HANDLER ======================
+// ====================== LOGIN ======================
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -223,154 +222,54 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const loginBtn = document.getElementById("loginBtn");
   const msgEl = document.getElementById("loginMsg");
 
-  // Reset message
   msgEl.textContent = "Logging in...";
-  msgEl.className = "text-center text-sm mt-6 text-blue-600";
-
+  msgEl.className = "text-blue-600";
   loginBtn.disabled = true;
   loginBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Logging in...`;
 
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "login");
+    formData.append("nationalId", nationalId);
+    formData.append("password", password);
+
     const res = await fetch(API, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json" 
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
       },
-      body: JSON.stringify({ 
-        action: "login", 
-        nationalId, 
-        password 
-      })
+      body: formData
     });
-
-    // Check if response is ok
-    if (!res.ok) {
-      throw new Error(`HTTP error! Status: ${res.status}`);
-    }
 
     const data = await res.json();
 
     if (!data.success) {
-      msgEl.textContent = data.message || "Invalid National ID or Password";
-      msgEl.className = "text-center text-sm mt-6 text-red-600";
+      msgEl.textContent = data.message || "Login failed";
+      msgEl.className = "text-red-600";
       return;
     }
 
-    // Successful login
     currentToken = data.token;
     currentMember = data.member;
 
     localStorage.setItem("token", currentToken);
     localStorage.setItem("member", JSON.stringify(currentMember));
 
-    // Force Password Change
-    if (data.mustChangePassword === true || data.forcePasswordChange === true) {
-      msgEl.textContent = "You must change your password first";
-      msgEl.className = "text-center text-sm mt-6 text-amber-600";
+    if (data.mustChangePassword || data.forcePasswordChange) {
       showPasswordChangeModal(currentMember.memberId);
-      return;
+    } else {
+      showDashboard();
     }
-
-    // Normal successful login
-    showDashboard();
 
   } catch (err) {
-    console.error("Login Error:", err);
-    
-    // Better error message for CORS / Network issues
-    if (err.message.includes("Failed to fetch") || err.name === "TypeError") {
-      msgEl.textContent = "Cannot connect to server. Check your internet or redeploy the script.";
-    } else {
-      msgEl.textContent = "Login failed. Please try again.";
-    }
-    msgEl.className = "text-center text-sm mt-6 text-red-600";
+    console.error(err);
+    msgEl.textContent = "Cannot connect to server. Please try again later.";
+    msgEl.className = "text-red-600";
   } finally {
     loginBtn.disabled = false;
     loginBtn.textContent = "Login";
   }
 });
-
-// ====================== PASSWORD CHANGE MODAL ======================
-function showPasswordChangeModal(memberId) {
-  let modal = document.getElementById("passwordModal");
-
-  if (!modal) {
-    modal = document.createElement("div");
-    modal.id = "passwordModal";
-    modal.innerHTML = `
-      <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-[999]">
-        <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl">
-          <h2 class="text-2xl font-bold mb-6 text-center">Change Password</h2>
-          
-          <input id="oldPass" type="password" placeholder="Current Password" 
-                 class="w-full p-4 border border-slate-300 rounded-2xl mb-4 focus:outline-none focus:border-teal-600">
-          <input id="newPass" type="password" placeholder="New Password" 
-                 class="w-full p-4 border border-slate-300 rounded-2xl mb-4 focus:outline-none focus:border-teal-600">
-          <input id="confirmPass" type="password" placeholder="Confirm New Password" 
-                 class="w-full p-4 border border-slate-300 rounded-2xl mb-6 focus:outline-none focus:border-teal-600">
-
-          <button onclick="submitPasswordChange('${memberId}')" 
-                  class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold text-lg">
-            Update Password
-          </button>
-
-          <p id="passMsg" class="text-center text-sm mt-4 min-h-[24px]"></p>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-  }
-  modal.style.display = "flex";
-}
-
-async function submitPasswordChange(memberId) {
-  const oldPass = document.getElementById("oldPass").value;
-  const newPass = document.getElementById("newPass").value;
-  const confirmPass = document.getElementById("confirmPass").value;
-  const msg = document.getElementById("passMsg");
-
-  if (newPass !== confirmPass) {
-    msg.textContent = "Passwords do not match!";
-    msg.className = "text-red-600";
-    return;
-  }
-
-  if (newPass.length < 6) {
-    msg.textContent = "New password must be at least 6 characters";
-    msg.className = "text-red-600";
-    return;
-  }
-
-  try {
-    const res = await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "changePassword",
-        memberId,
-        currentPassword: oldPass,
-        newPassword: newPass
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      msg.textContent = "✅ Password updated successfully!";
-      msg.className = "text-green-600";
-
-      setTimeout(() => {
-        document.getElementById("passwordModal").remove();
-        showDashboard();
-      }, 1500);
-    } else {
-      msg.textContent = data.message || "Failed to update password";
-      msg.className = "text-red-600";
-    }
-  } catch (err) {
-    msg.textContent = "Network error. Please try again.";
-    msg.className = "text-red-600";
-  }
-}
 // ====================== SHOW DASHBOARD ======================
     async function showDashboard() {
       document.getElementById("loginScreen").classList.add("hidden");
