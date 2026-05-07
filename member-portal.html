@@ -355,29 +355,29 @@ async function submitPasswordChange(memberId) {
   }
 }
 // ====================== SHOW DASHBOARD ======================
-    async function showDashboard() {
-      document.getElementById("loginScreen").classList.add("hidden");
-      document.getElementById("dashboardScreen").classList.remove("hidden");
+   function showDashboard() {
+  document.getElementById("loginScreen").classList.add("hidden");
+  document.getElementById("dashboardScreen").classList.remove("hidden");
 
-      const m = currentMember;
-      const role = (m.role || "").toUpperCase().trim();
+  const m = currentMember;
+  document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
+  document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
 
-      document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
-      document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
+  // Fill Profile
+  document.getElementById("fullName").textContent = m.fullName;
+  document.getElementById("memberIdDisplay").textContent = m.memberId || "—";
+  document.getElementById("nationalIdDisplay").textContent = m.nationalId || "—";
+  document.getElementById("phone").textContent = m.phone || "—";
+  document.getElementById("email").textContent = m.email || "—";
+  document.getElementById("status").innerHTML = `${m.status || "Active"} <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
+  document.getElementById("roleDisplay").textContent = m.role || "Member";
 
-      document.getElementById("fullName").textContent = m.fullName;
-      document.getElementById("memberIdDisplay").textContent = m.memberId || "—";
-      document.getElementById("nationalIdDisplay").textContent = m.nationalId || "—";
-      document.getElementById("phone").textContent = m.phone || "—";
-      document.getElementById("email").textContent = m.email || "—";
-      document.getElementById("status").innerHTML = `${m.status || "Active"} <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
-      document.getElementById("roleDisplay").textContent = m.role || "Member";
+  // Show Admin Button
+  if (["TREASURER", "ADMIN", "CHAIRPERSON"].includes((m.role || "").toUpperCase())) {
+    document.getElementById("adminBtn").classList.remove("hidden");
+  }
 
-      // Show Admin Button
-      const adminBtn = document.getElementById("adminBtn");
-      if (["TREASURER", "ADMIN", "CHAIRPERSON"].includes(role)) {
-        adminBtn.classList.remove("hidden");
-      }
+  console.log("✅ Dashboard loaded successfully");
 
       let photoUrl = m.photo || "";
       if (photoUrl) {
