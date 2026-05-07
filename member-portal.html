@@ -214,7 +214,7 @@ let currentToken = null;
 let currentMember = null;
 
 // ====================== LOGIN ======================
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
   e.preventDefault();
 
   const nationalId = document.getElementById("nationalId").value.trim();
@@ -269,7 +269,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   }
 });
 
-// ====================== PASSWORD CHANGE ======================
+// ====================== PASSWORD CHANGE MODAL ======================
 function showPasswordChangeModal(memberId) {
   const existing = document.getElementById("passwordModal");
   if (existing) existing.remove();
@@ -341,16 +341,19 @@ async function submitPasswordChange(memberId) {
     msgEl.className = "text-red-600";
   }
 }
-
 // ====================== SHOW DASHBOARD ======================
-function showDashboard() {
+async function showDashboard() {
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboardScreen").classList.remove("hidden");
 
   const m = currentMember;
+  const role = (m.role || "").toUpperCase().trim();
+
+  // Welcome Message
   document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
   document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
 
+  // Profile Information
   document.getElementById("fullName").textContent = m.fullName;
   document.getElementById("memberIdDisplay").textContent = m.memberId || "—";
   document.getElementById("nationalIdDisplay").textContent = m.nationalId || "—";
@@ -359,23 +362,26 @@ function showDashboard() {
   document.getElementById("status").innerHTML = `${m.status || "Active"} <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
   document.getElementById("roleDisplay").textContent = m.role || "Member";
 
-  console.log("✅ Dashboard loaded successfully");
+  // Profile Photo
+  const photoUrl = m.photo || "";
+  if (photoUrl) {
+    document.getElementById("profilePhoto").src = photoUrl;
+    document.getElementById("profilePhoto").classList.remove("hidden");
+    document.getElementById("photoPlaceholder").classList.add("hidden");
+  } else {
+    document.getElementById("profilePhoto").classList.add("hidden");
+    document.getElementById("photoPlaceholder").classList.remove("hidden");
+  }
+
+  // Render Action Buttons & Load Data
+  renderActionButtons();
+  
+  await loadDashboardData();
+  loadSavingsTrend();
 }
 
-
-      let photoUrl = m.photo || "";
-      if (photoUrl) {
-        document.getElementById("profilePhoto").src = photoUrl;
-        document.getElementById("profilePhoto").classList.remove("hidden");
-        document.getElementById("photoPlaceholder").classList.add("hidden");
-      }
-
-      renderActionButtons();
-      await loadDashboardData();
-      loadSavingsTrend();
-    }
-
-    function renderActionButtons() {
+// ====================== ACTION BUTTONS ======================
+function renderActionButtons() {
   const role = (currentMember.role || "").toUpperCase().trim();
   
   let html = `
@@ -384,7 +390,6 @@ function showDashboard() {
       <i class="fa-solid fa-hand-holding-dollar text-xl"></i> Apply for Loan
     </button>`;
 
-  // Only show extra buttons for Treasurer/Admin
   if (["TREASURER", "ADMIN", "CHAIRPERSON"].includes(role)) {
     html += `
       <button onclick="showAdminDashboard()" 
@@ -396,98 +401,139 @@ function showDashboard() {
   document.getElementById("actionButtons").innerHTML = html;
 }
 
-    async function loadDashboardData() {
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "dashboard", token: currentToken })
-        });
-        const data = await res.json();
-        if (!data.success) return alert(data.message);
+// ====================== LOAD DASHBOARD DATA ======================
+async function loadDashboardData() {
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        action: "dashboard", 
+        token: currentToken 
+      })
+    });
 
-        document.getElementById("totalSavings").innerHTML = `KSh ${Number(data.summary.personalTotalSavings || 0).toLocaleString()}`;
-        document.getElementById("regFees").innerHTML = `KSh ${Number(currentMember.regFees || 0).toLocaleString()}`;
-
-        const totalLoans = (data.loans || []).reduce((sum, l) => sum + Number(l.amount || 0), 0);
-        document.getElementById("totalLoans").innerHTML = `KSh ${totalLoans.toLocaleString()}`;
-
-        renderSavingsHistory(data.savings || []);
-        renderLoansHistory(data.loans || []);
-      } catch (err) {
-        console.error(err);
-      }
+    const data = await res.json();
+    if (!data.success) {
+      console.error(data.message);
+      return;
     }
 
-    function renderSavingsHistory(savings) {
-      const tbody = document.getElementById("savingsTableBody");
-      tbody.innerHTML = (savings && savings.length) ? savings.map(s => `
-        <tr class="hover:bg-slate-50">
-          <td class="py-4 px-4">${new Date(s.date).toLocaleDateString('en-GB')}</td>
-          <td class="py-4 px-4 font-mono text-xs">${s.id}</td>
-          <td class="py-4 px-4">${s.type}</td>
-          <td class="py-4 px-4 text-teal-700 font-semibold">+ KSh ${Number(s.amount).toLocaleString()}</td>
-          <td class="py-4 px-4 text-slate-600">${s.notes || '—'}</td>
-        </tr>`).join('') : `<tr><td colspan="5" class="text-center py-8 text-slate-400">No savings records yet</td></tr>`;
+    // Update Summary Cards
+    document.getElementById("totalSavings").innerHTML = `KSh ${Number(data.summary?.personalTotalSavings || 0).toLocaleString()}`;
+    document.getElementById("regFees").innerHTML = `KSh ${Number(currentMember.regFees || 0).toLocaleString()}`;
+
+    const totalLoans = (data.loans || []).reduce((sum, l) => sum + Number(l.amount || 0), 0);
+    document.getElementById("totalLoans").innerHTML = `KSh ${totalLoans.toLocaleString()}`;
+    document.getElementById("totalFines").innerHTML = `KSh ${Number(data.summary?.totalFines || 0).toLocaleString()}`;
+
+    // Render History Tables
+    renderSavingsHistory(data.savings || []);
+    renderLoansHistory(data.loans || []);
+
+  } catch (err) {
+    console.error("Error loading dashboard data:", err);
+  }
+}
+
+// ====================== RENDER HISTORY ======================
+function renderSavingsHistory(savings) {
+  const tbody = document.getElementById("savingsTableBody");
+  if (!savings || savings.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">No savings records yet</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = savings.map(s => `
+    <tr class="hover:bg-slate-50">
+      <td class="py-4 px-4">${new Date(s.date).toLocaleDateString('en-GB')}</td>
+      <td class="py-4 px-4 font-mono text-xs">${s.id}</td>
+      <td class="py-4 px-4">${s.type}</td>
+      <td class="py-4 px-4 text-teal-700 font-semibold">+ KSh ${Number(s.amount).toLocaleString()}</td>
+      <td class="py-4 px-4 text-slate-600">${s.notes || '—'}</td>
+    </tr>
+  `).join('');
+}
+
+function renderLoansHistory(loans) {
+  const tbody = document.getElementById("loansTableBody");
+  if (!loans || loans.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">No loan records yet</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = loans.map(l => `
+    <tr class="hover:bg-slate-50">
+      <td class="py-4 px-4">${new Date(l.date || Date.now()).toLocaleDateString('en-GB')}</td>
+      <td class="py-4 px-4 font-mono text-xs">${l.id}</td>
+      <td class="py-4 px-4 font-semibold">KSh ${Number(l.amount).toLocaleString()}</td>
+      <td class="py-4 px-4 text-amber-600">KSh ${Number(l.outstanding || l.amount).toLocaleString()}</td>
+      <td class="py-4 px-4">
+        <span class="px-3 py-1 text-xs rounded-full ${l.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+          ${l.status || 'Pending'}
+        </span>
+      </td>
+      <td class="py-4 px-4 text-center">—</td>
+    </tr>
+  `).join('');
+}
+
+// ====================== TABS & MODALS ======================
+function switchHistoryTab(n) {
+  document.getElementById("savingsHistory").classList.toggle("hidden", n !== 0);
+  document.getElementById("loansHistory").classList.toggle("hidden", n !== 1);
+  document.getElementById("tabSavingsBtn").classList.toggle("tab-active", n === 0);
+  document.getElementById("tabLoansBtn").classList.toggle("tab-active", n === 1);
+}
+
+function showRequestLoanModal() {
+  document.getElementById("requestLoanModal").classList.remove("hidden");
+}
+
+function showAddSavingsModal() {
+  document.getElementById("addSavingsModal").classList.remove("hidden");
+  document.getElementById("savingsMemberId").value = currentMember.memberId;
+}
+
+function hideModal(id) {
+  document.getElementById(id).classList.add("hidden");
+}
+
+// ====================== SUBMIT FUNCTIONS ======================
+async function submitAddSavings() {
+  const memberTarget = document.getElementById("savingsMemberId").value.trim().toUpperCase();
+  const amount = document.getElementById("savingsAmount").value;
+  const notes = document.getElementById("savingsNotes").value || "";
+
+  if (!amount) return alert("Please enter amount");
+
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        action: "addSavings", 
+        token: currentToken, 
+        memberTarget, 
+        amount, 
+        notes 
+      })
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      alert("✅ Savings added successfully!");
+      hideModal("addSavingsModal");
+      loadDashboardData();   // Refresh dashboard
+    } else {
+      alert(data.message || "Failed to add savings");
     }
+  } catch (err) {
+    alert("Error adding savings");
+  }
+}
 
-    function renderLoansHistory(loans) {
-      const tbody = document.getElementById("loansTableBody");
-      tbody.innerHTML = (loans && loans.length) ? loans.map(l => `
-        <tr class="hover:bg-slate-50">
-          <td class="py-4 px-4">${new Date(l.date || Date.now()).toLocaleDateString('en-GB')}</td>
-          <td class="py-4 px-4 font-mono text-xs">${l.id}</td>
-          <td class="py-4 px-4 font-semibold">KSh ${Number(l.amount).toLocaleString()}</td>
-          <td class="py-4 px-4 text-amber-600">KSh ${Number(l.outstanding || l.amount).toLocaleString()}</td>
-          <td class="py-4 px-4">
-            <span class="px-3 py-1 text-xs rounded-full ${l.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-              ${l.status || 'Pending'}
-            </span>
-          </td>
-          <td class="py-4 px-4 text-center">—</td>
-        </tr>`).join('') : `<tr><td colspan="6" class="text-center py-8 text-slate-400">No loan records yet</td></tr>`;
-    }
-
-    function switchHistoryTab(n) {
-      document.getElementById("savingsHistory").classList.toggle("hidden", n !== 0);
-      document.getElementById("loansHistory").classList.toggle("hidden", n !== 1);
-      document.getElementById("tabSavingsBtn").classList.toggle("tab-active", n === 0);
-      document.getElementById("tabLoansBtn").classList.toggle("tab-active", n === 1);
-    }
-
-    function showAddSavingsModal() {
-      document.getElementById("addSavingsModal").classList.remove("hidden");
-      document.getElementById("savingsMemberId").value = currentMember.memberId;
-    }
-
-    function showRequestLoanModal() {
-      document.getElementById("requestLoanModal").classList.remove("hidden");
-    }
-
-    function hideModal(id) {
-      document.getElementById(id).classList.add("hidden");
-    }
-
-    async function submitAddSavings() {
-      const memberTarget = document.getElementById("savingsMemberId").value.trim().toUpperCase();
-      const amount = document.getElementById("savingsAmount").value;
-      const notes = document.getElementById("savingsNotes").value;
-      if (!amount) return alert("Please enter amount");
-
-      try {
-        const res = await fetch(API, {
-          method: "POST",
-          body: JSON.stringify({ action: "addSavings", token: currentToken, memberTarget, amount, notes })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert("Savings added successfully!");
-          hideModal("addSavingsModal");
-          loadDashboardData();
-        } else alert(data.message);
-      } catch (err) { alert("Error"); }
-    }
-
-    async function submitRequestLoan() {
+async function submitRequestLoan() {
   const amount = document.getElementById("loanAmount").value;
   const term = document.getElementById("loanTerm").value || 6;
   const notes = document.getElementById("loanNotes").value || "";
@@ -497,24 +543,25 @@ function showDashboard() {
   try {
     const res = await fetch(API, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         action: "addLoan", 
         token: currentToken, 
         memberId: currentMember.memberId, 
-        amount: amount, 
-        term: term,
-        notes: notes
+        amount, 
+        term, 
+        notes 
       })
     });
+
     const data = await res.json();
 
     if (data.success) {
       alert("✅ Loan request submitted successfully!");
       hideModal("requestLoanModal");
-      loadDashboardData();           // Refresh member dashboard
-      // Optional: Show message that admin will review
+      loadDashboardData();
     } else {
-      alert(data.message || "Failed to submit loan");
+      alert(data.message || "Failed to submit loan request");
     }
   } catch (err) {
     alert("Error submitting loan request");
