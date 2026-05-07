@@ -295,6 +295,7 @@ function showPasswordChangeModal(memberId) {
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
+// ====================== SUBMIT PASSWORD CHANGE ======================
 async function submitPasswordChange(memberId) {
   const oldPass = document.getElementById("oldPass").value;
   const newPass = document.getElementById("newPass").value;
@@ -307,19 +308,28 @@ async function submitPasswordChange(memberId) {
     return;
   }
 
+  if (newPass.length < 6) {
+    msgEl.textContent = "New password must be at least 6 characters long";
+    msgEl.className = "text-red-600";
+    return;
+  }
+
   msgEl.textContent = "Updating password...";
   msgEl.className = "text-blue-600";
 
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "changePassword");
+    formData.append("memberId", memberId);
+    formData.append("currentPassword", oldPass);
+    formData.append("newPassword", newPass);
+
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "changePassword",
-        memberId: memberId,
-        currentPassword: oldPass,
-        newPassword: newPass
-      })
+      headers: { 
+        "Content-Type": "application/x-www-form-urlencoded" 
+      },
+      body: formData
     });
 
     const data = await res.json();
@@ -337,7 +347,8 @@ async function submitPasswordChange(memberId) {
       msgEl.className = "text-red-600";
     }
   } catch (err) {
-    msgEl.textContent = "Network error. Please try again.";
+    console.error(err);
+    msgEl.textContent = "Cannot connect to server. Please try again.";
     msgEl.className = "text-red-600";
   }
 }
