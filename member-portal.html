@@ -1853,34 +1853,150 @@ async function showMemberStatement(memberId) {
   }
 }
 
-// ====================== EMAIL STATEMENT ======================
+
+// ====================== EMAIL MEMBER STATEMENT ======================
 async function emailThisStatement(memberId) {
-  if (!memberId) return alert("Member ID is missing!");
   if (!confirm("Send account statement to this member's email?")) return;
 
+  const loadingMsg = "Sending statement to email...";
+  // Optional: Show loading indicator if you want
+
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "emailMemberStatement");
+    formData.append("memberId", memberId);
+
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "emailMemberStatement", memberId })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
+
     const result = await res.json();
 
     if (result.success) {
-      alert("✅ Statement sent successfully!");
+      alert("✅ Statement has been sent successfully to the member's email!");
     } else {
-      alert(result.message || "Failed to send statement");
+      alert(result.message || "Failed to send email");
     }
   } catch (err) {
     console.error(err);
-    alert("Network error while sending email");
+    alert("Network error while sending email. Please try again.");
   }
 }
+  // ====================== DOWNLOAD MEMBER STATEMENT (PDF-like) ======================
+async function downloadMemberStatement(memberId) {
+  try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getMemberStatement");
+    formData.append("memberId", memberId);
 
-// ====================== VIEW MEMBER DASHBOARD (Admin) ======================
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
+    });
+
+    const result = await res.json();
+
+    if (!result.success || !result.member) {
+      return alert(result.message || "Failed to generate statement");
+    }
+
+    const m = result.member;
+    const savingsTx = result.transactions || [];
+    const loansTx = result.loans || [];
+
+    const totalSavings = savingsTx.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const totalLoans = loansTx.reduce((sum, l) => sum + Number(l.amount || 0), 0);
+    const outstanding = loansTx.reduce((sum, l) => sum + Number(l.outstanding || 0), 0);
+
+    const statementHTML = `
+      <div id="printStatement" class="fixed inset-0 bg-white z-[200] overflow-auto p-8">
+        <div class="max-w-3xl mx-auto bg-white border border-gray-300 shadow-lg p-10">
+          
+          <!-- Header -->
+          <div class="text-center mb-10">
+            <img src="https://drive.google.com/thumbnail?id=1zn4KqLto2mUNxjcnA8VYY48K06S5UK8T&sz=w300" 
+                 alt="Kakelo Unity CBO" class="mx-auto h-20 mb-4">
+            <h1 class="text-3xl font-bold text-teal-800">Kakelo Unity CBO</h1>
+            <p class="text-xl text-slate-600">Account Statement</p>
+            <p class="text-sm text-slate-500 mt-1">Generated on: ${new Date().toLocaleDateString('en-GB')} ${new Date().toLocaleTimeString('en-GB')}</p>
+          </div>
+
+          <hr class="my-8">
+
+          <!-- Member Info -->
+          <div class="mb-8">
+            <p><strong>Member Name:</strong> ${m.fullName}</p>
+            <p><strong>Member ID:</strong> ${m.memberId}</p>
+          </div>
+
+          <!-- Account Summary -->
+          <h3 class="text-lg font-semibold mb-3 text-teal-700">Account Summary</h3>
+          <table class="w-full border-collapse border border-slate-300 mb-10">
+            <thead>
+              <tr class="bg-slate-100">
+                <th class="border border-slate-300 px-4 py-3 text-left">Item</th>
+                <th class="border border-slate-300 px-4 py-3 text-right">Amount (KSh)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="border border-slate-300 px-4 py-3">Total Personal Savings</td><td class="border border-slate-300 px-4 py-3 text-right font-semibold">${totalSavings.toLocaleString()}</td></tr>
+              <tr><td class="border border-slate-300 px-4 py-3">Total Fines Paid (Group Fund)</td><td class="border border-slate-300 px-4 py-3 text-right">0</td></tr>
+              <tr><td class="border border-slate-300 px-4 py-3">Total Loans Taken</td><td class="border border-slate-300 px-4 py-3 text-right">${totalLoans.toLocaleString()}</td></tr>
+              <tr><td class="border border-slate-300 px-4 py-3">Outstanding Loan Balance</td><td class="border border-slate-300 px-4 py-3 text-right font-semibold text-red-600">${outstanding.toLocaleString()}</td></tr>
+            </tbody>
+          </table>
+
+          <!-- Savings & Dividends -->
+          <h3 class="text-lg font-semibold mb-3 text-teal-700">Savings & Dividends</h3>
+          <table class="w-full border-collapse border border-slate-300 mb-12">
+            <thead>
+              <tr class="bg-slate-100">
+                <th class="border border-slate-300 px-4 py-3 text-left">Date</th>
+                <th class="border border-slate-300 px-4 py-3 text-left">Type</th>
+                <th class="border border-slate-300 px-4 py-3 text-right">Amount</th>
+                <th class="border border-slate-300 px-4 py-3 text-left">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${savingsTx.length ? savingsTx.map(t => `
+                <tr>
+                  <td class="border border-slate-300 px-4 py-3">${new Date(t.date).toLocaleDateString('en-GB')}</td>
+                  <td class="border border-slate-300 px-4 py-3">${t.type}</td>
+                  <td class="border border-slate-300 px-4 py-3 text-right font-medium">KSh ${Number(t.amount).toLocaleString()}</td>
+                  <td class="border border-slate-300 px-4 py-3">${t.notes || '-'}</td>
+                </tr>
+              `).join('') : `<tr><td colspan="4" class="text-center py-8 text-slate-400">No savings transactions</td></tr>`}
+            </tbody>
+          </table>
+
+          <div class="text-center text-slate-500 text-sm mt-12">
+            Thank you for being a valued member of Kakelo Unity CBO.
+          </div>
+        </div>
+      </div>`;
+
+    // Add to body and auto print
+    const printContainer = document.createElement('div');
+    printContainer.innerHTML = statementHTML;
+    document.body.appendChild(printContainer.firstElementChild);
+
+    // Auto trigger print dialog
+    setTimeout(() => {
+      window.print();
+    }, 500);
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to generate statement");
+  }
+}
+// ====================== VIEW MEMBER DASHBOARD (Full & Beautiful) ======================
 async function viewMemberDashboard(memberId) {
   try {
-    // Remove any existing modal
+    // Remove existing modal
     const existing = document.getElementById("memberViewModal");
     if (existing) existing.remove();
 
@@ -1909,31 +2025,56 @@ async function viewMemberDashboard(memberId) {
     const outstanding = loansTx.reduce((sum, l) => sum + Number(l.outstanding || 0), 0);
 
     const html = `
-      <div id="memberViewModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[120]">
-        <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-auto">
+      <div id="memberViewModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[120] p-4">
+        <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] overflow-auto shadow-2xl">
+
+          <!-- Header with Photo -->
           <div class="p-8 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-            <h2 class="text-2xl font-bold">Member Profile - ${m.fullName}</h2>
+            <div class="flex items-center gap-5">
+              <img src="${m.photo || 'https://via.placeholder.com/80x80?text=Photo'}" 
+                   alt="Passport Photo" 
+                   class="w-20 h-20 rounded-2xl object-cover border-4 border-teal-200 shadow">
+              <div>
+                <h2 class="text-2xl font-bold">${m.fullName}</h2>
+                <p class="text-slate-500">Member ID: <strong>${m.memberId}</strong></p>
+              </div>
+            </div>
             <button onclick="this.closest('#memberViewModal').remove()" 
-                    class="text-slate-500 hover:text-red-600 text-2xl leading-none">×</button>
+                    class="text-4xl text-slate-400 hover:text-red-500 leading-none">×</button>
           </div>
 
           <div class="p-8">
+
+            <!-- Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-              <div class="bg-slate-50 p-6 rounded-2xl">
-                <p class="text-sm text-slate-500">Total Savings</p>
-                <p class="text-3xl font-bold text-teal-600">KSh ${totalSavings.toLocaleString()}</p>
+              <div class="bg-teal-50 p-6 rounded-3xl text-center">
+                <p class="text-teal-600 text-sm">Total Savings</p>
+                <p class="text-4xl font-bold text-teal-700">KSh ${totalSavings.toLocaleString()}</p>
               </div>
-              <div class="bg-slate-50 p-6 rounded-2xl">
-                <p class="text-sm text-slate-500">Total Loans</p>
-                <p class="text-3xl font-bold text-amber-600">KSh ${totalLoans.toLocaleString()}</p>
+              <div class="bg-amber-50 p-6 rounded-3xl text-center">
+                <p class="text-amber-600 text-sm">Total Loans</p>
+                <p class="text-4xl font-bold text-amber-700">KSh ${totalLoans.toLocaleString()}</p>
               </div>
-              <div class="bg-slate-50 p-6 rounded-2xl">
-                <p class="text-sm text-slate-500">Outstanding</p>
-                <p class="text-3xl font-bold text-red-600">KSh ${outstanding.toLocaleString()}</p>
+              <div class="bg-red-50 p-6 rounded-3xl text-center">
+                <p class="text-red-600 text-sm">Outstanding Balance</p>
+                <p class="text-4xl font-bold text-red-700">KSh ${outstanding.toLocaleString()}</p>
               </div>
             </div>
 
-            <h3 class="text-xl font-semibold mb-4">Savings Transactions</h3>
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 mb-12">
+              <button onclick="emailThisStatement('${memberId}')" 
+                      class="flex-1 bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-semibold flex items-center justify-center gap-3">
+                <i class="fa-solid fa-envelope"></i> Email Statement
+              </button>
+              <button onclick="downloadMemberStatement('${memberId}')" 
+                      class="flex-1 bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold flex items-center justify-center gap-3">
+                <i class="fa-solid fa-download"></i> Download Statement
+              </button>
+            </div>
+
+            <!-- Savings Transactions -->
+            <h3 class="text-xl font-semibold mb-4 text-teal-700">Savings & Dividends History</h3>
             <div class="bg-white border rounded-2xl overflow-hidden mb-10">
               <table class="w-full">
                 <thead class="bg-slate-100">
@@ -1944,7 +2085,7 @@ async function viewMemberDashboard(memberId) {
                     <th class="px-6 py-3 text-left">Notes</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y">
+                <tbody class="divide-y text-sm">
                   ${savingsTx.length ? savingsTx.map(t => `
                     <tr>
                       <td class="px-6 py-3">${new Date(t.date).toLocaleDateString('en-GB')}</td>
@@ -1954,12 +2095,13 @@ async function viewMemberDashboard(memberId) {
                       </td>
                       <td class="px-6 py-3 text-slate-600">${t.notes || '-'}</td>
                     </tr>
-                  `).join('') : `<tr><td colspan="4" class="text-center py-8 text-slate-400">No savings transactions</td></tr>`}
+                  `).join('') : `<tr><td colspan="4" class="text-center py-8 text-slate-400">No savings transactions yet</td></tr>`}
                 </tbody>
               </table>
             </div>
 
-            <h3 class="text-xl font-semibold mb-4">Loan History</h3>
+            <!-- Loan History -->
+            <h3 class="text-xl font-semibold mb-4 text-teal-700">Loan History</h3>
             <div class="bg-white border rounded-2xl overflow-hidden">
               <table class="w-full">
                 <thead class="bg-slate-100">
@@ -1971,7 +2113,7 @@ async function viewMemberDashboard(memberId) {
                     <th class="px-6 py-3 text-right">Outstanding</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y">
+                <tbody class="divide-y text-sm">
                   ${loansTx.length ? loansTx.map(l => `
                     <tr>
                       <td class="px-6 py-3">${new Date(l.date).toLocaleDateString('en-GB')}</td>
