@@ -270,6 +270,90 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     loginBtn.textContent = "Login";
   }
 });
+  // ====================== PASSWORD CHANGE MODAL ======================
+function showPasswordChangeModal(memberId) {
+  // Remove existing modal if any
+  const existing = document.getElementById("passwordModal");
+  if (existing) existing.remove();
+
+  const modalHTML = `
+    <div id="passwordModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[999]">
+      <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
+        <h2 class="text-2xl font-bold mb-6 text-center">Change Password</h2>
+        
+        <input id="oldPass" type="password" placeholder="Current Password" 
+               class="w-full p-4 border border-slate-300 rounded-2xl mb-4 focus:outline-none focus:border-teal-600">
+        
+        <input id="newPass" type="password" placeholder="New Password" 
+               class="w-full p-4 border border-slate-300 rounded-2xl mb-4 focus:outline-none focus:border-teal-600">
+        
+        <input id="confirmPass" type="password" placeholder="Confirm New Password" 
+               class="w-full p-4 border border-slate-300 rounded-2xl mb-6 focus:outline-none focus:border-teal-600">
+
+        <button onclick="submitPasswordChange('${memberId}')" 
+                class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold text-lg">
+          Update Password
+        </button>
+
+        <p id="passMsg" class="text-center text-sm mt-4 min-h-[24px]"></p>
+      </div>
+    </div>`;
+
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+async function submitPasswordChange(memberId) {
+  const oldPass = document.getElementById("oldPass").value;
+  const newPass = document.getElementById("newPass").value;
+  const confirmPass = document.getElementById("confirmPass").value;
+  const msgEl = document.getElementById("passMsg");
+
+  if (newPass !== confirmPass) {
+    msgEl.textContent = "Passwords do not match!";
+    msgEl.className = "text-red-600";
+    return;
+  }
+
+  if (newPass.length < 6) {
+    msgEl.textContent = "New password must be at least 6 characters long";
+    msgEl.className = "text-red-600";
+    return;
+  }
+
+  msgEl.textContent = "Updating password...";
+  msgEl.className = "text-blue-600";
+
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "changePassword",
+        memberId: memberId,
+        currentPassword: oldPass,
+        newPassword: newPass
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      msgEl.textContent = "✅ Password updated successfully!";
+      msgEl.className = "text-green-600";
+
+      setTimeout(() => {
+        document.getElementById("passwordModal").remove();
+        showDashboard();
+      }, 1500);
+    } else {
+      msgEl.textContent = data.message || "Failed to update password";
+      msgEl.className = "text-red-600";
+    }
+  } catch (err) {
+    msgEl.textContent = "Network error. Please try again.";
+    msgEl.className = "text-red-600";
+  }
+}
 // ====================== SHOW DASHBOARD ======================
     async function showDashboard() {
       document.getElementById("loginScreen").classList.add("hidden");
