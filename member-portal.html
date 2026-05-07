@@ -235,9 +235,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     const res = await fetch(API, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      },
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: formData
     });
 
@@ -263,16 +261,16 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
   } catch (err) {
     console.error(err);
-    msgEl.textContent = "Cannot connect to server. Please try again later.";
+    msgEl.textContent = "Cannot connect to server. Please try again.";
     msgEl.className = "text-red-600";
   } finally {
     loginBtn.disabled = false;
     loginBtn.textContent = "Login";
   }
 });
-  // ====================== PASSWORD CHANGE MODAL ======================
+
+// ====================== PASSWORD CHANGE ======================
 function showPasswordChangeModal(memberId) {
-  // Remove existing modal if any
   const existing = document.getElementById("passwordModal");
   if (existing) existing.remove();
 
@@ -281,14 +279,9 @@ function showPasswordChangeModal(memberId) {
       <div class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl">
         <h2 class="text-2xl font-bold mb-6 text-center">Change Password</h2>
         
-        <input id="oldPass" type="password" placeholder="Current Password" 
-               class="w-full p-4 border border-slate-300 rounded-2xl mb-4 focus:outline-none focus:border-teal-600">
-        
-        <input id="newPass" type="password" placeholder="New Password" 
-               class="w-full p-4 border border-slate-300 rounded-2xl mb-4 focus:outline-none focus:border-teal-600">
-        
-        <input id="confirmPass" type="password" placeholder="Confirm New Password" 
-               class="w-full p-4 border border-slate-300 rounded-2xl mb-6 focus:outline-none focus:border-teal-600">
+        <input id="oldPass" type="password" placeholder="Current Password" class="w-full p-4 border border-slate-300 rounded-2xl mb-4">
+        <input id="newPass" type="password" placeholder="New Password" class="w-full p-4 border border-slate-300 rounded-2xl mb-4">
+        <input id="confirmPass" type="password" placeholder="Confirm New Password" class="w-full p-4 border border-slate-300 rounded-2xl mb-6">
 
         <button onclick="submitPasswordChange('${memberId}')" 
                 class="w-full bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold text-lg">
@@ -310,12 +303,6 @@ async function submitPasswordChange(memberId) {
 
   if (newPass !== confirmPass) {
     msgEl.textContent = "Passwords do not match!";
-    msgEl.className = "text-red-600";
-    return;
-  }
-
-  if (newPass.length < 6) {
-    msgEl.textContent = "New password must be at least 6 characters long";
     msgEl.className = "text-red-600";
     return;
   }
@@ -354,8 +341,9 @@ async function submitPasswordChange(memberId) {
     msgEl.className = "text-red-600";
   }
 }
+
 // ====================== SHOW DASHBOARD ======================
-   function showDashboard() {
+function showDashboard() {
   document.getElementById("loginScreen").classList.add("hidden");
   document.getElementById("dashboardScreen").classList.remove("hidden");
 
@@ -363,7 +351,6 @@ async function submitPasswordChange(memberId) {
   document.getElementById("welcome").innerHTML = `Welcome back, <span class="text-teal-700">${m.fullName}</span>`;
   document.getElementById("navName").textContent = m.fullName.split(" ")[0] || m.fullName;
 
-  // Fill Profile
   document.getElementById("fullName").textContent = m.fullName;
   document.getElementById("memberIdDisplay").textContent = m.memberId || "—";
   document.getElementById("nationalIdDisplay").textContent = m.nationalId || "—";
@@ -372,12 +359,9 @@ async function submitPasswordChange(memberId) {
   document.getElementById("status").innerHTML = `${m.status || "Active"} <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse inline-block"></span>`;
   document.getElementById("roleDisplay").textContent = m.role || "Member";
 
-  // Show Admin Button
-  if (["TREASURER", "ADMIN", "CHAIRPERSON"].includes((m.role || "").toUpperCase())) {
-    document.getElementById("adminBtn").classList.remove("hidden");
-  }
-
   console.log("✅ Dashboard loaded successfully");
+}
+
 
       let photoUrl = m.photo || "";
       if (photoUrl) {
