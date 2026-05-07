@@ -906,25 +906,32 @@ function renderAllSavings(savings) {
   `).join('');
 }
 
-// Edit & Delete Functions
 async function deleteSavings(transId) {
   if (!confirm("Delete this transaction?")) return;
 
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "deleteSavings");
+    formData.append("transId", transId);
+
     const res = await fetch(API, {
       method: "POST",
-      body: JSON.stringify({ action: "deleteSavings", transId })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
+
     const result = await res.json();
+
     if (result.success) {
-      alert("Transaction deleted");
+      alert("Transaction deleted successfully");
       loadAllSavings();
-    } else alert(result.message);
-  } catch(e) { alert("Error"); }
+    } else {
+      alert(result.message || "Failed to delete");
+    }
+  } catch (err) {
+    alert("Error deleting transaction");
+  }
 }
-
-
-
     // ====================== SAVINGS DIRECTORY FUNCTIONS ======================
    async function loadAllSavings() {
   try {
@@ -1101,40 +1108,39 @@ async function editSavings(transId) {
   if (!transId) return alert("Transaction ID is missing!");
 
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "getAllSavings");
+
     const res = await fetch(API, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ action: "getAllSavings" })
+      body: formData
     });
 
     const result = await res.json();
-
-    if (!result.success) return alert("Failed to load transaction data");
+    if (!result.success) return alert("Failed to load data");
 
     const transaction = result.savings.find(s => s.id === transId);
     if (!transaction) return alert("Transaction not found!");
 
+    // Create Edit Modal
     const formHTML = `
       <div class="fixed inset-0 bg-black/70 flex items-center justify-center z-[110]" id="editSavingsModal">
-        <div class="bg-white rounded-3xl p-8 w-full max-w-lg mx-4">
+        <div class="bg-white rounded-3xl p-8 w-full max-w-lg">
           <h3 class="text-2xl font-bold mb-6">Edit Transaction</h3>
-          
           <div class="space-y-5">
             <div>
               <label class="block text-sm font-medium mb-1">Transaction ID</label>
               <input id="editTransId" value="${transaction.id}" class="w-full p-4 border border-slate-300 rounded-2xl bg-gray-100" readonly>
             </div>
-            
             <div>
               <label class="block text-sm font-medium mb-1">Date</label>
               <input id="editDate" type="date" value="${transaction.date ? new Date(transaction.date).toISOString().split('T')[0] : ''}" class="w-full p-4 border border-slate-300 rounded-2xl">
             </div>
-            
             <div>
               <label class="block text-sm font-medium mb-1">Member ID</label>
               <input id="editMemberId" value="${transaction.memberId || ''}" class="w-full p-4 border border-slate-300 rounded-2xl">
             </div>
-            
             <div>
               <label class="block text-sm font-medium mb-1">Type</label>
               <select id="editType" class="w-full p-4 border border-slate-300 rounded-2xl">
@@ -1144,12 +1150,10 @@ async function editSavings(transId) {
                 <option value="dividend" ${transaction.type === 'dividend' ? 'selected' : ''}>Dividend</option>
               </select>
             </div>
-            
             <div>
               <label class="block text-sm font-medium mb-1">Amount (KSh)</label>
               <input id="editAmount" type="number" value="${transaction.amount || ''}" class="w-full p-4 border border-slate-300 rounded-2xl">
             </div>
-            
             <div>
               <label class="block text-sm font-medium mb-1">Notes</label>
               <textarea id="editNotes" class="w-full p-4 border border-slate-300 rounded-2xl h-24">${transaction.notes || ''}</textarea>
@@ -1157,72 +1161,53 @@ async function editSavings(transId) {
           </div>
 
           <div class="flex gap-4 mt-8">
-            <button onclick="closeEditModal()" 
-                    class="flex-1 py-4 border border-slate-300 rounded-2xl font-semibold hover:bg-slate-50">
-              Cancel
-            </button>
-            <button onclick="submitEditSavings('${transaction.id}')" 
-                    class="flex-1 bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold">
-              Update Transaction
-            </button>
+            <button onclick="closeEditModal()" class="flex-1 py-4 border border-slate-300 rounded-2xl font-semibold hover:bg-slate-50">Cancel</button>
+            <button onclick="submitEditSavings('${transaction.id}')" class="flex-1 bg-teal-700 hover:bg-teal-800 text-white py-4 rounded-2xl font-semibold">Update Transaction</button>
           </div>
         </div>
       </div>`;
 
-    // Remove old modal if exists
-    const oldModal = document.getElementById("editSavingsModal");
-    if (oldModal) oldModal.remove();
-
     document.body.insertAdjacentHTML('beforeend', formHTML);
 
   } catch (err) {
-    console.error(err);
-    alert("Error loading edit form. Please try again.");
+    alert("Error loading edit form");
   }
 }
-// ====================== SUBMIT EDIT ======================
+
 async function submitEditSavings(transId) {
-    const payload = {
-        action: "updateSavings",
-        transId: transId,
-        date: document.getElementById("editDate").value,
-        memberId: document.getElementById("editMemberId").value.trim().toUpperCase(),
-        type: document.getElementById("editType").value,
-        amount: document.getElementById("editAmount").value,
-        notes: document.getElementById("editNotes").value.trim()
-    };
+  const formData = new URLSearchParams();
+  formData.append("action", "updateSavings");
+  formData.append("transId", transId);
+  formData.append("date", document.getElementById("editDate").value);
+  formData.append("memberId", document.getElementById("editMemberId").value.trim().toUpperCase());
+  formData.append("type", document.getElementById("editType").value);
+  formData.append("amount", document.getElementById("editAmount").value);
+  formData.append("notes", document.getElementById("editNotes").value.trim());
 
-    if (!payload.memberId || !payload.amount) {
-        alert("Member ID and Amount are required!");
-        return;
+  try {
+    const res = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      alert("✅ Transaction updated successfully!");
+      closeEditModal();
+      loadAllSavings();
+    } else {
+      alert(result.message || "Failed to update");
     }
-
-    try {
-        const res = await fetch(API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-            alert("✅ Transaction updated successfully!");
-            closeEditModal();
-            loadAllSavings();        // Refresh the admin table
-        } else {
-            alert(result.message || "Failed to update transaction");
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Network error while updating");
-    }
+  } catch (err) {
+    alert("Network error while updating");
+  }
 }
 
-// ====================== CLOSE MODAL ======================
 function closeEditModal() {
-    const modal = document.getElementById("editSavingsModal");
-    if (modal) modal.remove();
+  const modal = document.getElementById("editSavingsModal");
+  if (modal) modal.remove();
 }
     // ====================== OTHER FUNCTIONS ======================
     async function downloadStatement() {
@@ -1323,22 +1308,31 @@ function filterExpensesTable() {
   renderAllExpenses(filtered);
 }
 
-// Add these at the bottom
 async function deleteExpense(expenseId) {
   if (!confirm("Delete this expense?")) return;
 
   try {
+    const formData = new URLSearchParams();
+    formData.append("action", "deleteExpense");
+    formData.append("expenseId", expenseId);
+
     const res = await fetch(API, {
       method: "POST",
-      body: JSON.stringify({ action: "deleteExpense", expenseId })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
+
     const result = await res.json();
 
     if (result.success) {
       alert("✅ Expense deleted!");
-      switchAdminTab(0);   // Back to main dashboard
-    } else alert(result.message);
-  } catch (err) { alert("Error"); }
+      loadAllExpenses();
+    } else {
+      alert(result.message || "Failed to delete");
+    }
+  } catch (err) {
+    alert("Error deleting expense");
+  }
 }
 // ====================== ADD EXPENSE FORM ======================
 function showAddExpenseForm() {
@@ -1883,15 +1877,21 @@ async function emailThisStatement(memberId) {
   }
 }
 
-// ====================== VIEW MEMBER DASHBOARD ======================
+// ====================== VIEW MEMBER DASHBOARD (Admin) ======================
 async function viewMemberDashboard(memberId) {
   try {
-    document.getElementById("memberDashboardModal")?.remove();
+    // Remove any existing modal
+    const existing = document.getElementById("memberViewModal");
+    if (existing) existing.remove();
+
+    const formData = new URLSearchParams();
+    formData.append("action", "getMemberStatement");
+    formData.append("memberId", memberId);
 
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getMemberStatement", memberId })
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData
     });
 
     const result = await res.json();
@@ -1906,19 +1906,99 @@ async function viewMemberDashboard(memberId) {
 
     const totalSavings = savingsTx.reduce((sum, t) => sum + Number(t.amount || 0), 0);
     const totalLoans = loansTx.reduce((sum, l) => sum + Number(l.amount || 0), 0);
-    const outstanding = loansTx.reduce
-    
-   ((sum, l) => sum + Number(l.outstanding || 0), 0);
+    const outstanding = loansTx.reduce((sum, l) => sum + Number(l.outstanding || 0), 0);
 
-    const html = `... your modal HTML ...`;   // Keep your existing modal HTML
+    const html = `
+      <div id="memberViewModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[120]">
+        <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-auto">
+          <div class="p-8 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+            <h2 class="text-2xl font-bold">Member Profile - ${m.fullName}</h2>
+            <button onclick="this.closest('#memberViewModal').remove()" 
+                    class="text-slate-500 hover:text-red-600 text-2xl leading-none">×</button>
+          </div>
 
-    document.body.insertAdjacentHTML("beforeend", html);
+          <div class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <div class="bg-slate-50 p-6 rounded-2xl">
+                <p class="text-sm text-slate-500">Total Savings</p>
+                <p class="text-3xl font-bold text-teal-600">KSh ${totalSavings.toLocaleString()}</p>
+              </div>
+              <div class="bg-slate-50 p-6 rounded-2xl">
+                <p class="text-sm text-slate-500">Total Loans</p>
+                <p class="text-3xl font-bold text-amber-600">KSh ${totalLoans.toLocaleString()}</p>
+              </div>
+              <div class="bg-slate-50 p-6 rounded-2xl">
+                <p class="text-sm text-slate-500">Outstanding</p>
+                <p class="text-3xl font-bold text-red-600">KSh ${outstanding.toLocaleString()}</p>
+              </div>
+            </div>
+
+            <h3 class="text-xl font-semibold mb-4">Savings Transactions</h3>
+            <div class="bg-white border rounded-2xl overflow-hidden mb-10">
+              <table class="w-full">
+                <thead class="bg-slate-100">
+                  <tr>
+                    <th class="px-6 py-3 text-left">Date</th>
+                    <th class="px-6 py-3 text-left">Type</th>
+                    <th class="px-6 py-3 text-right">Amount</th>
+                    <th class="px-6 py-3 text-left">Notes</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  ${savingsTx.length ? savingsTx.map(t => `
+                    <tr>
+                      <td class="px-6 py-3">${new Date(t.date).toLocaleDateString('en-GB')}</td>
+                      <td class="px-6 py-3">${t.type}</td>
+                      <td class="px-6 py-3 text-right font-medium ${Number(t.amount) > 0 ? 'text-teal-600' : 'text-red-600'}">
+                        KSh ${Number(t.amount).toLocaleString()}
+                      </td>
+                      <td class="px-6 py-3 text-slate-600">${t.notes || '-'}</td>
+                    </tr>
+                  `).join('') : `<tr><td colspan="4" class="text-center py-8 text-slate-400">No savings transactions</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+
+            <h3 class="text-xl font-semibold mb-4">Loan History</h3>
+            <div class="bg-white border rounded-2xl overflow-hidden">
+              <table class="w-full">
+                <thead class="bg-slate-100">
+                  <tr>
+                    <th class="px-6 py-3 text-left">Date</th>
+                    <th class="px-6 py-3 text-left">Loan ID</th>
+                    <th class="px-6 py-3 text-right">Amount</th>
+                    <th class="px-6 py-3 text-center">Status</th>
+                    <th class="px-6 py-3 text-right">Outstanding</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  ${loansTx.length ? loansTx.map(l => `
+                    <tr>
+                      <td class="px-6 py-3">${new Date(l.date).toLocaleDateString('en-GB')}</td>
+                      <td class="px-6 py-3">${l.id}</td>
+                      <td class="px-6 py-3 text-right">KSh ${Number(l.amount).toLocaleString()}</td>
+                      <td class="px-6 py-3 text-center">
+                        <span class="px-3 py-1 text-xs rounded-full ${l.status === 'Active' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                          ${l.status || 'Pending'}
+                        </span>
+                      </td>
+                      <td class="px-6 py-3 text-right font-medium text-red-600">KSh ${Number(l.outstanding || 0).toLocaleString()}</td>
+                    </tr>
+                  `).join('') : `<tr><td colspan="5" class="text-center py-8 text-slate-400">No loans found</td></tr>`}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+
   } catch (err) {
-    console.error("Dashboard Error:", err);
+    console.error(err);
     alert("Failed to load member dashboard");
   }
 }
-
 // Make important functions globally available
 window.logout = () => {
   localStorage.clear();
