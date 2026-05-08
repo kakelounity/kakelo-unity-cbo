@@ -2148,22 +2148,28 @@ async function viewMemberDashboard(memberId) {
     const totalLoans = loansTx.reduce((sum, l) => sum + Number(l.amount || 0), 0);
     const outstanding = loansTx.reduce((sum, l) => sum + Number(l.outstanding || 0), 0);
 
+   const photoSrc = m.photo && m.photo.trim() !== "" 
+      ? m.photo 
+      : "https://via.placeholder.com/80x80/0f766e/ffffff?text=No+Photo";
+
     const html = `
       <div id="memberViewModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[120] p-4">
         <div class="bg-white rounded-3xl w-full max-w-4xl max-h-[92vh] overflow-auto shadow-2xl">
 
-          <!-- Header -->
+          <!-- Header with Photo -->
           <div class="p-8 border-b flex justify-between items-center sticky top-0 bg-white z-10">
             <div class="flex items-center gap-5">
-              <img src="${m.photo || 'https://via.placeholder.com/80?text=No+Photo'}" 
-                   alt="Passport" 
-                   class="w-20 h-20 rounded-2xl object-cover border-4 border-teal-200 shadow-md">
+              <img src="${photoSrc}" 
+                   alt="Passport Photo" 
+                   class="w-20 h-20 rounded-2xl object-cover border-4 border-teal-200 shadow-md"
+                   onerror="this.src='https://via.placeholder.com/80x80/0f766e/ffffff?text=No+Photo';">
               <div>
                 <h2 class="text-2xl font-bold">${m.fullName}</h2>
                 <p class="text-slate-500">Member ID: <strong>${m.memberId}</strong></p>
               </div>
             </div>
-            <button onclick="this.closest('#memberViewModal').remove()" class="text-4xl text-slate-400 hover:text-red-500">×</button>
+            <button onclick="this.closest('#memberViewModal').remove()" 
+                    class="text-4xl text-slate-400 hover:text-red-500">×</button>
           </div>
 
           <div class="p-8">
