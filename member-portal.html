@@ -698,115 +698,405 @@ async function downloadMyStatement() {
 
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
       body: formData
     });
 
     const result = await res.json();
 
     if (!result.success || !result.member) {
-      return alert(result.message || "Failed to generate statement");
+      alert(result.message || "Failed to generate statement");
+      return;
     }
 
     const m = result.member;
+
     const savingsTx = result.transactions || [];
     const loansTx = result.loans || [];
+    const finesTx = result.fines || [];
 
-    const totalSavings = savingsTx.reduce((sum, t) => sum + Number(t.amount || 0), 0);
-    const outstanding = loansTx.reduce((sum, l) => sum + Number(l.outstanding || 0), 0);
+    // ====================== CALCULATIONS ======================
 
+    // Total Savings
+    const totalSavings = savingsTx
+      .filter(t => 
+        (t.type || "").toLowerCase().includes("saving")
+      )
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+    // Total Dividends
+    const totalDividends = savingsTx
+      .filter(t => 
+        (t.type || "").toLowerCase().includes("dividend")
+      )
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+    // Total Loans Taken
+    const totalLoansTaken = loansTx.reduce(
+      (sum, l) => sum + Number(l.amount || 0),
+      0
+    );
+
+    // Outstanding Loan Balance
+    const outstanding = loansTx.reduce(
+      (sum, l) => sum + Number(l.outstanding || 0),
+      0
+    );
+
+    // Total Fines Paid
+    const totalFinesPaid = finesTx.reduce(
+      (sum, f) => sum + Number(f.amount || 0),
+      0
+    );
+
+    // ====================== BUILD HTML ======================
     const statementHTML = `
-      <div id="printStatement" style="font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 40px; background: white; border: 1px solid #ddd;">
-        
-        <!-- Header -->
-        <div style="text-align: center; margin-bottom: 30px;">
-          <img src="https://drive.google.com/thumbnail?id=1zn4KqLto2mUNxjcnA8VYY48K06S5UK8T&sz=w300" 
-               style="height: 85px; margin-bottom: 15px;">
-          <h1 style="color: #0f766e; margin: 0; font-size: 28px;">Kakelo Unity CBO</h1>
-          <h2 style="color: #334155; margin: 8px 0 0 0; font-size: 20px;">Account Statement</h2>
-          <p style="color: #64748b; margin-top: 8px;">Generated on: ${new Date().toLocaleDateString('en-GB')} ${new Date().toLocaleTimeString('en-GB')}</p>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Member Statement</title>
+
+      <style>
+        *{
+          box-sizing:border-box;
+        }
+
+        body{
+          font-family: Arial, sans-serif;
+          padding:20px;
+          color:#111827;
+        }
+
+        .container{
+          width:100%;
+          max-width:900px;
+          margin:auto;
+        }
+
+        .header{
+          text-align:center;
+          margin-bottom:25px;
+        }
+
+        .header img{
+          height:80px;
+          margin-bottom:10px;
+        }
+
+        .title{
+          color:#0f766e;
+          margin:0;
+          font-size:28px;
+        }
+
+        .subtitle{
+          color:#334155;
+          margin-top:5px;
+        }
+
+        hr{
+          border:none;
+          border-top:2px solid #0f766e;
+          margin:25px 0;
+        }
+
+        .info p{
+          margin:6px 0;
+        }
+
+        h3{
+          color:#0f766e;
+          margin-bottom:12px;
+          margin-top:35px;
+        }
+
+        table{
+          width:100%;
+          border-collapse:collapse;
+          margin-bottom:30px;
+          page-break-inside:auto;
+        }
+
+        thead{
+          display:table-header-group;
+        }
+
+        tr{
+          page-break-inside:avoid;
+          page-break-after:auto;
+        }
+
+        th{
+          background:#f1f5f9;
+        }
+
+        th, td{
+          border:1px solid #cbd5e1;
+          padding:10px;
+          font-size:13px;
+          vertical-align:top;
+          word-break:break-word;
+        }
+
+        .right{
+          text-align:right;
+        }
+
+        .center{
+          text-align:center;
+        }
+
+        .summary-table td:first-child{
+          font-weight:bold;
+          background:#f8fafc;
+          width:50%;
+        }
+
+        .summary-table td:last-child{
+          text-align:right;
+          font-weight:bold;
+        }
+
+        .footer{
+          margin-top:50px;
+          text-align:center;
+          color:#64748b;
+          font-size:13px;
+        }
+
+        @media print {
+
+          body{
+            padding:0;
+            margin:0;
+          }
+
+          .container{
+            width:100%;
+            max-width:100%;
+          }
+
+          table{
+            page-break-inside:auto;
+          }
+
+          tr{
+            page-break-inside:avoid;
+          }
+
+          td, th{
+            font-size:12px;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+
+      <div class="container">
+
+        <!-- HEADER -->
+        <div class="header">
+          <img src="https://drive.google.com/thumbnail?id=1zn4KqLto2mUNxjcnA8VYY48K06S5UK8T&sz=w300">
+
+          <h1 class="title">Kakelo Unity CBO</h1>
+
+          <h2 class="subtitle">Member Account Statement</h2>
+
+          <p>
+            Generated on:
+            ${new Date().toLocaleDateString("en-GB")}
+            ${new Date().toLocaleTimeString("en-GB")}
+          </p>
         </div>
 
-        <hr style="border: none; border-top: 2px solid #0f766e; margin: 25px 0;">
+        <hr>
 
-        <!-- Member Info -->
-        <div style="margin-bottom: 25px;">
-          <p><strong>Member Name:</strong> ${m.fullName}</p>
-          <p><strong>Member ID:</strong> ${m.memberId}</p>
+        <!-- MEMBER INFO -->
+        <div class="info">
+          <p><strong>Member Name:</strong> ${m.fullName || "-"}</p>
+          <p><strong>Member ID:</strong> ${m.memberId || "-"}</p>
         </div>
 
-        <!-- Outstanding Loan Balance -->
-        <div style="background: #f8fafc; padding: 15px 20px; border-radius: 8px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
-          <span style="font-size: 16px;">Outstanding Loan Balance</span>
-          <span style="font-size: 20px; font-weight: bold; color: #ef4444;">KSh ${outstanding.toLocaleString()}</span>
-        </div>
+        <!-- ACCOUNT SUMMARY -->
+        <h3>Account Summary</h3>
 
-        <!-- Savings & Dividends -->
-        <h3 style="color: #0f766e; margin-bottom: 12px;">Savings & Dividends</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
-          <thead>
-            <tr style="background: #f1f5f9;">
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: left;">Date</th>
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: left;">Type</th>
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: right;">Amount</th>
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: left;">Notes</th>
-            </tr>
-          </thead>
+        <table class="summary-table">
           <tbody>
-            ${savingsTx.length ? savingsTx.map(t => `
-              <tr>
-                <td style="border: 1px solid #cbd5e1; padding: 12px;">${new Date(t.date).toLocaleDateString('en-GB')}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 12px;">${t.type}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 12px; text-align: right; font-weight: 500;">KSh ${Number(t.amount).toLocaleString()}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 12px;">${t.notes || '-'}</td>
-              </tr>
-            `).join('') : `<tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;">No savings records</td></tr>`}
+
+            <tr>
+              <td>Total Personal Savings</td>
+              <td>KSh ${totalSavings.toLocaleString()}</td>
+            </tr>
+
+            <tr>
+              <td>Total Loans Taken</td>
+              <td>KSh ${totalLoansTaken.toLocaleString()}</td>
+            </tr>
+
+            <tr>
+              <td>Outstanding Loan Balance</td>
+              <td style="color:#dc2626;">
+                KSh ${outstanding.toLocaleString()}
+              </td>
+            </tr>
+
+            <tr>
+              <td>Total Dividends</td>
+              <td style="color:#16a34a;">
+                KSh ${totalDividends.toLocaleString()}
+              </td>
+            </tr>
+
+            <tr>
+              <td>Total Fines Paid</td>
+              <td>
+                KSh ${totalFinesPaid.toLocaleString()}
+              </td>
+            </tr>
+
           </tbody>
         </table>
 
-        <!-- Loans History -->
-        <h3 style="color: #0f766e; margin-bottom: 12px;">Loans History</h3>
-        <table style="width: 100%; border-collapse: collapse;">
+        <!-- SAVINGS -->
+        <h3>Savings & Dividends</h3>
+
+        <table>
           <thead>
-            <tr style="background: #f1f5f9;">
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: left;">Date</th>
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: left;">Loan ID</th>
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: right;">Amount</th>
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: center;">Status</th>
-              <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: right;">Outstanding</th>
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th class="right">Amount</th>
+              <th>Notes</th>
             </tr>
           </thead>
+
           <tbody>
-            ${loansTx.length ? loansTx.map(l => `
-              <tr>
-                <td style="border: 1px solid #cbd5e1; padding: 12px;">${new Date(l.date).toLocaleDateString('en-GB')}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 12px;">${l.id}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 12px; text-align: right;">KSh ${Number(l.amount).toLocaleString()}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 12px; text-align: center;">${l.status || 'Pending'}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 12px; text-align: right; font-weight: bold; color: #ef4444;">KSh ${Number(l.outstanding || 0).toLocaleString()}</td>
-              </tr>
-            `).join('') : `<tr><td colspan="5" style="text-align:center; padding:40px; color:#64748b;">No loans found</td></tr>`}
+
+            ${
+              savingsTx.length
+                ? savingsTx.map(t => `
+                  <tr>
+                    <td>
+                      ${t.date
+                        ? new Date(t.date).toLocaleDateString("en-GB")
+                        : "-"}
+                    </td>
+
+                    <td>${t.type || "-"}</td>
+
+                    <td class="right">
+                      KSh ${Number(t.amount || 0).toLocaleString()}
+                    </td>
+
+                    <td>${t.notes || "-"}</td>
+                  </tr>
+                `).join("")
+                : `
+                  <tr>
+                    <td colspan="4" class="center">
+                      No savings records found
+                    </td>
+                  </tr>
+                `
+            }
+
           </tbody>
         </table>
 
-        <div style="text-align: center; margin-top: 60px; color: #64748b; font-size: 14px;">
+        <!-- LOANS -->
+        <h3>Loans History</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Loan ID</th>
+              <th class="right">Amount</th>
+              <th class="center">Status</th>
+              <th class="right">Outstanding</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            ${
+              loansTx.length
+                ? loansTx.map(l => `
+                  <tr>
+                    <td>
+                      ${l.date
+                        ? new Date(l.date).toLocaleDateString("en-GB")
+                        : "-"}
+                    </td>
+
+                    <td>${l.id || "-"}</td>
+
+                    <td class="right">
+                      KSh ${Number(l.amount || 0).toLocaleString()}
+                    </td>
+
+                    <td class="center">
+                      ${l.status || "Pending"}
+                    </td>
+
+                    <td class="right">
+                      KSh ${Number(l.outstanding || 0).toLocaleString()}
+                    </td>
+                  </tr>
+                `).join("")
+                : `
+                  <tr>
+                    <td colspan="5" class="center">
+                      No loans found
+                    </td>
+                  </tr>
+                `
+            }
+
+          </tbody>
+        </table>
+
+        <!-- FOOTER -->
+        <div class="footer">
           Thank you for being a valued member of Kakelo Unity CBO.
         </div>
-      </div>`;
 
-    // Trigger Print
-    const printDiv = document.createElement("div");
-    printDiv.innerHTML = statementHTML;
-    document.body.appendChild(printDiv);
+      </div>
 
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => printDiv.remove(), 1000);
-    }, 600);
+    </body>
+    </html>
+    `;
+
+    // ====================== PRINT IN CLEAN WINDOW ======================
+    const printWindow = window.open("", "_blank");
+
+    if (!printWindow) {
+      alert("Please allow popups to download statement");
+      return;
+    }
+
+    printWindow.document.open();
+    printWindow.document.write(statementHTML);
+    printWindow.document.close();
+
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+
+        setTimeout(() => {
+          printWindow.close();
+        }, 500);
+
+      }, 800);
+    };
 
   } catch (err) {
-    console.error(err);
-    alert("Failed to generate statement. Please try again.");
+    console.error("Statement Error:", err);
+    alert("Failed to generate statement");
   }
 }
 // ====================== PROFESSIONAL ADMIN DASHBOARD ======================
