@@ -683,11 +683,14 @@ async function loadSavingsTrend() {
     console.error("Chart error:", err);
   }
 }
-  // ====================== DOWNLOAD MY STATEMENT (Member Dashboard) ======================
+ // ====================== DOWNLOAD MY STATEMENT (Member Dashboard) ======================
 async function downloadStatement() {
   if (!currentMember || !currentMember.memberId) {
     return alert("Please log in first");
   }
+
+  const btn = event ? event.target : null;
+  if (btn) btn.disabled = true;
 
   try {
     const formData = new URLSearchParams();
@@ -792,7 +795,7 @@ async function downloadStatement() {
         </div>
       </div>`;
 
-    // Print
+    // Trigger Print
     const printDiv = document.createElement("div");
     printDiv.innerHTML = statementHTML;
     document.body.appendChild(printDiv);
@@ -804,7 +807,7 @@ async function downloadStatement() {
 
   } catch (err) {
     console.error(err);
-    alert("Failed to generate statement");
+    alert("Failed to generate statement. Please try again.");
   }
 }
 // ====================== PROFESSIONAL ADMIN DASHBOARD ======================
