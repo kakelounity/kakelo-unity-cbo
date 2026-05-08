@@ -2489,36 +2489,64 @@ async function showMemberStatement(memberId) {
 }
 
 
-// ====================== EMAIL MEMBER STATEMENT ======================
+// ====================== EMAIL STATEMENT ======================
 async function emailThisStatement(memberId) {
-  if (!confirm("Send account statement to this member's email?")) return;
 
-  const loadingMsg = "Sending statement to email...";
-  // Optional: Show loading indicator if you want
+  if (!memberId) {
+    alert("Missing member ID");
+    return;
+  }
+
+  if (!confirm("Send account statement to this member's email?")) {
+    return;
+  }
 
   try {
+
     const formData = new URLSearchParams();
     formData.append("action", "emailMemberStatement");
     formData.append("memberId", memberId);
 
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
       body: formData
     });
 
-    const result = await res.json();
+    // ====================== SAFER RESPONSE HANDLING ======================
+    const text = await res.text();
 
-    if (result.success) {
-      alert("✅ Statement has been sent successfully to the member's email!");
-    } else {
-      alert(result.message || "Failed to send email");
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch (e) {
+      console.error("Invalid JSON from server:", text);
+      alert("Server error: Invalid response format");
+      return;
     }
+
+    console.log("Email API Response:", result);
+
+    // ====================== SUCCESS ======================
+    if (result.success) {
+      alert("✅ Statement sent successfully to member email!");
+    } 
+    // ====================== FAILURE WITH SERVER MESSAGE ======================
+    else {
+      alert(result.message || "Server rejected email request");
+    }
+
   } catch (err) {
-    console.error(err);
-    alert("Network error while sending email. Please try again.");
+
+    console.error("Email Statement Error:", err);
+
+    alert("Network error or server not responding. Check console.");
+
   }
 }
+
 // ====================== DOWNLOAD MEMBER STATEMENT ======================
 async function downloadMemberStatement(memberId) {
   try {
