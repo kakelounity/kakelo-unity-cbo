@@ -354,22 +354,22 @@ async function submitPasswordChange(memberId) {
     const data = await res.json();
 
     if (data.success) {
-      msgEl.textContent = "✅ Password updated successfully!";
-      msgEl.className = "text-green-600";
+  msgEl.textContent = "✅ Password updated successfully!";
+  msgEl.className = "text-green-600";
 
-      setTimeout(() => {
-        document.getElementById("passwordModal").remove();
-        showDashboard();
-      }, 1500);
-    } else {
-      msgEl.textContent = data.message || "Failed to update password";
-      msgEl.className = "text-red-600";
-    }
-  } catch (err) {
-    console.error(err);
-    msgEl.textContent = "Cannot connect to server. Please try again.";
-    msgEl.className = "text-red-600";
-  }
+  setTimeout(() => {
+    document.getElementById("passwordModal").remove();
+    showDashboard();
+    
+    // ✅ Start Auto-Logout Timer AFTER successful password change
+    startAutoLogoutTimer();
+
+  }, 1500);
+
+} else {
+  msgEl.textContent = data.message || "Failed to update password";
+  msgEl.className = "text-red-600";
+}
 }
 // ====================== SHOW DASHBOARD ======================
 async function showDashboard() {
@@ -406,6 +406,7 @@ async function showDashboard() {
   renderActionButtons();
   await loadDashboardData();     // Important: await
   loadSavingsTrend();
+  startAutoLogoutTimer(); 
 }
 
 // ====================== ACTION BUTTONS ======================
@@ -3152,6 +3153,36 @@ window.showAdminDashboard = () => {
   document.getElementById("adminModal").classList.remove("hidden");
   switchAdminTab(0);
 };
+  // ====================== AUTO LOGOUT AFTER INACTIVITY ======================
+let inactivityTimer;
+const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(logoutDueToInactivity, INACTIVITY_LIMIT);
+}
+
+function logoutDueToInactivity() {
+  alert("You have been logged out due to inactivity (5 minutes).");
+  logout(); // Call your existing logout function
+}
+
+// Reset timer on user activity
+function setupInactivityListener() {
+  const events = ['mousemove', 'keydown', 'mousedown', 'scroll', 'touchstart', 'click'];
+
+  events.forEach(event => {
+    document.addEventListener(event, resetInactivityTimer, { passive: true });
+  });
+
+  // Start the timer initially after login
+  resetInactivityTimer();
+}
+
+// Call this function after successful login
+function startAutoLogoutTimer() {
+  setupInactivityListener();
+}
 </script>
 </body>
 </html>
