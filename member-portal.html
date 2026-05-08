@@ -2129,7 +2129,6 @@ async function emailThisStatement(memberId) {
     alert("Network error while sending email. Please try again.");
   }
 }
-// ====================== DOWNLOAD MEMBER STATEMENT (Clean Layout) ======================
 // ====================== DOWNLOAD MEMBER STATEMENT ======================
 async function downloadMemberStatement(memberId) {
   try {
@@ -2153,11 +2152,42 @@ async function downloadMemberStatement(memberId) {
     }
 
     const m = result.member;
+
     const savingsTx = result.transactions || [];
     const loansTx = result.loans || [];
+    const finesTx = result.fines || [];
 
+    // ====================== CALCULATIONS ======================
+
+    // Total Savings
+    const totalSavings = savingsTx
+      .filter(t => 
+        (t.type || "").toLowerCase().includes("saving")
+      )
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+    // Total Dividends
+    const totalDividends = savingsTx
+      .filter(t => 
+        (t.type || "").toLowerCase().includes("dividend")
+      )
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+    // Total Loans Taken
+    const totalLoansTaken = loansTx.reduce(
+      (sum, l) => sum + Number(l.amount || 0),
+      0
+    );
+
+    // Outstanding Loan Balance
     const outstanding = loansTx.reduce(
       (sum, l) => sum + Number(l.outstanding || 0),
+      0
+    );
+
+    // Total Fines Paid
+    const totalFinesPaid = finesTx.reduce(
+      (sum, f) => sum + Number(f.amount || 0),
       0
     );
 
@@ -2216,26 +2246,9 @@ async function downloadMemberStatement(memberId) {
           margin:6px 0;
         }
 
-        .summary{
-          background:#f8fafc;
-          padding:15px 20px;
-          border-radius:8px;
-          margin:20px 0 30px;
-          display:flex;
-          justify-content:space-between;
-          align-items:center;
-          font-size:16px;
-        }
-
-        .summary .amount{
-          color:#ef4444;
-          font-weight:bold;
-          font-size:20px;
-        }
-
         h3{
           color:#0f766e;
-          margin-bottom:10px;
+          margin-bottom:12px;
           margin-top:35px;
         }
 
@@ -2273,6 +2286,17 @@ async function downloadMemberStatement(memberId) {
 
         .center{
           text-align:center;
+        }
+
+        .summary-table td:first-child{
+          font-weight:bold;
+          background:#f8fafc;
+          width:50%;
+        }
+
+        .summary-table td:last-child{
+          text-align:right;
+          font-weight:bold;
         }
 
         .footer{
@@ -2336,14 +2360,45 @@ async function downloadMemberStatement(memberId) {
           <p><strong>Member ID:</strong> ${m.memberId || "-"}</p>
         </div>
 
-        <!-- OUTSTANDING -->
-        <div class="summary">
-          <span>Outstanding Loan Balance</span>
+        <!-- ACCOUNT SUMMARY -->
+        <h3>Account Summary</h3>
 
-          <span class="amount">
-            KSh ${outstanding.toLocaleString()}
-          </span>
-        </div>
+        <table class="summary-table">
+          <tbody>
+
+            <tr>
+              <td>Total Personal Savings</td>
+              <td>KSh ${totalSavings.toLocaleString()}</td>
+            </tr>
+
+            <tr>
+              <td>Total Loans Taken</td>
+              <td>KSh ${totalLoansTaken.toLocaleString()}</td>
+            </tr>
+
+            <tr>
+              <td>Outstanding Loan Balance</td>
+              <td style="color:#dc2626;">
+                KSh ${outstanding.toLocaleString()}
+              </td>
+            </tr>
+
+            <tr>
+              <td>Total Dividends</td>
+              <td style="color:#16a34a;">
+                KSh ${totalDividends.toLocaleString()}
+              </td>
+            </tr>
+
+            <tr>
+              <td>Total Fines Paid</td>
+              <td>
+                KSh ${totalFinesPaid.toLocaleString()}
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
 
         <!-- SAVINGS -->
         <h3>Savings & Dividends</h3>
@@ -2467,16 +2522,15 @@ async function downloadMemberStatement(memberId) {
     printWindow.document.write(statementHTML);
     printWindow.document.close();
 
-    // Wait for content + image to load
     printWindow.onload = () => {
       setTimeout(() => {
         printWindow.focus();
         printWindow.print();
 
-        // Close after printing
         setTimeout(() => {
           printWindow.close();
         }, 500);
+
       }, 800);
     };
 
