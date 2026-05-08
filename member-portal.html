@@ -119,15 +119,30 @@
       <!-- Action Buttons -->
       <div id="actionButtons" class="flex flex-wrap gap-4 mb-10"></div>
 
-      <!-- Savings Trend Chart -->
-      <div class="bg-white rounded-3xl shadow p-8 mb-10">
-        <h3 class="text-xl font-semibold mb-6 flex items-center gap-2">
-          <i class="fa-solid fa-chart-line"></i> My Savings Trend (Last 6 Months)
-        </h3>
-        <div class="chart-container">
-          <canvas id="savingsTrendChart"></canvas>
-        </div>
-      </div>
+     <!-- ====================== SAVINGS TREND CHART ====================== -->
+<div class="bg-white rounded-3xl shadow p-8 mb-10">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+
+    <h3 class="text-xl font-semibold flex items-center gap-2 text-slate-800">
+      <i class="fa-solid fa-chart-line text-teal-600"></i>
+      My Savings Trend (Last 6 Months)
+    </h3>
+
+  </div>
+
+  <!-- Chart Container -->
+  <div class="relative w-full h-80">
+
+    <!-- Chart -->
+    <canvas id="savingsTrendChart"></canvas>
+
+    <!-- Empty State Message Appears Here Automatically -->
+
+  </div>
+
+</div>
 
       <!-- History Tabs -->
       <div class="bg-white rounded-3xl shadow mb-10">
@@ -585,101 +600,181 @@ async function submitRequestLoan() {
   }
 }
 
-// ====================== SAVINGS TREND CHART (Professional) ======================
+// ====================== GLOBAL CHART VARIABLE ======================
+let savingsTrendChart = null;
+
+// ====================== SAVINGS TREND CHART ======================
 async function loadSavingsTrend() {
+
   try {
+
+    const canvas = document.getElementById("savingsTrendChart");
+
+    if (!canvas) {
+      console.error("Canvas #savingsTrendChart not found");
+      return;
+    }
+
+    const container = canvas.parentElement;
+
+    // Ensure proper visibility/height
+    canvas.style.display = "block";
+
+    // Remove previous empty state message
+    document.getElementById("noTrendMsg")?.remove();
+
+    // ====================== FETCH DATA ======================
     const formData = new URLSearchParams();
     formData.append("action", "getSavingsTrend");
     formData.append("token", currentToken);
 
     const res = await fetch(API, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
       body: formData
     });
 
     const data = await res.json();
 
-    const ctx = document.getElementById('savingsTrendChart');
-    if (savingsTrendChart) savingsTrendChart.destroy();
+    console.log("Savings Trend Response:", data);
 
-    if (!data.success || !data.trend || data.trend.length === 0) {
-      ctx.style.display = 'none';
-      const container = ctx.parentElement;
-      
-      if (!document.getElementById('noTrendMsg')) {
-        const msg = document.createElement('div');
-        msg.id = 'noTrendMsg';
-        msg.className = "flex flex-col items-center justify-center h-full text-slate-400";
-        msg.innerHTML = `
-          <i class="fa-solid fa-chart-line text-5xl mb-3"></i>
-          <p class="text-lg">No savings data yet</p>
-          <p class="text-sm mt-1">Start contributing to see your trend</p>
-        `;
-        container.appendChild(msg);
-      }
+    // Destroy old chart if exists
+    if (savingsTrendChart) {
+      savingsTrendChart.destroy();
+      savingsTrendChart = null;
+    }
+
+    // ====================== NO DATA STATE ======================
+    if (!data.success || !Array.isArray(data.trend) || data.trend.length === 0) {
+
+      canvas.style.display = "none";
+
+      const msg = document.createElement("div");
+      msg.id = "noTrendMsg";
+      msg.className =
+        "absolute inset-0 flex flex-col items-center justify-center text-slate-400";
+
+      msg.innerHTML = `
+        <i class="fa-solid fa-chart-line text-5xl mb-3"></i>
+        <p class="text-lg font-medium">No savings data yet</p>
+        <p class="text-sm mt-1">Start contributing to see your trend</p>
+      `;
+
+      container.appendChild(msg);
+
       return;
     }
 
-    ctx.style.display = 'block';
+    // ====================== FORMAT DATA ======================
+    const labels = data.trend.map(item => item.month || "");
+    const values = data.trend.map(item => Number(item.amount || 0));
 
-    const labels = data.trend.map(item => item.month);
-    const values = data.trend.map(item => item.amount);
+    // ====================== CREATE CHART ======================
+    savingsTrendChart = new Chart(canvas, {
 
-    savingsTrendChart = new Chart(ctx, {
-      type: 'line',
+      type: "line",
+
       data: {
-        labels: labels,
+
+        labels,
+
         datasets: [{
-          label: 'Monthly Savings',
+
+          label: "Monthly Savings",
+
           data: values,
-          borderColor: '#14b8a6',
-          backgroundColor: 'rgba(20, 184, 166, 0.08)',
+
+          borderColor: "#14b8a6",
+
+          backgroundColor: "rgba(20, 184, 166, 0.10)",
+
           borderWidth: 4,
+
           tension: 0.4,
+
           fill: true,
+
           pointRadius: 5,
-          pointBackgroundColor: '#14b8a6',
+
+          pointHoverRadius: 7,
+
+          pointBackgroundColor: "#14b8a6",
+
+          pointBorderColor: "#ffffff",
+
           pointBorderWidth: 2
+
         }]
       },
+
       options: {
+
         responsive: true,
+
         maintainAspectRatio: false,
+
+        interaction: {
+          mode: "index",
+          intersect: false
+        },
+
         plugins: {
-          legend: { display: false },
+
+          legend: {
+            display: false
+          },
+
           tooltip: {
-            backgroundColor: '#0f766e',
-            titleColor: '#fff',
-            bodyColor: '#fff',
+
+            backgroundColor: "#0f766e",
+            titleColor: "#ffffff",
+            bodyColor: "#ffffff",
             padding: 12,
             displayColors: false,
+
             callbacks: {
-              label: (ctx) => 'KSh ' + ctx.raw.toLocaleString()
+              label: function(context) {
+                return "KSh " + Number(context.raw).toLocaleString();
+              }
             }
           }
         },
+
         scales: {
-          y: { 
-            beginAtZero: true, 
-            grid: { color: '#e2e8f0' },
-            ticks: { 
-              callback: val => 'KSh ' + val.toLocaleString(),
-              font: { size: 12 }
+
+          y: {
+
+            beginAtZero: true,
+
+            grid: {
+              color: "#e2e8f0"
+            },
+
+            ticks: {
+              callback: value => "KSh " + Number(value).toLocaleString()
             }
           },
-          x: { 
-            grid: { color: '#f1f5f9' },
-            ticks: { font: { size: 12 } }
+
+          x: {
+
+            grid: {
+              color: "#f8fafc"
+            }
+
           }
-        },
-        elements: {
-          line: { borderJoinStyle: 'round' }
+
         }
+
       }
+
     });
+
   } catch (err) {
-    console.error("Chart error:", err);
+
+    console.error("Savings Trend Error:", err);
+
   }
 }
  // ====================== DOWNLOAD MY STATEMENT (Member Dashboard) ======================
