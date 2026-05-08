@@ -175,11 +175,10 @@
   </h3>
   
   <div class="max-w-md mx-auto">
-    <button onclick="downloadStatement()" 
-            class="w-full flex items-center justify-center gap-3 bg-teal-700 hover:bg-teal-800 text-white py-6 rounded-3xl font-semibold text-lg transition-all shadow-md">
-      <i class="fa-solid fa-download text-2xl"></i> 
-      Download My Statement
-    </button>
+    <button onclick="downloadMyStatement()"
+  class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg">
+  Download Statement
+</button>
   </div>
 
   <p class="text-center text-slate-500 text-sm mt-4">
@@ -684,7 +683,7 @@ async function loadSavingsTrend() {
   }
 }
  // ====================== DOWNLOAD MY STATEMENT (Member Dashboard) ======================
-async function downloadStatement() {
+async function downloadMyStatement() {
   if (!currentMember || !currentMember.memberId) {
     return alert("Please log in first");
   }
