@@ -226,7 +226,7 @@
     </div>
   </div>
 
-<script>
+  <script>
 const API = "https://script.google.com/macros/s/AKfycbzRuiKTuA3nnYAJtD3ZpXQTVyJddrPWjL8cdVsGobAMqlzHMsqMX9sIEbMdhX-vs0XI/exec";
 
 let currentToken = null;
@@ -369,6 +369,12 @@ async function submitPasswordChange(memberId) {
 } else {
   msgEl.textContent = data.message || "Failed to update password";
   msgEl.className = "text-red-600";
+}
+  } catch (err) {
+    console.error(err);
+    msgEl.textContent = "Cannot connect to server. Please try again.";
+    msgEl.className = "text-red-600";
+  }
 }
 // ====================== SHOW DASHBOARD ======================
 async function showDashboard() {
@@ -3162,7 +3168,7 @@ function resetInactivityTimer() {
 
 function logoutDueToInactivity() {
   alert("You have been logged out due to inactivity (5 minutes).");
-  logout(); // Your existing logout function
+  logout(); 
 }
 
 function setupInactivityListener() {
@@ -3172,13 +3178,16 @@ function setupInactivityListener() {
     document.addEventListener(event, resetInactivityTimer, { passive: true });
   });
   
-  resetInactivityTimer(); // Start timer
+  resetInactivityTimer();
 }
 
 function startAutoLogoutTimer() {
   setupInactivityListener();
 }
-    
+
+// Make sure these functions are globally available
+window.startAutoLogoutTimer = startAutoLogoutTimer;
 </script>
+
 </body>
 </html>
