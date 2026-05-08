@@ -3152,36 +3152,33 @@ window.showAdminDashboard = () => {
   document.getElementById("adminModal").classList.remove("hidden");
   switchAdminTab(0);
 };
-  // ====================== AUTO LOGOUT AFTER INACTIVITY ======================
+ // ====================== AUTO LOGOUT AFTER 5 MINUTES INACTIVITY ======================
 let inactivityTimer;
-const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 function resetInactivityTimer() {
   clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(logoutDueToInactivity, INACTIVITY_LIMIT);
+  inactivityTimer = setTimeout(logoutDueToInactivity, 5 * 60 * 1000); // 5 minutes
 }
 
 function logoutDueToInactivity() {
   alert("You have been logged out due to inactivity (5 minutes).");
-  logout(); // Call your existing logout function
+  logout(); // Your existing logout function
 }
 
-// Reset timer on user activity
 function setupInactivityListener() {
   const events = ['mousemove', 'keydown', 'mousedown', 'scroll', 'touchstart', 'click'];
-
+  
   events.forEach(event => {
     document.addEventListener(event, resetInactivityTimer, { passive: true });
   });
-
-  // Start the timer initially after login
-  resetInactivityTimer();
+  
+  resetInactivityTimer(); // Start timer
 }
 
-// Call this function after successful login
 function startAutoLogoutTimer() {
   setupInactivityListener();
 }
+    
 </script>
 </body>
 </html>
